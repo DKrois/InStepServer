@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "axios": "^1.10.0",
     "better-sqlite3": "^11.9.1",
     "chalk": "^5.6.2",

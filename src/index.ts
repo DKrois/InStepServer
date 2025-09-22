@@ -1,24 +1,41 @@
-import express from 'express';
-import { port } from './config.json' with { type: 'json' };
+import readline from 'node:readline';
+import { projectDB } from './database';
+import { initServer } from './server';
+import { log } from './util';
 
-const app = express();
-app.use(express.json());
+function main() {
+    initServer();
+    projectDB.connect();
 
-app.use(express.static('public'));
-app.get('/api', handleGETRequest);
-app.post('/api', handlePOSTRequest);
-
-app.listen(port, () => {
-    console.log(`Server started on port ${port}`);
-});
-
-async function handleGETRequest(req: express.Request, res: express.Response) {
-    res.send('heyyy');
+    listenForExit();
 }
 
-async function handlePOSTRequest(req: express.Request, res: express.Response) {
-    res.send('heyyy2');
+async function listenForExit() {
+    const rl = readline.createInterface({
+        input: process.stdin
+    });
+
+    rl.on('line', async input => {
+        input = input.trim();
+        switch (input) {
+            case 'exit':
+                return exit();
+            case 'restart':
+                return exit(100);
+        }
+    });
+
+    process.on('SIGINT', () => exit());
+    process.on('SIGTERM', () => exit());
 }
+
+async function exit(exitCode = 0) {
+    projectDB.disconnect();
+    log('Exiting...');
+    process.exit(exitCode);
+}
+
+main();
 
 // GUI for server ?
 // repo for IDM?
