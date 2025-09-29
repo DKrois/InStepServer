@@ -1,11 +1,9 @@
 import readline from 'node:readline';
-import { projectDB } from './database';
 import { initServer } from './server';
 import { log } from './util';
 
-function main() {
+async function main() {
     initServer();
-    projectDB.connect();
 
     listenForExit();
 }
@@ -30,7 +28,6 @@ async function listenForExit() {
 }
 
 async function exit(exitCode = 0) {
-    projectDB.disconnect();
     log('Exiting...');
     process.exit(exitCode);
 }
@@ -38,4 +35,4 @@ async function exit(exitCode = 0) {
 main();
 
 // GUI for server ?
-// repo for IDM?
+// database / json files?

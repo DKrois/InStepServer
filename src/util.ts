@@ -1,14 +1,48 @@
 import { Temporal } from '@js-temporal/polyfill';
-import chalk from 'chalk';
 import type { ChalkInstance } from 'chalk';
+import chalk from 'chalk';
+import { networkInterfaces } from 'node:os';
+
+export function formatError(e: Error | string, additional?: any) {
+    const message = typeof e === 'string' ? e : e.message;
+    return {
+        error: message,
+        ...additional,
+    };
+}
+
+export function getOwnIPs(): { allResults: string[], pick: string | undefined } {
+    const interfaces = networkInterfaces();
+    const results: string[] = [];
+    let ethernetIP: string | undefined = undefined;
+    let wifiIP: string | undefined = undefined;
+    let mobileDataIP: string | undefined = undefined;
+
+    Object.keys(interfaces).forEach(key => {
+        const lowercaseKey = key.toLowerCase();
+        interfaces[key]?.forEach(net => {
+            if (net.family === 'IPv4' && !net.internal) {
+                if (lowercaseKey.startsWith('ethernet')) {
+                    ethernetIP = net.address;
+                } else if (lowercaseKey.startsWith('wlan') || lowercaseKey.startsWith('wifi') || lowercaseKey.startsWith('wi-fi')) {
+                    wifiIP = net.address;
+                } else if (lowercaseKey.startsWith('rmnet')) {
+                    mobileDataIP = net.address;
+                }
+                results.push(net.address);
+            }
+        });
+    });
+
+    return { allResults: results, pick: ethernetIP || wifiIP || mobileDataIP };
+}
 
 export function log(message: any, includeTime = true) {
     console.log(strWithTime(message, includeTime));
 }
 
-const warnColor = 'ff4d00';
 export function warn(message: any, includeTime = true) {
-    console.warn(strWithTime(message, includeTime, chalk.hex(warnColor)));
+    console.warn(strWithTime(message, includeTime, chalk.hex('ff4d00')));
 }
 
 export function error(message: string | Error | unknown, printFull = true, includeTime = true) {

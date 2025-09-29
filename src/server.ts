@@ -1,24 +1,104 @@
 import express from 'express';
 import { port } from './config.json' with { type: 'json' };
-import { log } from './util';
+import { projectDB } from './database';
+import { errorWithMessage, formatError, getOwnIPs, log } from './util';
 
 export function initServer() {
     const app = express();
     app.use(express.json());
 
     app.use(express.static('public'));
-    app.get('/api', handleGETRequest);
-    app.post('/api', handlePOSTRequest);
 
-    app.listen(port, () => {
-        log(`Server started on port ${port}`);
+    app.put('/api/:id/:version', handlePUTRequest);
+    app.get('/api/:id/list', handleListRequest);
+    app.get('/api/:id', handleGETRequest);
+    app.get('/api/:id/:version', handleGETRequest);
+    app.delete('/api/:id', handleDELETERequest);
+    app.delete('/api/:id/:version', handleDELETERequest);
+
+    // handle non-existing routes
+    app.use((req, res) => {
+        res.status(404).json({
+            error: 'Not Found',
+            path: req.originalUrl,
+        });
+    });
+    
+    // unhandled error
+    app.use((err: any, _req: express.Request, res: express.Response) => {
+        errorWithMessage('Unhandled http error', err);
+        res.status(err.status || 500).json({
+            error: err.message || 'Internal Server Error',
+        });
+    });
+
+    app.listen(port, '0.0.0.0', () => {
+        log(`Server listening on http://${getOwnIPs().pick}:${port}`);
     });
 }
 
-async function handleGETRequest(req: express.Request, res: express.Response) {
-    res.send('heyyy');
+async function handlePUTRequest(req: express.Request, res: express.Response) {
+    const id = parseInt(req.params.id);
+    const version = parseInt(req.params.version);
+    const data = req.body;
+
+    // keys === 0 checks if body is empty
+    if (!data || Object.keys(data).length === 0) return res.status(400).send(formatError('No data provided.'));
+
+    const handler = async () => {
+        await projectDB.add(id, version, data);
+        res.sendStatus(204);
+    };
+
+    return handle(handler, res, id, version, true);
 }
 
-async function handlePOSTRequest(req: express.Request, res: express.Response) {
-    res.send('heyyy2');
+async function handleGETRequest(req: express.Request, res: express.Response) {
+    const id = parseInt(req.params.id);
+    const version = req.params.version ? parseInt(req.params.version) : undefined;
+
+    const handler = async () => {
+        const data = await projectDB.get(id, version);
+        res.status(200).send(data);
+    };
+
+    return handle(handler, res, id, version, false);
+}
+
+async function handleListRequest(req: express.Request, res: express.Response) {
+    const id = parseInt(req.params.id);
+
+    const handler = async () => {
+        const versions = await projectDB.list(id);
+        res.status(200).send({ versions });
+    };
+
+    return handle(handler, res, id);
+}
+
+async function handleDELETERequest(req: express.Request, res: express.Response) {
+    const id = parseInt(req.params.id);
+    const version = req.params.version ? parseInt(req.params.version) : undefined;
+
+    const handler = async () => {
+        await projectDB.delete(id, version);
+        res.sendStatus(204);
+    };
+
+    return handle(handler, res, id, version, false);
+}
+
+async function handle(handler: () => any, res: express.Response, id: number, version?: number, requireVersion?: boolean) {
+    res.setHeader('Content-Type', 'application/json');
+
+    if (isNaN(id)) return res.status(400).send(formatError('No / invalid ID provided.'));
+    if (version !== undefined && isNaN(version)) return res.status(400).send(formatError('Invalid version provided.'));
+    if (requireVersion && !version) return res.status(400).send(formatError('No version provided.'));
+
+    try {
+        return await handler();
+    } catch (e: any) {
+        if (e.code === 'ENOENT') return res.status(400).send(formatError('File not found.', { path: e.path }));
+        return res.status(500).send(formatError(e))
+    }
 }
