@@ -1,4 +1,3 @@
-import { Temporal } from '@js-temporal/polyfill';
 import type { ChalkInstance } from 'chalk';
 import chalk from 'chalk';
 import { networkInterfaces } from 'node:os';
@@ -79,8 +78,7 @@ function printErr(message: any, includeTime = true) {
 }
 
 function strWithTime(message: any, includeTime: boolean, formatter?: ChalkInstance) {
-    const time = chalk.hex('#909090').dim(getCurrentTime());
-    const base = includeTime ? `${time} ${message}` : message;
+    const base = includeTime ? `${chalk.hex('#909090').dim(getCurrentTime())} ${message}` : message;
     return formatter ? formatter(base) : base;
 }
 
@@ -90,29 +88,42 @@ function filterStack(err: Error) {
         .filter(line => !/node_modules|internal\//.test(line))
         .join('\n');
 }
-function getCurrentTime(includeTimezone = false, includeMillis = false, gmt = false): string {
-    return timeToString(gmt ? Temporal.Now.instant() : Temporal.Now.zonedDateTimeISO(), includeTimezone, includeMillis);
+function getCurrentTime(includeMillis = false, gmt = false): string {
+    return timeToString(new Date(), gmt, includeMillis);
 }
 
-function timeToString(time: Temporal.ZonedDateTime | Temporal.Instant | number | null, includeTimezone = true, includeMillis = true): string {
+function timeToString(time: number | Date | null, gmt = false, includeMillis = true): string {
     if (time === null) return 'time null';
 
+    let dt;
     if (typeof time === 'number') {
         const isMillis = time.toString().length > 12;
-        time = isMillis ? Temporal.Instant.fromEpochMilliseconds(time) : Temporal.Instant.fromEpochMilliseconds(time * 1000);
+        dt = isMillis ? new Date(time) : new Date(time * 1000);
+    } else {
+        dt = time;
     }
-    if (time instanceof Temporal.Instant) time = time.toZonedDateTimeISO('+00:00');
 
-    const year = addZeroes(time.year, 2);
-    const month = addZeroes(time.month, 2);
-    const day = addZeroes(time.day, 2);
-    const hours = addZeroes(time.hour, 2);
-    const minutes = addZeroes(time.minute, 2);
-    const seconds = addZeroes(time.second, 2);
-    const millis = includeMillis ? `.${addZeroes(time.millisecond, 3)}` : '';
-    const timezone = includeTimezone ? ` ${time.timeZoneId}` : '';
+    if (gmt) {
+        const year = addZeroes(dt.getUTCFullYear(), 2);
+        const month = addZeroes(dt.getUTCMonth() + 1, 2);
+        const day = addZeroes(dt.getUTCDate(), 2);
+        const hours = addZeroes(dt.getUTCHours(), 2);
+        const minutes = addZeroes(dt.getUTCMinutes(), 2);
+        const seconds = addZeroes(dt.getUTCSeconds(), 2);
+        const millis = includeMillis ? `.${addZeroes(dt.getUTCMilliseconds(), 3)}` : '';
 
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}${timezone}`;
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
+    } else {
+        const year = addZeroes(dt.getFullYear(), 2);
+        const month = addZeroes(dt.getMonth() + 1, 2);
+        const day = addZeroes(dt.getDate(), 2);
+        const hours = addZeroes(dt.getHours(), 2);
+        const minutes = addZeroes(dt.getMinutes(), 2);
+        const seconds = addZeroes(dt.getSeconds(), 2);
+        const millis = includeMillis ? `.${addZeroes(dt.getMilliseconds(), 3)}` : '';
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
+    }
 }
 
 function addZeroes(str: number, padAmount: number, radix: number = 10): string {

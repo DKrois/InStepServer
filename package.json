@@ -8,7 +8,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
     "axios": "^1.10.0",
     "chalk": "^5.6.2",
     "express": "^5.1.0"
