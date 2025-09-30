@@ -9,10 +9,13 @@ export function initServer() {
 
     app.use(express.static('public'));
 
+    app.put('/api/:id/', handlePUTRequest);
     app.put('/api/:id/:version', handlePUTRequest);
+
     app.get('/api/:id/list', handleListRequest);
     app.get('/api/:id', handleGETRequest);
     app.get('/api/:id/:version', handleGETRequest);
+
     app.delete('/api/:id', handleDELETERequest);
     app.delete('/api/:id/:version', handleDELETERequest);
 
@@ -39,17 +42,19 @@ export function initServer() {
 
 async function handlePUTRequest(req: express.Request, res: express.Response) {
     const id = parseInt(req.params.id);
-    const version = parseInt(req.params.version);
-    const data = req.body;
+    const version = req.params.version ? parseInt(req.params.version) : undefined;
 
     // keys === 0 checks if body is empty
+    const data = req.body;
     if (!data || Object.keys(data).length === 0) return res.status(400).send(formatError('No data provided.'));
 
+    const v = version ?? (await projectDB.getLatestVersion(id)).version + 1;
+
     const handler = async () => {
-        await projectDB.add(id, version, data);
+        await projectDB.add(id, v, data);
         res.sendStatus(204);
     };
-    const onSuccess = () => log(`Added / updated ${id}/v${version}`);
+    const onSuccess = () => log(`Added / updated ${id}/v${v}`);
 
     return handle(handler, onSuccess, res, id, version, true);
 }
