@@ -103,27 +103,15 @@ function timeToString(time: number | Date | null, gmt = false, includeMillis = t
         dt = time;
     }
 
-    if (gmt) {
-        const year = addZeroes(dt.getUTCFullYear(), 2);
-        const month = addZeroes(dt.getUTCMonth() + 1, 2);
-        const day = addZeroes(dt.getUTCDate(), 2);
-        const hours = addZeroes(dt.getUTCHours(), 2);
-        const minutes = addZeroes(dt.getUTCMinutes(), 2);
-        const seconds = addZeroes(dt.getUTCSeconds(), 2);
-        const millis = includeMillis ? `.${addZeroes(dt.getUTCMilliseconds(), 3)}` : '';
+    const year = addZeroes(gmt ? dt.getUTCFullYear() : dt.getFullYear(), 2);
+    const month = addZeroes((gmt ? dt.getUTCMonth() : dt.getMonth()) + 1, 2);
+    const day = addZeroes(gmt ? dt.getUTCDate() : dt.getDate(), 2);
+    const hours = addZeroes(gmt ? dt.getUTCHours() : dt.getHours(), 2);
+    const minutes = addZeroes(gmt ? dt.getUTCMinutes() : dt.getMinutes(), 2);
+    const seconds = addZeroes(gmt ? dt.getUTCSeconds() : dt.getSeconds(), 2);
+    const millis = includeMillis ? `.${addZeroes(gmt ? dt.getUTCMilliseconds() : dt.getMilliseconds(), 3)}` : '';
 
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
-    } else {
-        const year = addZeroes(dt.getFullYear(), 2);
-        const month = addZeroes(dt.getMonth() + 1, 2);
-        const day = addZeroes(dt.getDate(), 2);
-        const hours = addZeroes(dt.getHours(), 2);
-        const minutes = addZeroes(dt.getMinutes(), 2);
-        const seconds = addZeroes(dt.getSeconds(), 2);
-        const millis = includeMillis ? `.${addZeroes(dt.getMilliseconds(), 3)}` : '';
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
-    }
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
 }
 
 function addZeroes(str: number, padAmount: number, radix: number = 10): string {
