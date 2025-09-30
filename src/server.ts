@@ -18,14 +18,14 @@ export function initServer() {
 
     // handle non-existing routes
     app.use((req, res) => {
-        res.status(404).json({
+        res.status(404).send({
             error: 'Not Found',
             path: req.originalUrl,
         });
     });
     
     // unhandled error
-    app.use((err: any, _req: express.Request, res: express.Response) => {
+    app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         errorWithMessage('Unhandled http error', err);
         res.status(err.status || 500).json({
             error: err.message || 'Internal Server Error',
@@ -49,8 +49,9 @@ async function handlePUTRequest(req: express.Request, res: express.Response) {
         await projectDB.add(id, version, data);
         res.sendStatus(204);
     };
+    const onSuccess = () => log(`Added / updated ${id}/v${version}`);
 
-    return handle(handler, res, id, version, true);
+    return handle(handler, onSuccess, res, id, version, true);
 }
 
 async function handleGETRequest(req: express.Request, res: express.Response) {
@@ -61,8 +62,9 @@ async function handleGETRequest(req: express.Request, res: express.Response) {
         const data = await projectDB.get(id, version);
         res.status(200).send(data);
     };
+    const onSuccess = () => log(`Requested ${id}/${(version ? `v${version}` : '@latest')}`);
 
-    return handle(handler, res, id, version, false);
+    return handle(handler, onSuccess, res, id, version, false);
 }
 
 async function handleListRequest(req: express.Request, res: express.Response) {
@@ -72,8 +74,9 @@ async function handleListRequest(req: express.Request, res: express.Response) {
         const versions = await projectDB.list(id);
         res.status(200).send({ versions });
     };
+    const onSuccess = () => log(`Listed ${id}/`);
 
-    return handle(handler, res, id);
+    return handle(handler, onSuccess, res, id);
 }
 
 async function handleDELETERequest(req: express.Request, res: express.Response) {
@@ -84,11 +87,12 @@ async function handleDELETERequest(req: express.Request, res: express.Response) 
         await projectDB.delete(id, version);
         res.sendStatus(204);
     };
+    const onSuccess = () => log(`Deleted ${id}/${version ? `v${version}` : ''}`);
 
-    return handle(handler, res, id, version, false);
+    return handle(handler, onSuccess, res, id, version, false);
 }
 
-async function handle(handler: () => any, res: express.Response, id: number, version?: number, requireVersion?: boolean) {
+async function handle(handler: () => Promise<any>, onSuccess: () => any, res: express.Response, id: number, version?: number, requireVersion?: boolean) {
     res.setHeader('Content-Type', 'application/json');
 
     if (isNaN(id)) return res.status(400).send(formatError('No / invalid ID provided.'));
@@ -96,7 +100,7 @@ async function handle(handler: () => any, res: express.Response, id: number, ver
     if (requireVersion && !version) return res.status(400).send(formatError('No version provided.'));
 
     try {
-        return await handler();
+        return await handler().then(onSuccess);
     } catch (e: any) {
         if (e.code === 'ENOENT') return res.status(400).send(formatError('File not found.', { path: e.path }));
         return res.status(500).send(formatError(e))
