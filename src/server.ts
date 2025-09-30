@@ -48,7 +48,7 @@ async function handlePUTRequest(req: express.Request, res: express.Response) {
     const data = req.body;
     if (!data || Object.keys(data).length === 0) return res.status(400).send(formatError('No data provided.'));
 
-    const v = version ?? (await projectDB.getLatestVersion(id)).version + 1;
+    const v = version ?? ((await projectDB.getLatestVersion(id))?.version ?? 0) + 1;
 
     const handler = async () => {
         await projectDB.add(id, v, data);
@@ -56,7 +56,7 @@ async function handlePUTRequest(req: express.Request, res: express.Response) {
     };
     const onSuccess = () => log(`Added / updated ${id}/v${v}`);
 
-    return handle(handler, onSuccess, res, id, version, true);
+    return handle(handler, onSuccess, res, id, v, true);
 }
 
 async function handleGETRequest(req: express.Request, res: express.Response) {

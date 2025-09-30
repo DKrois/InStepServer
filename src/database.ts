@@ -32,7 +32,8 @@ class ProjectDatabase {
      * @param version version to read. If absent, uses most recent one
      */
     async get(id: number, version?: number) {
-        const v = version ? `v${version}.json` : (await this.getLatestVersion(id)).file;
+        const v = version ? `v${version}.json` : (await this.getLatestVersion(id))?.file;
+        if (!v) throw new Error(`${id}/@latest not found.`);
         const filePath = join(this.dbPath, id.toString(), v);
 
         const json = await fs.readFile(filePath, 'utf8');
@@ -51,12 +52,13 @@ class ProjectDatabase {
 
     async getLatestVersion(id: number) {
         const path = join(this.dbPath, id.toString());
-        const files = await fs.readdir(path);
+        const files = await fs.readdir(path).catch(() => []);
 
         const versioned = files
             .map(file => ({ file, version: this._extractVersionNumber(file) }))
             .filter(f => f.version !== null) as ({ file: string, version: number })[];
 
+        if (versioned.length === 0) return null;
         return versioned.reduce((a, b) => (b.version > a.version ? b : a));
     }
 

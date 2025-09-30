@@ -90,32 +90,6 @@ function filterStack(err: Error) {
         .filter(line => !/node_modules|internal\//.test(line))
         .join('\n');
 }
-
-export function errToString(err: Error | undefined | unknown, includeName = true): string {
-    try {
-        const error = err as Error;
-
-        const parts: string[] = [];
-        let end = '';
-
-        if (includeName && error.name) {
-            if (error.message) parts.push(`${error.name}: ${error.message}`);
-            else parts.push(error.name);
-        } else if (error.message) {
-            parts.push(error.message);
-        }
-
-        if (error.cause) {
-            parts.push(`Cause: ${String(error.cause)}`);
-        }
-
-        if (end) parts.push(end);
-        return parts.join('\n');
-    } catch (e) {
-        return `${(err)}`;
-    }
-}
-
 function getCurrentTime(includeTimezone = false, includeMillis = false, gmt = false): string {
     return timeToString(gmt ? Temporal.Now.instant() : Temporal.Now.zonedDateTimeISO(), includeTimezone, includeMillis);
 }
