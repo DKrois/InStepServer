@@ -1,13 +1,28 @@
 import express from 'express';
-import { port } from './config.json' with { type: 'json' };
+import { port } from './config.json';
 import { projectDB } from './database';
 import { errorWithMessage, formatError, getOwnIPs, log } from './util';
+import { Server } from 'node:http';
 
+// const { port } = config;
+
+export const stats = {
+    resourceAccessed: 0
+};
+let server: Server | null = null;
 export function initServer() {
+    if (server) {
+        log('Server already running.');
+        return;
+    }
+
     const app = express();
     app.use(express.json());
 
-    app.use(express.static('public'));
+    app.use((req, res, next) => {
+        stats.resourceAccessed++;
+        next();
+    }, express.static('public'));
 
     app.put('/api/:id/', handlePUTRequest);
     app.put('/api/:id/:version', handlePUTRequest);
@@ -35,8 +50,20 @@ export function initServer() {
         });
     });
 
-    app.listen(port, '0.0.0.0', () => {
+    server = app.listen(port, '0.0.0.0', () => {
         log(`Server listening on http://${getOwnIPs().pick}:${port}`);
+    });
+}
+
+export function stopServer() {
+    if (!server) {
+        log('Server not running.');
+        return;
+    }
+
+    server.close(() => {
+        log('Server closed.');
+        server = null;
     });
 }
 

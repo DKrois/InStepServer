@@ -1,7 +1,9 @@
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
-import { dbPath } from './config.json' with { type: 'json' };
+import { dbPath } from './config.json';
+
+// const { dbPath } = config;
 
 class ProjectDatabase {
     constructor(private dbPath: string) {}

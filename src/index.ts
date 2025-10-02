@@ -1,9 +1,11 @@
 import readline from 'node:readline';
+import { initApp } from './app';
 import { initServer } from './server';
 import { log } from './util';
 
 async function main() {
     initServer();
+    initApp();
 
     listenForExit();
 }
@@ -33,6 +35,3 @@ async function exit(exitCode = 0) {
 }
 
 main();
-
-// GUI for server ?
-// database / json files?

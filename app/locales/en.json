@@ -1,0 +1,11 @@
+{
+  "title": "Server Control Panel",
+  "serverControls": "Server Controls",
+  "startServer": "Start Server",
+  "stopServer": "Stop Server",
+  "statistics": "Statistics",
+  "resourceAccessCount": "Resource Access Count",
+  "refresh": "Refresh",
+  "toggleLogs": "Show Logs",
+  "toggleTheme": "Toggle Theme"
+}

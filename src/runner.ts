@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 
 function runApp() {
-    const loaderImport = 'file:/C:/Program Files/JetBrains/WebStorm 2024.2.3/plugins/nodeJS/js/ts-file-loader/node_modules/tsx/dist/loader.cjs';
+    // const loaderImport = 'file:/C:/Program Files/JetBrains/WebStorm 2024.2.3/plugins/nodeJS/js/ts-file-loader/node_modules/tsx/dist/loader.cjs';
     const args = [
-        '--import', loaderImport,
+        // '--import', loaderImport,
         '--trace-warnings', '--no-deprecation',
         'src/index.ts'
     ];

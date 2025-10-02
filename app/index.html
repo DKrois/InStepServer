@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Server Control Panel</title>
+    </head>
+
+    <body class="light-mode">
+        <header class="top-bar">
+            <h1 data-i18n="title">Server Control Panel</h1>
+            <div class="controls">
+                <select id="language-switcher">
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                </select>
+                <button id="theme-switcher" class="icon-button" data-i18n-title="toggleTheme">☀️</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <h2 data-i18n="serverControls">Server Controls</h2>
+                <div class="button-group">
+                    <button id="start-btn" data-i18n="startServer">Start Server</button>
+                    <button id="stop-btn" data-i18n="stopServer">Stop Server</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 data-i18n="statistics">Statistics</h2>
+                <p>
+                    <span data-i18n="resourceAccessCount">Resource Access Count</span>: <span id="resource-count">0</span>
+                </p>
+                <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
+            </div>
+        </main>
+
+        <div class="logs-section">
+            <button id="toggle-logs-btn" data-i18n="toggleLogs">Show Logs</button>
+            <div id="logs-container" class="hidden">
+                <pre id="logs-output"></pre>
+            </div>
+        </div>
+    </body>
+</html>

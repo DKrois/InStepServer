@@ -1,0 +1,11 @@
+{
+  "title": "Server-Bedienfeld",
+  "serverControls": "Serversteuerung",
+  "startServer": "Server starten",
+  "stopServer": "Server stoppen",
+  "statistics": "Statistik",
+  "resourceAccessCount": "Anzahl der Ressourcenzugriffe",
+  "refresh": "Aktualisieren",
+  "toggleLogs": "Protokolle anzeigen",
+  "toggleTheme": "Theme wechseln"
+}

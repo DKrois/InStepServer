@@ -1,0 +1,47 @@
+/* Light Mode (Default) */
+body.light-mode {
+    --bg-color: #f0f2f5;
+    --text-color: #1c1e21;
+    --card-bg: #ffffff;
+    --button-bg: #e4e6eb;
+    --button-text: #050505;
+    --primary-button-bg: #1877f2;
+    --primary-button-text: #ffffff;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    --bg-color: #000000;
+    --text-color: #e4e6eb;
+    --card-bg: #1c1c1c;
+    --button-bg: #3a3b3c;
+    --button-text: #e4e6eb;
+    --primary-button-bg: #2d88ff;
+    --primary-button-text: #ffffff;
+}
+
+/* Apply variables */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.top-bar, .card {
+    background-color: var(--card-bg);
+}
+
+button, select {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid transparent;
+}
+
+#start-btn {
+    background-color: var(--primary-button-bg);
+    color: var(--primary-button-text);
+}
+
+#logs-container {
+    background-color: var(--card-bg);
+    border-color: var(--button-bg);
+}
