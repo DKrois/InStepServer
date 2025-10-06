@@ -3,8 +3,6 @@ import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { dbPath } from './config.json';
 
-// const { dbPath } = config;
-
 class ProjectDatabase {
     constructor(private dbPath: string) {}
 

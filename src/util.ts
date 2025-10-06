@@ -1,6 +1,6 @@
-import type { ChalkInstance } from 'chalk';
 import chalk from 'chalk';
 import { networkInterfaces } from 'node:os';
+import { sendLog } from './app';
 
 export function formatError(e: Error | string, additional?: any) {
     const message = typeof e === 'string' ? e : e.message;
@@ -36,12 +36,14 @@ export function getOwnIPs(): { allResults: string[], pick: string | undefined } 
     return { allResults: results, pick: ethernetIP || wifiIP || mobileDataIP };
 }
 
-export function log(message: any, includeTime = true) {
+export function log(message: any, includeTime = true, inApp = true) {
     console.log(strWithTime(message, includeTime));
+    if (inApp) sendLog(message);
 }
 
-export function warn(message: any, includeTime = true) {
-    console.warn(strWithTime(message, includeTime, chalk.hex('ff4d00')));
+export function warn(message: any, includeTime = true, inApp = true) {
+    console.warn(chalk.hex('ff4d00')(strWithTime(message, includeTime)));
+    if (inApp) sendLog(chalk.hex('ff4d00')(message));
 }
 
 export function error(message: string | Error | unknown, printFull = true, includeTime = true) {
@@ -61,7 +63,7 @@ export function error(message: string | Error | unknown, printFull = true, inclu
 }
 
 export function errorWithMessage(message: string, err: Error | unknown, includeTime = true) {
-    console.error(strWithTime(message, includeTime, chalk.red));
+    console.error(chalk.red(strWithTime(message, includeTime)));
     console.error(err);
 }
 
@@ -70,16 +72,19 @@ function printErr(message: any, includeTime = true) {
         const stack = filterStack(message);
         message.stack = undefined;
 
-        console.error(strWithTime(message, includeTime, chalk.red));
+        console.error(chalk.red(strWithTime(message, includeTime)));
         console.error(stack);
     } else {
-        console.error(strWithTime(message, includeTime, chalk.red));
+        console.error(chalk.red(strWithTime(message, includeTime)));
     }
 }
 
-function strWithTime(message: any, includeTime: boolean, formatter?: ChalkInstance) {
-    const base = includeTime ? `${chalk.hex('#909090').dim(getCurrentTime())} ${message}` : message;
-    return formatter ? formatter(base) : base;
+function strWithTime(message: any, includeTime: boolean) {
+    return includeTime ? `${formatBackground(getCurrentTime())} ${message}` : message;
+}
+
+function formatBackground(str: string) {
+    return chalk.hex('#909090').dim(str);
 }
 
 function filterStack(err: Error) {
@@ -88,6 +93,8 @@ function filterStack(err: Error) {
         .filter(line => !/node_modules|internal\//.test(line))
         .join('\n');
 }
+
+// noinspection DuplicatedCode
 function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
 }

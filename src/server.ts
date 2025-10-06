@@ -4,11 +4,13 @@ import { projectDB } from './database';
 import { errorWithMessage, formatError, getOwnIPs, log } from './util';
 import { Server } from 'node:http';
 
-// const { port } = config;
-
-export const stats = {
+const stats = {
     resourceAccessed: 0
 };
+export function getStats() {
+    return stats;
+}
+
 let server: Server | null = null;
 export function initServer() {
     if (server) {
@@ -19,10 +21,7 @@ export function initServer() {
     const app = express();
     app.use(express.json());
 
-    app.use((req, res, next) => {
-        stats.resourceAccessed++;
-        next();
-    }, express.static('public'));
+    app.use(express.static('public'));
 
     app.put('/api/:id/', handlePUTRequest);
     app.put('/api/:id/:version', handlePUTRequest);

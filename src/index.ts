@@ -1,7 +1,11 @@
+// force color support before imports as electron breaks it otherwise
+process.env.FORCE_COLOR = '1';
+
 import readline from 'node:readline';
 import { initApp } from './app';
 import { initServer } from './server';
-import { log } from './util';
+import 'source-map-support/register'
+import { errorWithMessage, log } from './util';
 
 async function main() {
     initServer();
@@ -27,9 +31,11 @@ async function listenForExit() {
 
     process.on('SIGINT', () => exit());
     process.on('SIGTERM', () => exit());
+    process.on('uncaughtException', exception => errorWithMessage('Unhandled Exception:', exception));
+    process.on('unhandledRejection', reason => errorWithMessage('Unhandled Rejection:', reason));
 }
 
-async function exit(exitCode = 0) {
+function exit(exitCode = 0) {
     log('Exiting...');
     process.exit(exitCode);
 }

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron';
-import { initServer, stats, stopServer } from './server';
+import { initServer, getStats, stopServer } from './server';
 
 /*
  * start / stop
@@ -28,14 +28,8 @@ function createWindow() {
     });
 }
 
-function logToRenderer(log: string) {
-    if (mainWindow) {
-        mainWindow.webContents.send('log', log);
-    }
-}
-
-function sendLog(message: string) {
-    logToRenderer(`[Server] ${message}`);
+export function sendLog(message: string) {
+    if (mainWindow) mainWindow.webContents.send('log', message);
 }
 
 export function initApp() {
@@ -47,15 +41,15 @@ export function initApp() {
         createWindow();
 
         // IPC Handlers
-        ipcMain.on('start-server', () => initServer());
-        ipcMain.on('stop-server', () => stopServer());
-        ipcMain.handle('get-stats', () => stats);
+        ipcMain.on('start-server', initServer);
+        ipcMain.on('stop-server', stopServer);
+        ipcMain.handle('get-stats', getStats);
 
         ipcMain.handle('toggle-theme', () => {
             if (nativeTheme.shouldUseDarkColors) {
-                nativeTheme.themeSource = 'dark';
-            } else {
                 nativeTheme.themeSource = 'light';
+            } else {
+                nativeTheme.themeSource = 'dark';
             }
             return nativeTheme.shouldUseDarkColors;
         });
@@ -65,14 +59,10 @@ export function initApp() {
     });
 
     app.on('window-all-closed', () => {
-        if (process.platform !== 'darwin') {
-            app.quit();
-        }
+        if (process.platform !== 'darwin') app.quit();
     });
 
     app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
 }

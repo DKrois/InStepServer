@@ -45,3 +45,24 @@ button, select {
     background-color: var(--card-bg);
     border-color: var(--button-bg);
 }
+
+body.light-mode .light-icon {
+    display: block;
+}
+body.light-mode .dark-icon {
+    display: none;
+}
+
+body.dark-mode .light-icon {
+    display: none;
+}
+body.dark-mode .dark-icon {
+    display: block;
+}
+
+body.light-mode .icon-button:hover {
+    background-color: #e0e0e0;
+}
+body.dark-mode .icon-button:hover {
+    background-color: #333333;
+}
