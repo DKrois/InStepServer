@@ -90,11 +90,16 @@ body.dark-mode .icon-button:hover {
 }
 
 .sidebar {
-    background-color: var(--bg-color);
+    background-color: var(--card-bg);
     border-left: 1px solid var(--button-bg);
 }
 
 #logs-container {
     background-color: var(--card-bg);
     border-color: var(--button-bg);
+}
+
+.app-footer {
+    background-color: var(--card-bg); /* Use the card background for consistency */
+    border-top-color: var(--button-bg);
 }

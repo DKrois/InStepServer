@@ -1,6 +1,8 @@
-// @ts-nocheck
+// @ts-ignore
 import { setInitialStatus } from './serverStatus';
+// @ts-ignore
 import { refreshStats } from './stats';
+// @ts-ignore
 import { setInitialLanguage, setInitialTheme } from './theme';
 
 import '../css/styles.css';

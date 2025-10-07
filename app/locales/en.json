@@ -6,6 +6,6 @@
   "statistics": "Statistics",
   "resourceAccessCount": "Resource Access Count",
   "refresh": "Refresh",
-  "toggleLogs": "Show Logs",
+  "showLogs": "Show Logs",
   "toggleTheme": "Toggle Theme"
 }

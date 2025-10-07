@@ -3,8 +3,6 @@ process.env.FORCE_COLOR = '1';
 
 import readline from 'node:readline';
 import { initApp } from './app.js';
-import { port } from '../config.json';
-import { initServer } from './server.js';
 import 'source-map-support/register';
 import { errorWithMessage, log } from './util.js';
 
@@ -13,7 +11,6 @@ import { errorWithMessage, log } from './util.js';
 */
 
 async function main() {
-    initServer(port);
     initApp();
 
     listenForExit();

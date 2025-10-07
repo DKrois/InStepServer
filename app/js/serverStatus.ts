@@ -45,7 +45,5 @@ function handleServerStatus(status: { isRunning: boolean, message?: string }) {
     startBtn.textContent = getTranslation('startServer');
     stopBtn.textContent = getTranslation('stopServer');
 
-    if (status.message) {
-        showToast(status.message);
-    }
+    if (status.message) showToast(status.message);
 }

@@ -13,13 +13,9 @@ const store = new Store({
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
-export let mainWindow: BrowserWindow | null = null;
+let mainWindow: BrowserWindow | null = null;
 let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;
-
-export function setServerStartTime(t: number | null) {
-    serverStartTime = t;
-}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -82,10 +78,21 @@ export function initApp() {
         // IPC Handlers
         ipcMain.on('start-server', (_event, port: number) => {
             initServer(port);
+
+            serverStartTime = Date.now();
             if (statsInterval) clearInterval(statsInterval);
             statsInterval = setInterval(sendStats, 1000);
+
+            mainWindow?.webContents.send('server-status-changed', { isRunning: true, message: `Server started on port ${port}` });
         });
-        ipcMain.on('stop-server', stopServer);
+        ipcMain.on('stop-server', () => {
+            stopServer();
+
+            serverStartTime = null;
+            if (statsInterval) clearInterval(statsInterval);
+
+            mainWindow?.webContents.send('server-status-changed', { isRunning: false, message: 'Server stopped successfully' });
+        });
         ipcMain.handle('get-stats', () => stats);
 
         ipcMain.handle('toggle-theme', () => {

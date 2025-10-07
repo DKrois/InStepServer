@@ -9,6 +9,7 @@
     <body class="light-mode">
         <header class="top-bar">
             <h1 data-i18n="title">Server Control Panel</h1>
+
             <div class="controls">
                 <label for="language-switcher"></label><select id="language-switcher">
                     <option value="en">English</option>
@@ -21,53 +22,59 @@
             </div>
         </header>
 
-        <main class="main-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 data-i18n="serverControls">Server Controls</h2>
-                    <div id="server-status-indicator" title="Server is running"></div>
+        <div id="app-body">
+            <main class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 data-i18n="serverControls">Server Controls</h2>
+                        <div id="server-status-indicator" title="Server is running"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="start-btn" data-i18n="startServer">Start Server</button>
+                        <button id="stop-btn" data-i18n="stopServer">Stop Server</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="port-input" data-i18n="portLabel">Port:</label>
+                        <input type="number" id="port-input" value="5000" min="80" max="65535">
+                    </div>
                 </div>
 
-                <div class="button-group">
-                    <button id="start-btn" data-i18n="startServer">Start Server</button>
-                    <button id="stop-btn" data-i18n="stopServer">Stop Server</button>
+                <div class="logs-section">
+                    <div id="logs-container" class="hidden">
+                        <pre id="logs-output"></pre>
+                    </div>
                 </div>
+            </main>
 
-                <div class="form-group">
-                    <label for="port-input" data-i18n="portLabel">Port:</label>
-                    <input type="number" id="port-input" value="5000" min="80" max="65535">
+            <aside id="stats-sidebar" class="sidebar">
+                <div class="card">
+                    <h2 data-i18n="statistics">Statistics</h2>
+                    <p>
+                        <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span>
+                    </p>
+                    <p>
+                        <span data-i18n="memoryUsage">Memory Usage</span>: <span id="memory-display">0 MB</span>
+                    </p>
+                    <p>
+                        <span data-i18n="resourceAccessCount">Resource Access Count</span>: <span id="resource-count">0</span>
+                    </p>
+                    <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
                 </div>
-            </div>
-        </main>
-
-        <aside id="stats-sidebar" class="sidebar">
-            <div class="card">
-                <h2 data-i18n="statistics">Statistics</h2>
-                <p>
-                    <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span>
-                </p>
-                <p>
-                    <span data-i18n="memoryUsage">Memory Usage</span>: <span id="memory-display">0 MB</span>
-                </p>
-                <p>
-                    <span data-i18n="resourceAccessCount">Resource Access Count</span>: <span id="resource-count">0</span>
-                </p>
-                <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
-            </div>
-        </aside>
-
-        <div class="bottom-controls">
-            <button id="toggle-stats-btn" data-i18n="toggleStatistics">Show Statistics</button>
-            <button id="toggle-logs-btn" data-i18n="toggleLogs">Show Logs</button>
+            </aside>
         </div>
 
-        <div class="logs-section">
-            <div class="log-actions">
-                <button id="clear-logs-btn" data-i18n="clearLogs">Clear Logs</button>
+        <footer class="app-footer">
+            <div class="footer-left">
+                <button id="toggle-logs-btn" data-i18n="toggleLogs">Show Logs</button>
+                <div id="log-actions" class="hidden">
+                    <button id="clear-logs-btn" data-i18n="clearLogs">Clear Logs</button>
+                </div>
             </div>
-            <div id="logs-container" class="hidden">
-                <pre id="logs-output"></pre>
+            <div class="footer-right">
+                <button id="toggle-stats-btn" data-i18n="toggleStatistics">Show Statistics</button>
             </div>
-        </div>
+        </footer>
     </body>
 </html>

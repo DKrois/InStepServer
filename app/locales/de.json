@@ -6,6 +6,6 @@
   "statistics": "Statistik",
   "resourceAccessCount": "Anzahl der Ressourcenzugriffe",
   "refresh": "Aktualisieren",
-  "toggleLogs": "Protokolle anzeigen",
+  "showLogs": "Protokolle anzeigen",
   "toggleTheme": "Theme wechseln"
 }

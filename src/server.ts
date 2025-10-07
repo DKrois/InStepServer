@@ -1,6 +1,5 @@
 import express from 'express';
 import { Server } from 'node:http';
-import { mainWindow, setServerStartTime } from './app.js';
 import { projectDB } from './database.js';
 import { errorWithMessage, formatError, getOwnIPs, log } from './util.js';
 
@@ -48,8 +47,6 @@ export function initServer(port: number) {
 
     server = app.listen(port, '0.0.0.0', () => {
         log(`Server listening on http://${getOwnIPs().pick}:${port}`);
-        mainWindow?.webContents.send('server-status-changed', { isRunning: true, message: `Server started on port ${port}` });
-        setServerStartTime(Date.now());
     });
 }
 
@@ -62,8 +59,6 @@ export function stopServer() {
     server.close(() => {
         log('Server closed.');
         server = null;
-        setServerStartTime(null);
-        mainWindow?.webContents.send('server-status-changed', { isRunning: false, message: 'Server stopped successfully' });
     });
 }
 

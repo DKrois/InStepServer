@@ -10,12 +10,15 @@ const logsOutput = document.getElementById('logs-output')!;
 const toggleLogsBtn = document.getElementById('toggle-logs-btn')!;
 const clearLogsBtn = document.getElementById('clear-logs-btn')!;
 const logsContainer = document.getElementById('logs-container')!;
+const logActions = document.getElementById('log-actions')!;
 
 toggleLogsBtn.addEventListener('click', () => {
-    logsContainer.classList.toggle('hidden');
+    const isHidden = logsContainer.classList.toggle('hidden');
+    logActions.classList.toggle('hidden', isHidden);
+
     toggleLogsBtn.textContent = logsContainer.classList.contains('hidden')
-        ? getTranslation('toggleLogs')
-        : 'Hide Logs';
+        ? getTranslation('showLogs')
+        : getTranslation('hideLogs');
 });
 
 clearLogsBtn.addEventListener('click', () => {
