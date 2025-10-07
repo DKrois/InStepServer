@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { networkInterfaces } from 'node:os';
-import { sendLog } from './app';
+import { sendLog } from './app.js';
 
 export function formatError(e: Error | string, additional?: any) {
     const message = typeof e === 'string' ? e : e.message;
@@ -99,6 +99,7 @@ function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
 }
 
+// noinspection DuplicatedCode
 function timeToString(time: number | Date | null, gmt = false, includeMillis = true): string {
     if (time === null) return 'time null';
 

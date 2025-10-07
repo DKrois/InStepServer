@@ -7,6 +7,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 export const plugins = [
     new ForkTsCheckerWebpackPlugin({
         logger: 'webpack-infrastructure',
+        typescript: {
+            configFile: 'tsconfig.webpack.json'
+        },
     }),
     new CopyWebpackPlugin({
         patterns: [

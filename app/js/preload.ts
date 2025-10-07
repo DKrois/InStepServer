@@ -1,22 +1,28 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-// --- API Definition ---
 const api = {
-    startServer: () => ipcRenderer.send('start-server'),
+    startServer: (port: number) => ipcRenderer.send('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
-    onLog: (callback: (log: string) => void) => {
-        ipcRenderer.on('log', (_event, value) => callback(value as string));
+    onServerStatusChanged: (callback: (status: { isRunning: boolean, message?: string }) => void) => {
+        ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },
-    getStats: () => ipcRenderer.invoke('get-stats'),
     toggleTheme: () => ipcRenderer.invoke('toggle-theme'),
     getInitialTheme: () => ipcRenderer.invoke('get-initial-theme'),
     getInitialLocale: () => ipcRenderer.invoke('get-initial-locale'),
+    onUpdateStats: (callback: (stats: { uptime: string, memory: string }) => void) => {
+        ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
+    },
+    getStats: () => ipcRenderer.invoke('get-stats'),
+    getInitialSettings: () => ipcRenderer.invoke('get-initial-settings'),
+    saveSetting: (key: string, value: any) => ipcRenderer.send('save-setting', { key, value }),
+    onLog: (callback: (log: string) => void) => {
+        ipcRenderer.on('log', (_event, value) => callback(value as string));
+    },
 };
 
 // --- Expose to Renderer ---
 contextBridge.exposeInMainWorld('api', api);
 
-// --- Type Augmentation for the Window object ---
 declare global {
     interface Window {
         api: typeof api;

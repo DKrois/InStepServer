@@ -13,6 +13,7 @@ body {
     align-items: center;
     padding: 10px 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
 .top-bar h1 {
@@ -55,6 +56,16 @@ body {
     flex: 1;
 }
 
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.card-header h2 {
+    margin: 0;
+}
+
 .button-group {
     display: flex;
     gap: 10px;
@@ -74,9 +85,70 @@ button:active {
     transform: scale(0.98);
 }
 
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#server-status-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0; /* Prevents it from shrinking */
+}
+#port-input {
+    margin: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 80px;
+}
+#port-input::-webkit-outer-spin-button, #port-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#port-input {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.sidebar {
+    position: fixed;
+    top: 61px; /* Height of top-bar + 1px border */
+    right: 0;
+    width: 300px;
+    height: calc(100vh - 61px);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(100%); /* Hide off-screen to the right */
+    z-index: 10;
+}
+.sidebar.visible {
+    transform: translateX(0); /* Slide into view */
+}
+
+.bottom-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 20; /* Keep it above logs and sidebar */
+}
+
 .logs-section {
     padding: 0 20px 20px 20px;
     margin-top: auto;
+}
+
+.log-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 5px;
 }
 
 #logs-container {
@@ -92,4 +164,8 @@ button:active {
 
 #logs-container.hidden {
     display: none;
+}
+
+.hidden {
+    display: none !important;
 }

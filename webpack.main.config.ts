@@ -16,6 +16,9 @@ export const mainConfig: Configuration = {
     plugins,
     resolve: {
         extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
+        extensionAlias: {
+            '.js': ['.ts', '.js'],
+        },
     },
     mode: 'production',
     devtool: 'source-map',

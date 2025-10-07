@@ -2,13 +2,18 @@
 process.env.FORCE_COLOR = '1';
 
 import readline from 'node:readline';
-import { initApp } from './app';
-import { initServer } from './server';
-import 'source-map-support/register'
-import { errorWithMessage, log } from './util';
+import { initApp } from './app.js';
+import { port } from '../config.json';
+import { initServer } from './server.js';
+import 'source-map-support/register';
+import { errorWithMessage, log } from './util.js';
+
+/*
+* Auto update ?
+*/
 
 async function main() {
-    initServer();
+    initServer(port);
     initApp();
 
     listenForExit();
@@ -24,8 +29,6 @@ async function listenForExit() {
         switch (input) {
             case 'exit':
                 return exit();
-            case 'restart':
-                return exit(100);
         }
     });
 

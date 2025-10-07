@@ -1,18 +1,15 @@
 import express from 'express';
-import { port } from './config.json';
-import { projectDB } from './database';
-import { errorWithMessage, formatError, getOwnIPs, log } from './util';
 import { Server } from 'node:http';
+import { mainWindow, setServerStartTime } from './app.js';
+import { projectDB } from './database.js';
+import { errorWithMessage, formatError, getOwnIPs, log } from './util.js';
 
-const stats = {
+export const stats = {
     resourceAccessed: 0
 };
-export function getStats() {
-    return stats;
-}
 
 let server: Server | null = null;
-export function initServer() {
+export function initServer(port: number) {
     if (server) {
         log('Server already running.');
         return;
@@ -51,6 +48,8 @@ export function initServer() {
 
     server = app.listen(port, '0.0.0.0', () => {
         log(`Server listening on http://${getOwnIPs().pick}:${port}`);
+        mainWindow?.webContents.send('server-status-changed', { isRunning: true, message: `Server started on port ${port}` });
+        setServerStartTime(Date.now());
     });
 }
 
@@ -63,6 +62,8 @@ export function stopServer() {
     server.close(() => {
         log('Server closed.');
         server = null;
+        setServerStartTime(null);
+        mainWindow?.webContents.send('server-status-changed', { isRunning: false, message: 'Server stopped successfully' });
     });
 }
 

@@ -2,6 +2,7 @@
 body.light-mode {
     --bg-color: #f0f2f5;
     --text-color: #1c1e21;
+    --accent-color: #1877f2;
     --card-bg: #ffffff;
     --button-bg: #e4e6eb;
     --button-text: #050505;
@@ -13,6 +14,7 @@ body.light-mode {
 body.dark-mode {
     --bg-color: #000000;
     --text-color: #e4e6eb;
+    --accent-color: #2d88ff;
     --card-bg: #1c1c1c;
     --button-bg: #3a3b3c;
     --button-text: #e4e6eb;
@@ -29,6 +31,9 @@ body {
 .top-bar, .card {
     background-color: var(--card-bg);
 }
+.top-bar {
+    border-bottom-color: var(--button-bg);
+}
 
 button, select {
     background-color: var(--button-bg);
@@ -39,11 +44,6 @@ button, select {
 #start-btn {
     background-color: var(--primary-button-bg);
     color: var(--primary-button-text);
-}
-
-#logs-container {
-    background-color: var(--card-bg);
-    border-color: var(--button-bg);
 }
 
 body.light-mode .light-icon {
@@ -65,4 +65,36 @@ body.light-mode .icon-button:hover {
 }
 body.dark-mode .icon-button:hover {
     background-color: #333333;
+}
+
+#port-input {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--button-bg);
+}
+
+#port-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+/* Status Indicator Colors */
+#server-status-indicator {
+    background-color: #909090;
+}
+#server-status-indicator.status-running {
+    background-color: #2ecc71;
+}
+#server-status-indicator.status-stopped {
+    background-color: #e74c3c;
+}
+
+.sidebar {
+    background-color: var(--bg-color);
+    border-left: 1px solid var(--button-bg);
+}
+
+#logs-container {
+    background-color: var(--card-bg);
+    border-color: var(--button-bg);
 }
