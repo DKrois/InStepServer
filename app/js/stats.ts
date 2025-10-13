@@ -8,8 +8,6 @@ const resourceCount = document.getElementById('resource-count')!;
 const uptimeDisplay = document.getElementById('uptime-display')!;
 const memoryDisplay = document.getElementById('memory-display')!;
 
-const appBody = document.getElementById('app-body')!;
-
 export async function refreshStats() {
     const stats = await window.api.getStats();
     resourceCount.textContent = stats.resourceAccessed.toString();
@@ -18,9 +16,9 @@ export async function refreshStats() {
 refreshStatsBtn.addEventListener('click', refreshStats);
 toggleStatsBtn.addEventListener('click', () => {
     const isVisible = statsSidebar.classList.toggle('visible');
-    toggleStatsBtn.textContent = isVisible ? getTranslation('hideStatistics') : getTranslation('showStatistics');
+    document.body.classList.toggle('stats-visible', isVisible);
 
-    appBody.classList.toggle('stats-visible', isVisible);
+    toggleStatsBtn.textContent = isVisible ? getTranslation('hideStatistics') : getTranslation('showStatistics');
 });
 
 window.api.onUpdateStats(stats => {

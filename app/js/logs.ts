@@ -7,18 +7,18 @@ import AnsiToHTML from 'ansi-to-html';
 const convert = new AnsiToHTML();
 
 const logsOutput = document.getElementById('logs-output')!;
+const logsSection = document.querySelector('.logs-section')!;
 const toggleLogsBtn = document.getElementById('toggle-logs-btn')!;
 const clearLogsBtn = document.getElementById('clear-logs-btn')!;
 const logsContainer = document.getElementById('logs-container')!;
 const logActions = document.getElementById('log-actions')!;
 
 toggleLogsBtn.addEventListener('click', () => {
-    const isHidden = logsContainer.classList.toggle('hidden');
+    const isHidden = logsSection.classList.toggle('hidden');
     logActions.classList.toggle('hidden', isHidden);
+    document.body.classList.toggle('logs-visible', !isHidden);
 
-    toggleLogsBtn.textContent = logsContainer.classList.contains('hidden')
-        ? getTranslation('showLogs')
-        : getTranslation('hideLogs');
+    toggleLogsBtn.textContent = isHidden ? getTranslation('showLogs') : getTranslation('hideLogs');
 });
 
 clearLogsBtn.addEventListener('click', () => {
