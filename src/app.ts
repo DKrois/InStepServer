@@ -1,12 +1,13 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeTheme, Menu, screen } from 'electron';
 import Store from 'electron-store';
+import { defaultWindowWidth, defaultWindowHeight, minWindowWidth, minWindowHeight } from '../config.json'
 import { stats, initServer, stopServer } from './server.js';
 
 const store = new Store({
     defaults: {
         port: 5000,
         theme: 'system', // 'system', 'light', or 'dark'
-        language: 'en'
+        language: app.getLocale().split('-')[0]
     }
 });
 
@@ -18,15 +19,28 @@ let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;
 
 function createWindow() {
+    // get primary screens work area
+    const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+    const shouldMaximize = screenWidth < defaultWindowWidth || screenHeight < defaultWindowHeight;
+
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: shouldMaximize ? screenWidth : defaultWindowWidth,
+        height: shouldMaximize ? screenHeight : defaultWindowHeight,
+        minWidth: minWindowWidth,
+        minHeight: minWindowHeight,
+        show: false, // prevent visual flash of resize
+
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
         },
     });
 
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+    if (shouldMaximize) mainWindow.maximize();
+
+    // Once window is ready, show it. This avoids the flash
+    mainWindow.once('ready-to-show', mainWindow?.show);
 
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -104,7 +118,6 @@ export function initApp() {
         });
 
         ipcMain.handle('get-initial-theme', () => nativeTheme.shouldUseDarkColors);
-        ipcMain.handle('get-initial-locale', () => app.getLocale().split('-')[0]);
 
         ipcMain.handle('get-initial-settings', () => {
             return {

@@ -11,10 +11,15 @@
             <h1 data-i18n="title">Server Control Panel</h1>
 
             <div class="controls">
-                <label for="language-switcher"></label><select id="language-switcher">
-                    <option value="en">English</option>
-                    <option value="de">Deutsch</option>
-                </select>
+                <div class="select-wrapper">
+                    <img src="assets/language-light.png" class="language-icon dark-icon" alt="🌐">
+                    <img src="assets/language-dark.png" class="language-icon light-icon" alt="🌐">
+                    <label for="language-switcher"></label><select id="language-switcher">
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+
                 <button id="theme-switcher" class="icon-button" data-i18n-title="toggleTheme">
                     <img src="assets/lightMode.png" class="button-image light-icon" alt="☀️">
                     <img src="assets/darkMode.png" class="button-image dark-icon" alt="🌙">
@@ -46,7 +51,7 @@
             </main>
 
             <aside id="stats-sidebar" class="sidebar">
-                <div class="card">
+                <div> <!-- class="card"  fixes wrap on expand -->
                     <h2 data-i18n="statistics">Statistics</h2>
                     <p>
                         <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span>
@@ -69,7 +74,7 @@
         </div>
         <footer class="app-footer">
             <div class="footer-left">
-                <button id="toggle-logs-btn" data-i18n="toggleLogs">Show Logs</button>
+                <button id="toggle-logs-btn" data-i18n="showLogs">Show Logs</button>
                 <div id="log-actions" class="hidden">
                     <button id="clear-logs-btn" data-i18n="clearLogs">Clear Logs</button>
                 </div>
@@ -78,5 +83,7 @@
                 <button id="toggle-stats-btn" data-i18n="showStatistics">Show Statistics</button>
             </div>
         </footer>
+
+        <div id="toast-container"></div>
     </body>
 </html>

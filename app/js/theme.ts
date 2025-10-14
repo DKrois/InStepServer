@@ -1,6 +1,9 @@
 import i18next from 'i18next';
+import type { TOptions } from 'i18next';
 import en from '../locales/en.json';
 import de from '../locales/de.json';
+// @ts-ignore
+import { showTranslatedToast } from './logs';
 
 const themeSwitcher = document.getElementById('theme-switcher')!;
 const languageSwitcher = document.getElementById('language-switcher') as HTMLSelectElement;
@@ -21,6 +24,9 @@ languageSwitcher.addEventListener('change', async () => {
     await i18next.changeLanguage(newLang);
     updateUIText();
     window.api.saveSetting('language', newLang);
+
+    const fullLang = languageSwitcher.selectedOptions.item(0)?.innerText;
+    showTranslatedToast('toastLangSwitch', { lang: fullLang });
 });
 
 export async function setInitialLanguage(language: string) {
@@ -30,8 +36,8 @@ export async function setInitialLanguage(language: string) {
     updateUIText();
 }
 
-export function getTranslation(str: string) {
-    return i18next.t(str);
+export function getTranslation(str: string, options?: TOptions) {
+    return i18next.t(str, options);
 }
 
 export function updateUIText() {

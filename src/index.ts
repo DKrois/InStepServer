@@ -7,8 +7,13 @@ import 'source-map-support/register';
 import { errorWithMessage, log } from './util.js';
 
 /*
-* Auto update ?
-*/
+ * Auto update ?
+ * Storing images
+ * Statistics:
+ *  - how many projects
+ *  - how many files / versions
+ *  - total storage size
+ */
 
 async function main() {
     initApp();

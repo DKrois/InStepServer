@@ -8,7 +8,6 @@ const api = {
     },
     toggleTheme: () => ipcRenderer.invoke('toggle-theme'),
     getInitialTheme: () => ipcRenderer.invoke('get-initial-theme'),
-    getInitialLocale: () => ipcRenderer.invoke('get-initial-locale'),
     onUpdateStats: (callback: (stats: { uptime: string, memory: string }) => void) => {
         ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
     },

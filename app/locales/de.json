@@ -1,11 +1,33 @@
 {
   "title": "Server-Bedienfeld",
+  "toggleTheme": "Theme wechseln",
+
   "serverControls": "Serversteuerung",
   "startServer": "Server starten",
-  "stopServer": "Server stoppen",
-  "statistics": "Statistik",
-  "resourceAccessCount": "Anzahl der Ressourcenzugriffe",
+  "stopServer": "Server anhalten",
+  "portLabel": "Port:",
+
+  "statistics": "Statistiken",
+  "uptime": "Laufzeit",
+  "memoryUsage": "Arbeitsspeichernutzung",
+  "resourceAccessCount": "Ressourcenzugriffe",
   "refresh": "Aktualisieren",
+
   "showLogs": "Protokolle anzeigen",
-  "toggleTheme": "Theme wechseln"
+  "hideLogs": "Protokolle ausblenden",
+  "clearLogs": "Protokolle leeren",
+
+  "showStatistics": "Statistiken anzeigen",
+  "hideStatistics": "Statistiken ausblenden",
+
+  "serverStarting": "Starten...",
+  "serverStopping": "Anhalten...",
+
+  "toastInvalidPort": "Ungültige Portnummer",
+  "toastLangSwitch": "Sprache auf {{lang}} geändert",
+  "toastServerStarted": "Server auf Port {{port}} gestartet",
+  "toastServerStopped": "Server erfolgreich angehalten",
+
+  "statusRunning": "Server läuft",
+  "statusStopped": "Server gestoppt"
 }

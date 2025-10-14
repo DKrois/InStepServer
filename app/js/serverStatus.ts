@@ -1,5 +1,5 @@
 // @ts-ignore
-import { showToast } from './logs';
+import { showToast, showTranslatedToast } from './logs';
 // @ts-ignore
 import { getTranslation } from './theme';
 
@@ -16,34 +16,43 @@ startBtn.addEventListener('click', () => {
         window.api.startServer(port);
         window.api.saveSetting('port', port); // Save the port on start
     } else {
-        showToast('Invalid port number', 'error');
+        showTranslatedToast('toastInvalidPort', undefined, 'error');
     }
 });
 
 stopBtn.addEventListener('click', () => {
     stopBtn.disabled = true;
-    stopBtn.textContent = 'Stopping...';
+    stopBtn.textContent = getTranslation('serverStopping');
     window.api.stopServer();
 });
 
-window.api.onServerStatusChanged(handleServerStatus);
 
 export function setInitialStatus(settings: any) {
     portInput.value = settings.port;
 }
 
-function handleServerStatus(status: { isRunning: boolean, message?: string }) {
+window.api.onServerStatusChanged((status: { isRunning: boolean, message?: string }) => {
     serverStatusIndicator.classList.toggle('status-running', status.isRunning);
     serverStatusIndicator.classList.toggle('status-stopped', !status.isRunning);
-    serverStatusIndicator.title = status.isRunning ? 'Server is running' : 'Server is stopped';
+
+    serverStatusIndicator.title = status.isRunning
+        ? getTranslation('statusRunning')
+        : getTranslation('statusStopped');
 
     portInput.disabled = status.isRunning;
     startBtn.disabled = status.isRunning;
     stopBtn.disabled = !status.isRunning;
 
-    // Revert button text from "Starting..."/"Stopping..."
+    // Revert button text from "Starting..." / "Stopping..."
     startBtn.textContent = getTranslation('startServer');
     stopBtn.textContent = getTranslation('stopServer');
 
-    if (status.message) showToast(status.message);
-}
+    if (status.message?.includes('started')) {
+        const port = status.message.split(' ').pop();
+        showTranslatedToast('toastServerStarted', { port });
+    } else if (status.message?.includes('stopped')) {
+        showTranslatedToast('toastServerStopped');
+    } else if (status.message) {
+        showToast(status.message);
+    }
+});

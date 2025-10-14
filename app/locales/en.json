@@ -1,11 +1,33 @@
 {
   "title": "Server Control Panel",
+  "toggleTheme": "Toggle Theme",
+
   "serverControls": "Server Controls",
   "startServer": "Start Server",
   "stopServer": "Stop Server",
+  "portLabel": "Port:",
+
   "statistics": "Statistics",
+  "uptime": "Uptime",
+  "memoryUsage": "Memory Usage",
   "resourceAccessCount": "Resource Access Count",
   "refresh": "Refresh",
+
   "showLogs": "Show Logs",
-  "toggleTheme": "Toggle Theme"
+  "hideLogs": "Hide Logs",
+  "clearLogs": "Clear Logs",
+
+  "showStatistics": "Show Statistics",
+  "hideStatistics": "Hide Statistics",
+
+  "serverStarting": "Starting...",
+  "serverStopping": "Stopping...",
+
+  "toastInvalidPort": "Invalid port number",
+  "toastLangSwitch": "Switched language to {{lang}}",
+  "toastServerStarted": "Server started on port {{port}}",
+  "toastServerStopped": "Server stopped successfully",
+
+  "statusRunning": "Server is running",
+  "statusStopped": "Server is stopped"
 }

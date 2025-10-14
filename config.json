@@ -1,3 +1,9 @@
 {
-  "dbPath": "data"
+  "dbPath": "data",
+  "toastTimeout": 2000,
+
+  "defaultWindowWidth": 1200,
+  "defaultWindowHeight": 700,
+  "minWindowWidth": 700,
+  "minWindowHeight": 500
 }
