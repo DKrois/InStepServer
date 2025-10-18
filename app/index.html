@@ -2,13 +2,13 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Server Control Panel</title>
+        <title>InStep Server Control Panel</title>
         <link rel="icon" type="image/ico" href="assets/icon.ico">
     </head>
 
     <body class="light-mode">
         <header class="top-bar">
-            <h1 data-i18n="title">Server Control Panel</h1>
+            <h1 data-i18n="title">InStep Server Control Panel</h1>
 
             <div class="controls">
                 <div class="select-wrapper">
@@ -54,13 +54,13 @@
                 <div> <!-- class="card"  fixes wrap on expand -->
                     <h2 data-i18n="statistics">Statistics</h2>
                     <p>
-                        <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span>
-                    </p>
-                    <p>
+                        <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span><br>
                         <span data-i18n="memoryUsage">Memory Usage</span>: <span id="memory-display">0 MB</span>
                     </p>
                     <p>
-                        <span data-i18n="resourceAccessCount">Resource Access Count</span>: <span id="resource-count">0</span>
+                        <span data-i18n="projectsAmount">Amount of projects stored</span>: <span id="projects-amount">0</span><br>
+                        <span data-i18n="filesAmount">Amount of version files stored</span>: <span id="files-amount">0</span><br>
+                        <span data-i18n="storageSize">Total storage size used</span>: <span id="storage-used">0</span>
                     </p>
                     <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
                 </div>

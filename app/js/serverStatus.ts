@@ -43,6 +43,8 @@ window.api.onServerStatusChanged((status: { isRunning: boolean, message?: string
     startBtn.disabled = status.isRunning;
     stopBtn.disabled = !status.isRunning;
 
+    portInput.title = status.isRunning ? getTranslation('requireStop') : '';
+
     // Revert button text from "Starting..." / "Stopping..."
     startBtn.textContent = getTranslation('startServer');
     stopBtn.textContent = getTranslation('stopServer');

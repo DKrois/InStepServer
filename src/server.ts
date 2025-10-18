@@ -3,10 +3,6 @@ import { Server } from 'node:http';
 import { projectDB } from './database.js';
 import { errorWithMessage, formatError, getOwnIPs, log } from './util.js';
 
-export const stats = {
-    resourceAccessed: 0
-};
-
 let server: Server | null = null;
 export function initServer(port: number) {
     if (server) {
@@ -30,7 +26,7 @@ export function initServer(port: number) {
     app.delete('/api/:id/:version', handleDELETERequest);
 
     // handle non-existing routes
-    app.use((req, res) => {
+    app.use((req: express.Request, res: express.Response) => {
         res.status(404).send({
             error: 'Not Found',
             path: req.originalUrl,

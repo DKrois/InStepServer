@@ -1,4 +1,7 @@
 {
+  "name": "InStep Server",
+  "exeBaseName": "InStepServer",
+
   "dbPath": "data",
   "toastTimeout": 2000,
 

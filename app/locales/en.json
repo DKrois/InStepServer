@@ -6,6 +6,12 @@
   "startServer": "Start Server",
   "stopServer": "Stop Server",
   "portLabel": "Port:",
+  "requireStop": "Server has to be stopped to change port",
+
+  "serverStarting": "Starting...",
+  "serverStopping": "Stopping...",
+  "statusRunning": "Server is running",
+  "statusStopped": "Server is stopped",
 
   "statistics": "Statistics",
   "uptime": "Uptime",
@@ -13,21 +19,15 @@
   "resourceAccessCount": "Resource Access Count",
   "refresh": "Refresh",
 
+  "showStatistics": "Show Statistics",
+  "hideStatistics": "Hide Statistics",
+
   "showLogs": "Show Logs",
   "hideLogs": "Hide Logs",
   "clearLogs": "Clear Logs",
 
-  "showStatistics": "Show Statistics",
-  "hideStatistics": "Hide Statistics",
-
-  "serverStarting": "Starting...",
-  "serverStopping": "Stopping...",
-
   "toastInvalidPort": "Invalid port number",
   "toastLangSwitch": "Switched language to {{lang}}",
   "toastServerStarted": "Server started on port {{port}}",
-  "toastServerStopped": "Server stopped successfully",
-
-  "statusRunning": "Server is running",
-  "statusStopped": "Server is stopped"
+  "toastServerStopped": "Server stopped successfully"
 }

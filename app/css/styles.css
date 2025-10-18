@@ -184,9 +184,6 @@ button:disabled:active {
     -webkit-appearance: none;
     margin: 0;
 }
-#port-input {
-    -moz-appearance: textfield; /* Firefox */
-}
 
 .sidebar {
     width: 0; /* Starts hidden */
@@ -200,13 +197,13 @@ button:disabled:active {
 }
 
 body.stats-visible .sidebar {
-    width: max(25%, 250px);
+    width: max(27%, 250px);
     padding: 20px;
     white-space: normal;
 }
 
 body.stats-visible .logs-section {
-    right: max(25%, 250px); /* Shrinks the section from the right */
+    right: max(27%, 250px); /* Shrinks the section from the right */
 }
 
 .logs-section {

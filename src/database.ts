@@ -2,6 +2,13 @@ import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { dbPath } from '../config.json';
+import { errorWithMessage } from './util.js';
+
+export interface DirectoryStats {
+    directoryCount: number;
+    fileCount: number;
+    size: number;
+}
 
 class ProjectDatabase {
     constructor(private dbPath: string) {}
@@ -12,7 +19,7 @@ class ProjectDatabase {
 
         const jsonFileName = `v${version}.json`;
         const path = join(folderPath, jsonFileName);
-        await writeJSON(path, JSON.stringify(data, null, 2));
+        await writeJSON(path, data);
     }
 
     /**
@@ -66,8 +73,54 @@ class ProjectDatabase {
         const match = path.match(/^v(\d+)\.json$/);
         return match ? parseInt(match[1], 10) : null;
     }
+
+    /**
+     * Efficiently counts subdirectories, files and their sizes within a given directory and subdirectories.
+     * @param directoryPath The path to the directory to scan.
+     * @returns An object containing the total size and subdirectory and file counts.
+     */
+    async getStats(directoryPath: string = this.dbPath): Promise<DirectoryStats> {
+        let stats: DirectoryStats = { directoryCount: 0, fileCount: 0, size: 0 };
+
+        try {
+            // use withFileTypes: true to get fs.Dirent objects
+            const entries = await fs.readdir(directoryPath, { withFileTypes: true });
+
+            for (const entry of entries) {
+                const fullPath = join(directoryPath, entry.name);
+
+                if (entry.isDirectory()) {
+                    stats.directoryCount++;
+                    // Recursively call and add the stats from the subdirectory
+                    const subDirStats = await this.getStats(fullPath);
+                    stats.directoryCount += subDirStats.directoryCount;
+                    stats.fileCount += subDirStats.fileCount;
+                    stats.size += subDirStats.size;
+                } else if (entry.isFile() && entry.name.endsWith('.json')) {
+                    stats.fileCount++;
+                    try {
+                        const fileStats = await fs.stat(fullPath);
+                        stats.size += fileStats.size; // .size is in bytes
+                    } catch (err) {
+                        // This can happen if the file is deleted between readdir and stat calls
+                        errorWithMessage(`Could not get stats for file: ${fullPath}`, err);
+                    }
+                }
+            }
+        } catch (error) {
+            errorWithMessage(`Could not read directory: ${directoryPath}`, error);
+            // Return zeroed stats if the directory can't be read
+            return { directoryCount: 0, fileCount: 0, size: 0 };
+        }
+
+        return stats;
+    }
 }
 
+/**
+ * Safely writes a JSON file at `path`.
+ * This avoids corrupted or half-written files in case of a crash.
+ */
 async function writeJSON(path: string, data: any) {
     const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
 

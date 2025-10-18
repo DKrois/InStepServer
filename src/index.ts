@@ -1,3 +1,4 @@
+import process from 'node:process';
 // force color support before imports as electron breaks it otherwise
 process.env.FORCE_COLOR = '1';
 
@@ -7,12 +8,15 @@ import 'source-map-support/register';
 import { errorWithMessage, log } from './util.js';
 
 /*
- * Auto update ?
+ * Auto update ? → forge.config / MakerWix : autoUpdate
+ *
  * Storing images
- * Statistics:
- *  - how many projects
- *  - how many files / versions
- *  - total storage size
+ *
+ * Hide to tray
+ *
+ * Button to open db path
+ *  Manage files menu?
+ *  → change version, ...
  */
 
 async function main() {
@@ -21,12 +25,12 @@ async function main() {
     listenForExit();
 }
 
-async function listenForExit() {
+function listenForExit() {
     const rl = readline.createInterface({
         input: process.stdin
     });
 
-    rl.on('line', async input => {
+    rl.on('line', (input) => {
         input = input.trim();
         switch (input) {
             case 'exit':

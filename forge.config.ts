@@ -1,27 +1,59 @@
-import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
+import { MakerWix } from '@electron-forge/maker-wix';
+import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
-import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
+import { WebpackPlugin } from '@electron-forge/plugin-webpack';
+import type { ForgeConfig } from '@electron-forge/shared-types';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { exeBaseName, name } from './config.json';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
+const iconPath = './app/assets/icon.ico';
+const exeName = `${exeBaseName}-$\{version}`;
+
 const config: ForgeConfig = {
     packagerConfig: {
-        asar: true,
-        icon: './app/assets/icon'
+        executableName: exeName,
+        icon: iconPath,
+        asar: true
     },
     rebuildConfig: {},
     makers: [
-        new MakerSquirrel({}),
+        /*new MakerSquirrel({
+            setupExe: setupExeName,
+            setupIcon: icon,
+        }),*/
+        new MakerWix({
+            name: name,
+            exe: exeName,
+            icon: iconPath,
+            /*ui: {
+                chooseDirectory: true,
+            },
+            features: {
+                autoLaunch: false,
+                autoUpdate: false, // TODO
+            }*/
+            beforeCreate: async (msiCreator) => {
+                msiCreator.wixTemplate = await getTemplate('wixTemplate', false); // https://stackoverflow.com/questions/76722043/how-to-modify-electron-wix-msi-installer
+            }
+        }),
         new MakerZIP({}, ['darwin']),
-        new MakerRpm({}),
-        new MakerDeb({}),
+        new MakerRpm({
+            options: {
+                icon: iconPath,
+            }
+        }),
+        new MakerDeb({
+            options: {
+                icon: iconPath,
+            }
+        }),
     ],
     plugins: [
         new AutoUnpackNativesPlugin({}),
@@ -54,5 +86,10 @@ const config: ForgeConfig = {
         }),
     ],
 };
+
+async function getTemplate(name: string, trimTrailingNewLine: boolean) {
+    const content = await readFile(join(import.meta.dirname, `app\\installer\\${name}.wxs`), 'utf8');
+    return trimTrailingNewLine ? content.replace(/[\r\n]+$/g, '') : content;
+}
 
 export default config;

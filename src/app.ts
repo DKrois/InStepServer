@@ -1,7 +1,10 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, Menu, screen } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, nativeTheme, screen } from 'electron';
+// @ts-ignore
 import Store from 'electron-store';
-import { defaultWindowWidth, defaultWindowHeight, minWindowWidth, minWindowHeight } from '../config.json'
-import { stats, initServer, stopServer } from './server.js';
+import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../config.json';
+import { projectDB } from './database.js';
+import { initServer, stopServer } from './server.js';
+import { normalizeSize } from './util.js';
 
 const store = new Store({
     defaults: {
@@ -52,9 +55,7 @@ export function sendLog(message: string) {
 }
 
 export function initApp() {
-    if (require('electron-squirrel-startup')) {
-        app.quit();
-    }
+    if (require('electron-squirrel-startup')) app.quit();
 
     app.on('ready', () => {
         // add custom menu
@@ -95,7 +96,7 @@ export function initApp() {
 
             serverStartTime = Date.now();
             if (statsInterval) clearInterval(statsInterval);
-            statsInterval = setInterval(sendStats, 1000);
+            statsInterval = setInterval(sendUsageStats, 1000);
 
             mainWindow?.webContents.send('server-status-changed', { isRunning: true, message: `Server started on port ${port}` });
         });
@@ -107,7 +108,7 @@ export function initApp() {
 
             mainWindow?.webContents.send('server-status-changed', { isRunning: false, message: 'Server stopped successfully' });
         });
-        ipcMain.handle('get-stats', () => stats);
+        ipcMain.handle('get-stats', sendDBStats);
 
         ipcMain.handle('toggle-theme', () => {
             const newTheme = nativeTheme.shouldUseDarkColors ? 'light' : 'dark';
@@ -147,7 +148,7 @@ export function initApp() {
     });
 }
 
-function sendStats() {
+function sendUsageStats() {
     if (!serverStartTime || !mainWindow) return;
 
     const uptimeMs = Date.now() - serverStartTime;
@@ -155,10 +156,20 @@ function sendStats() {
     const minutes = Math.floor((uptimeMs % 3600000) / 60000).toString().padStart(2, '0');
     const seconds = Math.floor((uptimeMs % 60000) / 1000).toString().padStart(2, '0');
 
-    const memory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+    const memory = normalizeSize(process.memoryUsage().heapUsed, 2);
 
     mainWindow.webContents.send('update-stats', {
         uptime: `${hours}:${minutes}:${seconds}`,
-        memory: `${memory} MB`
+        memory: memory
     });
+}
+
+async function sendDBStats() {
+    if (!mainWindow) return;
+    const base = await projectDB.getStats();
+
+    const { directoryCount: projectsCount, fileCount } = base;
+    const sizeUsed = normalizeSize(base.size, 2);
+
+    return { projectsCount, fileCount, sizeUsed };
 }

@@ -1,7 +1,7 @@
-import i18next from 'i18next';
 import type { TOptions } from 'i18next';
-import en from '../locales/en.json';
+import i18next from 'i18next';
 import de from '../locales/de.json';
+import en from '../locales/en.json';
 // @ts-ignore
 import { showTranslatedToast } from './logs';
 
