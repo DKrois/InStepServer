@@ -1,5 +1,5 @@
 // @ts-ignore
-import { setInitialStatus } from './serverStatus';
+import { setInitialPort } from './serverStatus';
 // @ts-ignore
 import { refreshStats } from './stats';
 // @ts-ignore
@@ -12,7 +12,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Update to stored settings
     const settings = await window.api.getInitialSettings();
 
-    setInitialStatus(settings);
+    setInitialPort(settings);
     setInitialLanguage(settings.language);
     setInitialTheme();
 

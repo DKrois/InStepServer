@@ -13,6 +13,10 @@ export interface DirectoryStats {
 class ProjectDatabase {
     constructor(private dbPath: string) {}
 
+    get path(): string {
+        return this.dbPath;
+    }
+
     async add(id: number, version: number, data: any) {
         const folderPath = join(this.dbPath, id.toString());
         await fs.mkdir(folderPath, { recursive: true }); // nothing happens if dir already exists

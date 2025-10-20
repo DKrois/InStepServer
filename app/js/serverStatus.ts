@@ -27,34 +27,33 @@ stopBtn.addEventListener('click', () => {
 });
 
 
-export function setInitialStatus(settings: any) {
+export function setInitialPort(settings: any) {
     portInput.value = settings.port;
 }
 
-window.api.onServerStatusChanged((status: { isRunning: boolean, message?: string }) => {
-    serverStatusIndicator.classList.toggle('status-running', status.isRunning);
-    serverStatusIndicator.classList.toggle('status-stopped', !status.isRunning);
+window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | null }) => {
+    const { isRunning, port } = status;
 
-    serverStatusIndicator.title = status.isRunning
+    serverStatusIndicator.classList.toggle('status-running', isRunning);
+    serverStatusIndicator.classList.toggle('status-stopped', !isRunning);
+
+    serverStatusIndicator.title = isRunning
         ? getTranslation('statusRunning')
         : getTranslation('statusStopped');
 
-    portInput.disabled = status.isRunning;
-    startBtn.disabled = status.isRunning;
-    stopBtn.disabled = !status.isRunning;
+    portInput.disabled = isRunning;
+    startBtn.disabled = isRunning;
+    stopBtn.disabled = !isRunning;
 
-    portInput.title = status.isRunning ? getTranslation('requireStop') : '';
+    portInput.title = isRunning ? getTranslation('requireStop') : '';
 
     // Revert button text from "Starting..." / "Stopping..."
     startBtn.textContent = getTranslation('startServer');
     stopBtn.textContent = getTranslation('stopServer');
 
-    if (status.message?.includes('started')) {
-        const port = status.message.split(' ').pop();
-        showTranslatedToast('toastServerStarted', { port });
-    } else if (status.message?.includes('stopped')) {
-        showTranslatedToast('toastServerStopped');
-    } else if (status.message) {
-        showToast(status.message);
+    // don't show toast if port is null (in case of startup)
+    if (port !== null) {
+        if (status.isRunning) showTranslatedToast('toastServerStarted', { port: port });
+        else showTranslatedToast('toastServerStopped');
     }
 });

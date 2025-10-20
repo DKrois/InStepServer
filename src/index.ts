@@ -5,19 +5,34 @@ process.env.FORCE_COLOR = '1';
 import readline from 'node:readline';
 import { initApp } from './app.js';
 import 'source-map-support/register';
-import { errorWithMessage, log } from './util.js';
+import { errorWithMessage, info } from './util.js';
 
 /*
  * Auto update ? → forge.config / MakerWix : autoUpdate
  *
+ * electron-log
+ *
  * Storing images
  *
  * Hide to tray
+ * → Also hide on normal close
+ *      (isQuitting flag, set in app.on('before-quit', ...))
  *
- * Button to open db path
- *  Manage files menu?
- *  → change version, ...
+ *
+ * TESTING:
+ * - open storage path also on final build
+ *
+ * Installer:
+ * github.com/markmorris/electron-wix-msi ??
+ * "ui": {
+ *     ...,
+ *     "images": {
+ *         "background": "[...]/path/to/background-493x312.bmp",
+ *         "banner": "[...]/path/to/banner-493x58.bmp"
+ *     }
+ * }
  */
+
 
 async function main() {
     initApp();
@@ -45,7 +60,7 @@ function listenForExit() {
 }
 
 function exit(exitCode = 0) {
-    log('Exiting...');
+    info('Exiting...');
     process.exit(exitCode);
 }
 

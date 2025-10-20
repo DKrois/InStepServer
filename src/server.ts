@@ -1,12 +1,12 @@
 import express from 'express';
 import { Server } from 'node:http';
 import { projectDB } from './database.js';
-import { errorWithMessage, formatError, getOwnIPs, log } from './util.js';
+import { errorWithMessage, formatError, getOwnIPs, info } from './util.js';
 
 let server: Server | null = null;
 export function initServer(port: number) {
     if (server) {
-        log('Server already running.');
+        info('Server already running.');
         return;
     }
 
@@ -42,18 +42,18 @@ export function initServer(port: number) {
     });
 
     server = app.listen(port, '0.0.0.0', () => {
-        log(`Server listening on http://${getOwnIPs().pick}:${port}`);
+        info(`Server listening on http://${getOwnIPs().pick}:${port}`);
     });
 }
 
 export function stopServer() {
     if (!server) {
-        log('Server not running.');
+        info('Server not running.');
         return;
     }
 
     server.close(() => {
-        log('Server closed.');
+        info('Server closed.');
         server = null;
     });
 }
@@ -72,7 +72,7 @@ async function handlePUTRequest(req: express.Request, res: express.Response) {
         await projectDB.add(id, v, data);
         res.sendStatus(204);
     };
-    const onSuccess = () => log(`Added / updated ${id}/v${v}`);
+    const onSuccess = () => info(`Added / updated ${id}/v${v}`);
 
     return handle(handler, onSuccess, res, id, v, true);
 }
@@ -85,7 +85,7 @@ async function handleGETRequest(req: express.Request, res: express.Response) {
         const data = await projectDB.get(id, version);
         res.status(200).send(data);
     };
-    const onSuccess = () => log(`Requested ${id}/${(version ? `v${version}` : '@latest')}`);
+    const onSuccess = () => info(`Requested ${id}/${(version ? `v${version}` : '@latest')}`);
 
     return handle(handler, onSuccess, res, id, version, false);
 }
@@ -97,7 +97,7 @@ async function handleListRequest(req: express.Request, res: express.Response) {
         const versions = await projectDB.list(id);
         res.status(200).send({ versions });
     };
-    const onSuccess = () => log(`Listed ${id}/`);
+    const onSuccess = () => info(`Listed ${id}/`);
 
     return handle(handler, onSuccess, res, id);
 }
@@ -110,7 +110,7 @@ async function handleDELETERequest(req: express.Request, res: express.Response) 
         await projectDB.delete(id, version);
         res.sendStatus(204);
     };
-    const onSuccess = () => log(`Deleted ${id}/${version ? `v${version}` : ''}`);
+    const onSuccess = () => info(`Deleted ${id}/${version ? `v${version}` : ''}`);
 
     return handle(handler, onSuccess, res, id, version, false);
 }

@@ -20,7 +20,10 @@ const config: ForgeConfig = {
     packagerConfig: {
         executableName: exeName,
         icon: iconPath,
-        asar: true
+        asar: true,
+        extraResource: [
+            './app/assets/icon.ico',
+        ]
     },
     rebuildConfig: {},
     makers: [

@@ -3,7 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 const api = {
     startServer: (port: number) => ipcRenderer.send('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
-    onServerStatusChanged: (callback: (status: { isRunning: boolean, message?: string }) => void) => {
+    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number | null }) => void) => {
         ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },
     toggleTheme: () => ipcRenderer.invoke('toggle-theme'),
