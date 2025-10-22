@@ -46,6 +46,41 @@
                             <input type="number" id="port-input" value="5000" min="80" max="65535">
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 data-i18n="security">Security</h2>
+                        </div>
+
+                        <!-- This section is for unlocking the form -->
+                        <div id="unlock-section">
+                            <div class="form-group password-wrapper">
+                                <label for="current-password-input" data-i18n="currentPassword">Current Password:</label>
+                                <input type="password" id="current-password-input" autocomplete="current-password">
+                                <button id="toggle-current-password" class="icon-button password-toggle" data-i18n-title="togglePassword">
+                                    <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
+                                    <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
+                                    <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
+                                    <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
+                                </button>
+                            </div>
+                            <button id="unlock-btn" data-i18n="unlock">Unlock</button>
+                        </div>
+
+                        <!-- This section is for setting a new password, hidden by default -->
+                        <div id="change-password-section" class="hidden">
+                            <div class="form-group password-wrapper">
+                                <label for="new-password-input" data-i18n="newPassword">New Password:</label>
+                                <input type="password" id="new-password-input" autocomplete="new-password">
+                                <button id="toggle-new-password" class="icon-button password-toggle" title="Show/Hide Password">
+                                    <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
+                                    <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
+                                    <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
+                                    <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
+                                </button>
+                            </div>
+                            <button id="save-password-btn" data-i18n="save">Save</button>
+                        </div>
+                    </div>
                     <!-- add more cards here -->
                 </div>
             </main>
@@ -85,5 +120,20 @@
         </footer>
 
         <div id="toast-container"></div>
+
+        <div id="modal-backdrop" class="hidden">rs
+            <div id="modal-dialog" class="card">
+                <h3 data-i18n="initialPasswordTitle">Initial Password</h3>
+                <p data-i18n="initialPasswordDesc">This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.</p>
+                <div class="password-display-wrapper">
+                    <label for="initial-password-display"></label><input type="text" id="initial-password-display" readonly>
+                    <button id="copy-initial-password-btn" class="icon-button" data-i18n-title="copyPassword">
+                        <img src="assets/copy-dark.png" class="light-icon" alt="Copy">
+                        <img src="assets/copy-light.png" class="dark-icon" alt="Copy">
+                    </button>
+                </div>
+                <button id="close-modal-btn" data-i18n="close">Close</button>
+            </div>
+        </div>
     </body>
 </html>

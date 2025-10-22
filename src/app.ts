@@ -1,32 +1,19 @@
-import { app, BrowserWindow, ipcMain, Menu, nativeTheme, screen, shell, Tray } from 'electron';
-// @ts-ignore
-import Store from 'electron-store';
+import { app, BrowserWindow, Menu, nativeTheme, screen, shell, Tray } from 'electron';
 import { join } from 'node:path';
+import { updateElectronApp } from 'update-electron-app';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../config.json';
+import { handleStartServer, handleStopServer, initStore, registerIPCHandlers, store } from './appFunctions';
 import { projectDB } from './database.js';
-import { initServer, stopServer } from './server.js';
-import { initLogging, normalizeSize } from './util.js';
+import { initLogging } from './util.js';
 
 const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'app/assets/icon.ico');
 const projectStoragePath = projectDB.path;
 
-const store = new Store({
-    defaults: {
-        port: 5000,
-        theme: 'system', // 'system', 'light', or 'dark'
-        language: app.getLocale().split('-')[0],
-        hideToTray: true,
-        startServerOnOpen: false,
-    }
-});
-
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
-let mainWindow: BrowserWindow | null = null;
+export let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
-let serverStartTime: number | null = null;
-let statsInterval: NodeJS.Timeout | null = null;
 let isQuitting = false;
 
 function createWindow() {
@@ -158,6 +145,7 @@ function createTray() {
 }
 
 export function initApp() {
+    updateElectronApp();
     if (require('electron-squirrel-startup')) app.quit();
 
     app.on('ready', () => {
@@ -168,31 +156,8 @@ export function initApp() {
         createWindow();
         createTray();
 
-        // IPC Handlers
-        ipcMain.on('start-server', (_event, port: number) => handleStartServer(port));
-        ipcMain.on('stop-server', handleStopServer);
-        ipcMain.handle('get-stats', sendDBStats);
-
-        ipcMain.handle('toggle-theme', () => {
-            const newTheme = nativeTheme.shouldUseDarkColors ? 'light' : 'dark';
-            nativeTheme.themeSource = newTheme;
-            store.set('theme', newTheme);
-
-            return nativeTheme.shouldUseDarkColors;
-        });
-
-        ipcMain.handle('get-initial-theme', () => nativeTheme.shouldUseDarkColors);
-
-        ipcMain.handle('get-initial-settings', () => {
-            return {
-                port: store.get('port'),
-                theme: store.get('theme'),
-                language: store.get('language')
-            };
-        });
-        ipcMain.on('save-setting', (_event, { key, value }) => {
-            store.set(key, value);
-        });
+        initStore();
+        registerIPCHandlers();
 
         if (store.get('startServerOnOpen')) {
             handleStartServer();
@@ -216,54 +181,4 @@ export function initApp() {
 
 export function sendLog(message: string) {
     if (mainWindow) mainWindow.webContents.send('log', message);
-}
-
-
-// *** Server ***
-function handleStartServer(port?: number) {
-    const p = port ?? store.get('port');
-    initServer(p);
-
-    serverStartTime = Date.now();
-    if (statsInterval) clearInterval(statsInterval);
-    statsInterval = setInterval(sendUsageStats, 1000);
-
-    mainWindow?.webContents.send('server-status-changed', { isRunning: true, port: p });
-}
-
-function handleStopServer() {
-    stopServer();
-
-    serverStartTime = null;
-    if (statsInterval) clearInterval(statsInterval);
-
-    mainWindow?.webContents.send('server-status-changed', { isRunning: false });
-}
-
-
-// *** Stats ***
-function sendUsageStats() {
-    if (!serverStartTime || !mainWindow) return;
-
-    const uptimeMs = Date.now() - serverStartTime;
-    const hours = Math.floor(uptimeMs / 3600000).toString().padStart(2, '0');
-    const minutes = Math.floor((uptimeMs % 3600000) / 60000).toString().padStart(2, '0');
-    const seconds = Math.floor((uptimeMs % 60000) / 1000).toString().padStart(2, '0');
-
-    const memory = normalizeSize(process.memoryUsage().heapUsed, 2);
-
-    mainWindow.webContents.send('update-stats', {
-        uptime: `${hours}:${minutes}:${seconds}`,
-        memory: memory
-    });
-}
-
-async function sendDBStats() {
-    if (!mainWindow) return;
-    const base = await projectDB.getStats();
-
-    const { directoryCount: projectsCount, fileCount } = base;
-    const sizeUsed = normalizeSize(base.size, 2);
-
-    return { projectsCount, fileCount, sizeUsed };
 }

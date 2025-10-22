@@ -2,7 +2,6 @@ import type { TOptions } from 'i18next';
 import i18next from 'i18next';
 import de from '../locales/de.json';
 import en from '../locales/en.json';
-// @ts-ignore
 import { showTranslatedToast } from './logs';
 
 const themeSwitcher = document.getElementById('theme-switcher')!;
@@ -12,7 +11,8 @@ const languageSwitcher = document.getElementById('language-switcher') as HTMLSel
 
 i18next.init({
     lng: 'en',
-    debug: false,
+    debug: true,
+    fallbackLng: 'en',
     resources: {
         en: { translation: en },
         de: { translation: de }

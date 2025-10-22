@@ -2,7 +2,6 @@ import process from 'node:process';
 // force color support before imports as electron breaks it otherwise
 process.env.FORCE_COLOR = '1';
 
-import readline from 'node:readline';
 import { initApp } from './app.js';
 import 'source-map-support/register';
 import { errorWithMessage, info } from './util.js';
@@ -10,17 +9,10 @@ import { errorWithMessage, info } from './util.js';
 /*
  * Auto update ? → forge.config / MakerWix : autoUpdate
  *
- * electron-log
- *
  * Storing images
  *
- * Hide to tray
- * → Also hide on normal close
- *      (isQuitting flag, set in app.on('before-quit', ...))
- *
- *
- * TESTING:
- * - open storage path also on final build
+ * show pw icon sometimes not working ?
+ * translations
  *
  * Installer:
  * github.com/markmorris/electron-wix-msi ??
@@ -36,22 +28,6 @@ import { errorWithMessage, info } from './util.js';
 
 async function main() {
     initApp();
-
-    listenForExit();
-}
-
-function listenForExit() {
-    const rl = readline.createInterface({
-        input: process.stdin
-    });
-
-    rl.on('line', (input) => {
-        input = input.trim();
-        switch (input) {
-            case 'exit':
-                return exit();
-        }
-    });
 
     process.on('SIGINT', () => exit());
     process.on('SIGTERM', () => exit());

@@ -50,11 +50,11 @@ body.light-mode .light-icon {
     display: block;
 }
 body.light-mode .dark-icon {
-    display: none;
+    display: none !important;
 }
 
 body.dark-mode .light-icon {
-    display: none;
+    display: none !important;
 }
 body.dark-mode .dark-icon {
     display: block;
@@ -87,6 +87,16 @@ body.dark-mode .icon-button:hover {
 }
 #server-status-indicator.status-stopped {
     background-color: #e74c3c;
+}
+
+.password-wrapper input, #initial-password-display {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--button-bg);
+}
+.password-wrapper input:focus, #initial-password-display:focus {
+    outline: none;
+    border-color: var(--accent-color);
 }
 
 .sidebar {

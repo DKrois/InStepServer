@@ -1,8 +1,6 @@
-// @ts-ignore
+import { getInitialPassword } from './security';
 import { setInitialPort } from './serverStatus';
-// @ts-ignore
 import { refreshStats } from './stats';
-// @ts-ignore
 import { setInitialLanguage, setInitialTheme } from './theme';
 
 import '../css/styles.css';
@@ -15,6 +13,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     setInitialPort(settings);
     setInitialLanguage(settings.language);
     setInitialTheme();
+
+    getInitialPassword();
 
     // Refresh stats on load
     await refreshStats();

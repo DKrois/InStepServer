@@ -1,9 +1,7 @@
 import AnsiToHTML from 'ansi-to-html';
 import type { TOptions } from 'i18next';
 import { toastTimeout } from '../../config.json';
-// @ts-ignore
 import { getTranslation } from './theme';
-// @ts-ignore
 import { getCurrentTime } from './util';
 
 const convert = new AnsiToHTML();

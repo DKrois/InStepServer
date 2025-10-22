@@ -1,6 +1,4 @@
-// @ts-ignore
-import { showToast, showTranslatedToast } from './logs';
-// @ts-ignore
+import { showTranslatedToast } from './logs';
 import { getTranslation } from './theme';
 
 const startBtn = document.getElementById('start-btn')! as HTMLButtonElement;

@@ -1,6 +1,6 @@
+import { app } from 'electron';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { cwd } from 'node:process';
 import { dbPath } from '../config.json';
 import { errorWithMessage } from './util.js';
 
@@ -111,8 +111,9 @@ class ProjectDatabase {
                     }
                 }
             }
-        } catch (error) {
-            errorWithMessage(`Could not read directory: ${directoryPath}`, error);
+        } catch (error: any) {
+            // only print if error isn't 'no such file or directory'
+            if (error.code !== 'ENOENT') errorWithMessage(`Could not read directory: ${directoryPath}`, error);
             // Return zeroed stats if the directory can't be read
             return { directoryCount: 0, fileCount: 0, size: 0 };
         }
@@ -133,4 +134,4 @@ async function writeJSON(path: string, data: any) {
     await fs.rename(tmp, path);
 }
 
-export const projectDB = new ProjectDatabase(join(cwd(), dbPath));
+export const projectDB = new ProjectDatabase(join(app.getPath('userData'), dbPath));

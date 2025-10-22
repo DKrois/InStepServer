@@ -13,10 +13,18 @@
   "statusRunning": "Server is running",
   "statusStopped": "Server is stopped",
 
+  "security": "Security",
+  "currentPassword": "Current Password:",
+  "newPassword": "New Password:",
+  "unlock": "Unlock",
+  "save": "Save",
+
   "statistics": "Statistics",
   "uptime": "Uptime",
   "memoryUsage": "Memory Usage",
-  "resourceAccessCount": "Resource Access Count",
+  "projectsAmount": "Amount of projects",
+  "filesAmount": "Amount of files",
+  "storageSize": "Storage used",
   "refresh": "Refresh",
 
   "showStatistics": "Show Statistics",
@@ -26,8 +34,18 @@
   "hideLogs": "Hide Logs",
   "clearLogs": "Clear Logs",
 
+  "initialPasswordTitle": "Initial Password",
+  "initialPasswordDesc": "This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.",
+  "copyPassword": "Copy to Clipboard",
+  "close": "Close",
+  "togglePassword": "Show/Hide Password",
+
   "toastInvalidPort": "Invalid port number",
   "toastLangSwitch": "Switched language to {{lang}}",
   "toastServerStarted": "Server started on port {{port}}",
-  "toastServerStopped": "Server stopped successfully"
+  "toastServerStopped": "Server stopped successfully",
+  "toastPasswordIncorrect": "Incorrect password.",
+  "toastPasswordEmpty": "New password cannot be empty.",
+  "toastPasswordUpdated": "Password updated successfully.",
+  "toastPasswordCopied": "Password copied to clipboard!"
 }

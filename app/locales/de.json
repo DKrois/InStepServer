@@ -13,10 +13,18 @@
   "statusRunning": "Server läuft",
   "statusStopped": "Server gestoppt",
 
+  "security": "Sicherheit",
+  "currentPassword": "Aktuelles Passwort:",
+  "newPassword": "Neues Passwort:",
+  "unlock": "Entsperren",
+  "save": "Speichern",
+
   "statistics": "Statistiken",
   "uptime": "Laufzeit",
   "memoryUsage": "Arbeitsspeichernutzung",
-  "resourceAccessCount": "Ressourcenzugriffe",
+  "projectsAmount": "Anzahl an Projekten",
+  "filesAmount": "Anzahl an Dateien",
+  "storageSize": "Belegter Speicher",
   "refresh": "Aktualisieren",
 
   "showStatistics": "Statistiken anzeigen",
@@ -26,8 +34,18 @@
   "hideLogs": "Protokolle ausblenden",
   "clearLogs": "Protokolle leeren",
 
+  "initialPasswordTitle": "Initialpasswort",
+  "initialPasswordDesc": "Dies ist das erste Mal, dass Sie die Anwendung ausführen. Bitte kopieren und speichern Sie dieses zufällig generierte Passwort an einem sicheren Ort.",
+  "copyPassword": "In die Zwischenablage kopieren",
+  "close": "Schließen",
+  "togglePassword": "Passwort anzeigen/verbergen",
+
   "toastInvalidPort": "Ungültige Portnummer",
   "toastLangSwitch": "Sprache auf {{lang}} geändert",
   "toastServerStarted": "Server auf Port {{port}} gestartet",
-  "toastServerStopped": "Server erfolgreich angehalten"
+  "toastServerStopped": "Server erfolgreich angehalten",
+  "toastPasswordIncorrect": "Falsches Passwort.",
+  "toastPasswordEmpty": "Neues Passwort darf nicht leer sein.",
+  "toastPasswordUpdated": "Passwort erfolgreich aktualisiert.",
+  "toastPasswordCopied": "Passwort in die Zwischenablage kopiert!"
 }
