@@ -412,6 +412,15 @@ body.logs-visible .main-content {
     height: 20px;
 }
 
+#shortcut-options-container .button-group {
+    justify-content: center; /* Center the buttons within the group */
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+#shortcut-options-container button {
+    width: fit-content;
+}
+
 .hidden {
     display: none !important;
 }

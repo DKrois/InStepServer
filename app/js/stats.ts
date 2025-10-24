@@ -1,4 +1,4 @@
-import { getTranslation } from './theme';
+import { getTranslation } from './translate';
 
 const statsSidebar = document.getElementById('stats-sidebar')!;
 const toggleStatsBtn = document.getElementById('toggle-stats-btn')!;

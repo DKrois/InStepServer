@@ -8,7 +8,6 @@ const themeSwitcher = document.getElementById('theme-switcher')!;
 const languageSwitcher = document.getElementById('language-switcher') as HTMLSelectElement;
 
 // *** Translation ***
-
 i18next.init({
     lng: 'en',
     debug: true,

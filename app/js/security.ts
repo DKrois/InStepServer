@@ -1,5 +1,5 @@
 import { showTranslatedToast } from './logs';
-document.getElementById('unlock-section')!;
+
 const changePasswordSection = document.getElementById('change-password-section')!;
 const currentPasswordInput = document.getElementById('current-password-input') as HTMLInputElement;
 const newPasswordInput = document.getElementById('new-password-input') as HTMLInputElement;
@@ -9,18 +9,8 @@ const savePasswordBtn = document.getElementById('save-password-btn')!;
 const toggleCurrentPasswordBtn = document.getElementById('toggle-current-password')!;
 const toggleNewPasswordBtn = document.getElementById('toggle-new-password')!;
 
-const modalBackdrop = document.getElementById('modal-backdrop')!;
 const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
 const copyInitialPasswordBtn = document.getElementById('copy-initial-password-btn')!;
-const closeModalBtn = document.getElementById('close-modal-btn')!;
-
-export async function getInitialPassword() {
-    const initialPassword = await window.api.getInitialPassword();
-    if (initialPassword) {
-        initialPasswordDisplay.value = initialPassword;
-        modalBackdrop.classList.remove('hidden');
-    }
-}
 
 function setLockedState(locked: boolean) {
     // unlockSection.classList.toggle('hidden', !locked); // hide unlock section when password is entered
@@ -97,11 +87,3 @@ copyInitialPasswordBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(initialPasswordDisplay.value);
     showTranslatedToast('toastPasswordCopied');
 });
-closeModalBtn.addEventListener('click', () => {
-    modalBackdrop.classList.remove('hidden');
-    initialPasswordDisplay.value = ''; // clear password
-    modalBackdrop.addEventListener('transitionend', () => {
-        modalBackdrop.classList.add('hidden');
-    }, { once: true });
-});
-

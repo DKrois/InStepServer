@@ -1,7 +1,7 @@
-import { getInitialPassword } from './security';
+import { setupModal } from './modal';
 import { setInitialPort } from './serverStatus';
 import { refreshStats } from './stats';
-import { setInitialLanguage, setInitialTheme } from './theme';
+import { setInitialLanguage, setInitialTheme } from './translate';
 
 import '../css/styles.css';
 import '../css/theme.css';
@@ -14,7 +14,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     setInitialLanguage(settings.language);
     setInitialTheme();
 
-    getInitialPassword();
+    setupModal();
 
     // Refresh stats on load
     await refreshStats();

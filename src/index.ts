@@ -9,12 +9,21 @@ import { errorWithMessage, info } from './util.js';
 /*
  * Auto update ? → forge.config / MakerWix : autoUpdate
  *
+ * Open existing one rather than new instance if shortcut clicked
+ * Disable desktop shortcut by default
+ * → electron-squirrel-startup, msi template...
+ *
  * Storing images
+ *
+ * Time stuff
+ *
+ * "Stop Server" button not disabled on startup
  *
  * show pw icon sometimes not working ?
  * translations
  *
  * Installer:
+ * Read default template? (msiCreator.wixTemplate)
  * github.com/markmorris/electron-wix-msi ??
  * "ui": {
  *     ...,

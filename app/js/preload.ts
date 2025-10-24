@@ -14,6 +14,10 @@ const api = {
     verifyPassword: (password: string) => ipcRenderer.invoke('verify-password', password),
     updatePassword: (oldPassword: string, newPassword: string) => ipcRenderer.invoke('update-password', oldPassword, newPassword),
 
+    createStartMenuShortcut: () => ipcRenderer.invoke('create-start-menu-shortcut'),
+    createDesktopShortcut: () => ipcRenderer.invoke('create-desktop-shortcut'),
+    isWindows: () => ipcRenderer.invoke('is-windows'),
+
     onUpdateStats: (callback: (stats: { uptime: string, memory: string }) => void) => {
         ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
     },

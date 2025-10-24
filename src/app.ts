@@ -2,7 +2,7 @@ import { app, BrowserWindow, Menu, nativeTheme, screen, shell, Tray } from 'elec
 import { join } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../config.json';
-import { handleStartServer, handleStopServer, initStore, registerIPCHandlers, store } from './appFunctions';
+import { handleStartServer, handleStopServer, initStore, registerIPCHandlers, store } from './ipc';
 import { projectDB } from './database.js';
 import { initLogging } from './util.js';
 
@@ -146,7 +146,10 @@ function createTray() {
 
 export function initApp() {
     updateElectronApp();
-    if (require('electron-squirrel-startup')) app.quit();
+    if (require('electron-squirrel-startup')) {
+        app.quit();
+        return;
+    }
 
     app.on('ready', () => {
         initLogging();

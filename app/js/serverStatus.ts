@@ -1,5 +1,5 @@
 import { showTranslatedToast } from './logs';
-import { getTranslation } from './theme';
+import { getTranslation } from './translate';
 
 const startBtn = document.getElementById('start-btn')! as HTMLButtonElement;
 const stopBtn = document.getElementById('stop-btn')! as HTMLButtonElement;

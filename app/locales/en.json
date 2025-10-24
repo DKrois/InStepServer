@@ -39,13 +39,18 @@
   "copyPassword": "Copy to Clipboard",
   "close": "Close",
   "togglePassword": "Show/Hide Password",
+  "shortcutsTitle": "Create shortcuts",
+  "createStartMenuShortcut": "Create start menu shortcut",
+  "createDesktopShortcut": "Create desktop shortcut",
 
   "toastInvalidPort": "Invalid port number",
   "toastLangSwitch": "Switched language to {{lang}}",
   "toastServerStarted": "Server started on port {{port}}",
   "toastServerStopped": "Server stopped successfully",
-  "toastPasswordIncorrect": "Incorrect password.",
-  "toastPasswordEmpty": "New password cannot be empty.",
-  "toastPasswordUpdated": "Password updated successfully.",
-  "toastPasswordCopied": "Password copied to clipboard!"
+  "toastPasswordIncorrect": "Incorrect password",
+  "toastPasswordEmpty": "New password cannot be empty",
+  "toastPasswordUpdated": "Password updated successfully",
+  "toastPasswordCopied": "Password copied to clipboard",
+  "toastShortcutCreated": "Created {{type}} shortcut",
+  "toastShortcutFailed": "Failed to create {{type}} shortcut"
 }

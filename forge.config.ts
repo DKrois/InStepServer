@@ -1,5 +1,6 @@
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
+import MakerSquirrel from '@electron-forge/maker-squirrel';
 import { MakerWix } from '@electron-forge/maker-wix';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
@@ -7,14 +8,13 @@ import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { exeBaseName, name } from './config.json';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
 const iconPath = './app/assets/icon.ico';
 const exeName = `${exeBaseName}-$\{version}`;
+const setupExeName = `${exeBaseName}-Setup-$\{version}`;
 
 const config: ForgeConfig = {
     packagerConfig: {
@@ -22,38 +22,39 @@ const config: ForgeConfig = {
         icon: iconPath,
         asar: true,
         extraResource: [
-            './app/assets/icon.ico',
+            iconPath,
         ]
     },
     rebuildConfig: {},
     makers: [
-        /*new MakerSquirrel({
-            setupExe: setupExeName,
-            setupIcon: icon,
-        }),*/
+        new MakerSquirrel({
+            setupExe: `${setupExeName}.exe`,
+            setupIcon: iconPath,
+            exe: `${exeName}.exe`,
+
+        }),
         new MakerWix({
             name: name,
             exe: exeName,
-            icon: iconPath,
-            /*ui: {
+            icon: iconPath, // https://stackoverflow.com/questions/19271862/wix-how-to-run-exe-files-after-installation-from-installed-directory, icons, name (Machine)
+            ui: {
                 chooseDirectory: true,
             },
             features: {
                 autoLaunch: false,
                 autoUpdate: false, // TODO
-            }*/
-            beforeCreate: async (msiCreator) => {
-                msiCreator.wixTemplate = await getTemplate('wixTemplate', false); // https://stackoverflow.com/questions/76722043/how-to-modify-electron-wix-msi-installer
             }
         }),
         new MakerZIP({}, ['darwin']),
         new MakerRpm({
             options: {
+                name: name,
                 icon: iconPath,
             }
         }),
         new MakerDeb({
             options: {
+                name: name,
                 icon: iconPath,
             }
         }),
@@ -89,10 +90,5 @@ const config: ForgeConfig = {
         }),
     ],
 };
-
-async function getTemplate(name: string, trimTrailingNewLine: boolean) {
-    const content = await readFile(join(import.meta.dirname, `app\\installer\\${name}.wxs`), 'utf8');
-    return trimTrailingNewLine ? content.replace(/[\r\n]+$/g, '') : content;
-}
 
 export default config;

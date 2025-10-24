@@ -39,13 +39,18 @@
   "copyPassword": "In die Zwischenablage kopieren",
   "close": "Schließen",
   "togglePassword": "Passwort anzeigen/verbergen",
+  "shortcutsTitle": "Shortcuts erstellen",
+  "createStartMenuShortcut": "Startmenü-Shortcut erstellen",
+  "createDesktopShortcut": "Desktop-Shortcut erstellen",
 
   "toastInvalidPort": "Ungültige Portnummer",
   "toastLangSwitch": "Sprache auf {{lang}} geändert",
   "toastServerStarted": "Server auf Port {{port}} gestartet",
   "toastServerStopped": "Server erfolgreich angehalten",
-  "toastPasswordIncorrect": "Falsches Passwort.",
-  "toastPasswordEmpty": "Neues Passwort darf nicht leer sein.",
-  "toastPasswordUpdated": "Passwort erfolgreich aktualisiert.",
-  "toastPasswordCopied": "Passwort in die Zwischenablage kopiert!"
+  "toastPasswordIncorrect": "Falsches Passwort",
+  "toastPasswordEmpty": "Neues Passwort darf nicht leer sein",
+  "toastPasswordUpdated": "Passwort erfolgreich aktualisiert",
+  "toastPasswordCopied": "Passwort in die Zwischenablage kopiert",
+  "toastShortcutCreated": "{{type}}-Shortcut erstellt",
+  "toastShortcutFailed": "Erstellen von {{type}}-Shortcut fehlgeschlagen"
 }

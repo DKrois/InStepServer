@@ -1,5 +1,6 @@
 {
   "name": "instepserver",
+  "productName": "InStep Server",
   "version": "1.0.0",
   "author": "DKrois - IDimova",
   "description": "Server for InStep Indoor Navigation System",

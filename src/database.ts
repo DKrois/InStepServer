@@ -11,7 +11,9 @@ export interface DirectoryStats {
 }
 
 class ProjectDatabase {
-    constructor(private dbPath: string) {}
+    constructor(private dbPath: string) {
+        fs.mkdir(dbPath, { recursive: true }); // nothing happens if dir already exists
+    }
 
     get path(): string {
         return this.dbPath;
@@ -19,7 +21,7 @@ class ProjectDatabase {
 
     async add(id: number, version: number, data: any) {
         const folderPath = join(this.dbPath, id.toString());
-        await fs.mkdir(folderPath, { recursive: true }); // nothing happens if dir already exists
+        await fs.mkdir(folderPath, { recursive: true });
 
         const jsonFileName = `v${version}.json`;
         const path = join(folderPath, jsonFileName);
