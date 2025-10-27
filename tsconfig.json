@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"],
-      "express": ["node_modules/@types/express/index.d.ts"]
+      "express": ["node_modules/@types/express/index.d.ts"],
+      "multer": ["node_modules/@types/multer/index.d.ts"]
     }
   },
   "include": ["src/**/*", "app"],

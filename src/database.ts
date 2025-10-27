@@ -19,24 +19,49 @@ class ProjectDatabase {
         return this.dbPath;
     }
 
-    async add(id: number, version: number, data: any) {
-        const folderPath = join(this.dbPath, id.toString());
-        await fs.mkdir(folderPath, { recursive: true });
-
-        const jsonFileName = `v${version}.json`;
-        const path = join(folderPath, jsonFileName);
-        await writeJSON(path, data);
+    private _createPath(id: number, version?: number, ...additional: string[]): string {
+        const base = join(this.dbPath, id.toString());
+        const fullPath = version !== null && version !== undefined ? join(base, `v${version}`) : base;
+        return additional.length ? fullPath : join(fullPath, ...additional);
     }
 
     /**
-     * Removes an entire project or a project file.
+     * Creates a new version and saves the JSON data.
+     * floorplanImages will be removed.
+     */
+    async add(id: number, version: number, data: any) {
+        const versionPath = this._createPath(id, version);
+        await fs.mkdir(versionPath, { recursive: true });
+
+        const { floorplanImages, ...projectData } = data;
+
+        const path = join(versionPath, 'data.json');
+        await writeJSON(path, projectData);
+    }
+
+    /**
+     * Saves an image file to a specific project version.
+     * @param id project id
+     * @param version version number
+     * @param file The uploaded file object.
+     */
+    async addImage(id: number, version: number, file: Express.Multer.File) {
+        const versionPath = this._createPath(id, version);
+        const newPath = join(versionPath, file.originalname); // Use originalname as filename
+
+        // Multer saves to a temporary path, so we move it to the final destination.
+        await fs.rename(file.path, newPath);
+    }
+
+    /**
+     * Removes an entire project or a project version.
      * @param id project id
      * @param version version to remove. If absent, removes the entire project.
      */
     async delete(id: number, version?: number) {
-        const path = join(this.dbPath, id.toString(), version ? `v${version}.json` : '');
+        const path = this._createPath(id, version);
 
-        await fs.rm(path, { recursive: true });
+        await fs.rm(path, { recursive: true, force: true });
     }
 
     /**
@@ -45,10 +70,10 @@ class ProjectDatabase {
      * @param version version to read. If absent, uses most recent one
      */
     async get(id: number, version?: number) {
-        const v = version ? `v${version}.json` : (await this.getLatestVersion(id))?.file;
+        const v = version ? `v${version}.json` : (await this.getLatestVersion(id))?.path;
         if (!v) throw new Error(`${id}/@latest not found.`);
-        const filePath = join(this.dbPath, id.toString(), v);
 
+        const filePath = this._createPath(id, version, 'data.json');
         const json = await fs.readFile(filePath, 'utf8');
         return JSON.parse(json);
     }
@@ -58,25 +83,43 @@ class ProjectDatabase {
      * @param id project id
      */
     async list(id: number): Promise<number[]> {
-        const path = join(this.dbPath, id.toString());
-        const files = await fs.readdir(path);
-        return files.map(this._extractVersionNumber).filter(v => v !== null);
+        const path = this._createPath(id);
+        try {
+            const entries = await fs.readdir(path);
+            return entries.map(this._extractVersionNumber).filter(v => v !== null);
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Gets a list of image filenames for a specific version.
+     */
+    async listImages(id: number, version: number): Promise<string[]> {
+        const versionPath = this._createPath(id, version);
+        try {
+            const files = await fs.readdir(versionPath);
+            return files.filter(file => !file.endsWith('.json'));
+        } catch (e) {
+            // If directory doesn't exist or is empty, return empty array
+            return [];
+        }
     }
 
     async getLatestVersion(id: number) {
-        const path = join(this.dbPath, id.toString());
-        const files = await fs.readdir(path).catch(() => []);
+        const path = this._createPath(id);
+        const entries = await fs.readdir(path).catch(() => []);
 
-        const versioned = files
-            .map(file => ({ file, version: this._extractVersionNumber(file) }))
-            .filter(f => f.version !== null) as ({ file: string, version: number })[];
+        const versioned = entries
+            .map(entry => ({ path: entry, version: this._extractVersionNumber(entry) }))
+            .filter(e => e.version !== null) as ({ path: string, version: number })[];
 
         if (versioned.length === 0) return null;
         return versioned.reduce((a, b) => (b.version > a.version ? b : a));
     }
 
     private _extractVersionNumber(path: string) {
-        const match = path.match(/^v(\d+)\.json$/);
+        const match = path.match(/^v(\d+)$/);
         return match ? parseInt(match[1], 10) : null;
     }
 
