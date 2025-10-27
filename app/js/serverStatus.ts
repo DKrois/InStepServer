@@ -25,8 +25,8 @@ stopBtn.addEventListener('click', () => {
 });
 
 
-export function setInitialPort(settings: any) {
-    portInput.value = settings.port;
+export function setInitialPort(port: any) {
+    portInput.value = port;
 }
 
 window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | null }) => {

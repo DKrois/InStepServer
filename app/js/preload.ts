@@ -1,11 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 const api = {
+    getInitialSettings: () => ipcRenderer.invoke('get-initial-settings'),
+    saveSetting: (key: string, value: any) => ipcRenderer.send('save-setting', { key, value }),
+
     startServer: (port: number) => ipcRenderer.send('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
     onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number | null }) => void) => {
         ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },
+
+    saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
 
     toggleTheme: () => ipcRenderer.invoke('toggle-theme'),
     getInitialTheme: () => ipcRenderer.invoke('get-initial-theme'),
@@ -22,9 +27,6 @@ const api = {
         ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
     },
     getStats: () => ipcRenderer.invoke('get-stats'),
-
-    getInitialSettings: () => ipcRenderer.invoke('get-initial-settings'),
-    saveSetting: (key: string, value: any) => ipcRenderer.send('save-setting', { key, value }),
 
     onLog: (callback: (log: string) => void) => {
         ipcRenderer.on('log', (_event, value) => callback(value as string));

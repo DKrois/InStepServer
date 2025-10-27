@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>InStep Server Control Panel</title>
+        <!--<meta http-equiv="Content-Security-Policy" content="script-src 'self'">-->
         <link rel="icon" type="image/ico" href="assets/icon.ico">
     </head>
 
@@ -33,12 +34,12 @@
                     <div class="card">
                         <div class="card-header">
                             <h2 data-i18n="serverControls">Server Controls</h2>
-                            <div id="server-status-indicator" title="Server is running" class="status-stopped"></div>
+                            <div id="server-status-indicator" title="Server is stopped" class="status-stopped"></div>
                         </div>
 
                         <div class="button-group">
                             <button id="start-btn" data-i18n="startServer">Start Server</button>
-                            <button id="stop-btn" data-i18n="stopServer">Stop Server</button>
+                            <button id="stop-btn" data-i18n="stopServer" disabled>Stop Server</button>
                         </div>
 
                         <div class="form-group">
@@ -46,6 +47,26 @@
                             <input type="number" id="port-input" value="5000" min="80" max="65535">
                         </div>
                     </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 data-i18n="timeManagement">Time Management</h2>
+                        </div>
+                        <div class="form-group">
+                            <label for="time-global-start" data-i18n="enableAt">Enable At:</label>
+                            <input type="time" id="time-global-start">
+                        </div>
+                        <div class="form-group">
+                            <label for="time-global-end" data-i18n="disableAt">Disable At:</label>
+                            <input type="time" id="time-global-end">
+                        </div>
+                        <div class="button-group">
+                            <button id="time-advanced-btn" data-i18n="advanced">Advanced</button>
+                            <button id="time-save-btn" data-i18n="save">Save</button>
+                            <button id="time-clear-btn" data-i18n="clear">Clear</button>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
                             <h2 data-i18n="security">Security</h2>
@@ -55,13 +76,15 @@
                         <div id="unlock-section">
                             <div class="form-group password-wrapper">
                                 <label for="current-password-input" data-i18n="currentPassword">Current Password:</label>
-                                <input type="password" id="current-password-input" autocomplete="current-password">
-                                <button id="toggle-current-password" class="icon-button password-toggle" data-i18n-title="togglePassword">
-                                    <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
-                                    <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
-                                    <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
-                                    <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
-                                </button>
+                                <div class="input-with-icon">
+                                    <input type="password" id="current-password-input" autocomplete="current-password">
+                                    <button id="toggle-current-password" class="icon-button password-toggle" data-i18n-title="togglePassword">
+                                        <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
+                                        <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
+                                    </button>
+                                </div>
                             </div>
                             <button id="unlock-btn" data-i18n="unlock">Unlock</button>
                         </div>
@@ -69,14 +92,16 @@
                         <!-- This section is for setting a new password, hidden by default -->
                         <div id="change-password-section" class="hidden">
                             <div class="form-group password-wrapper">
-                                <label for="new-password-input" data-i18n="newPassword">New Password:</label>
-                                <input type="password" id="new-password-input" autocomplete="new-password">
-                                <button id="toggle-new-password" class="icon-button password-toggle" title="Show/Hide Password">
-                                    <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
-                                    <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
-                                    <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
-                                    <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
-                                </button>
+                                <div class="input-with-icon">
+                                    <label for="new-password-input" data-i18n="newPassword">New Password:</label>
+                                    <input type="password" id="new-password-input" autocomplete="new-password">
+                                    <button id="toggle-new-password" class="icon-button password-toggle" title="Show/Hide Password">
+                                        <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
+                                        <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
+                                    </button>
+                                </div>
                             </div>
                             <button id="save-password-btn" data-i18n="save">Save</button>
                         </div>
@@ -121,8 +146,24 @@
 
         <div id="toast-container"></div>
 
-        <div id="modal-backdrop" class="hidden">rs
-            <div id="modal-dialog" class="card">
+        <!-- Time Modal -->
+        <div id="time-modal-backdrop" class="modal hidden">
+            <div id="time-modal-dialog" class="modal-dialog card">
+                <h3 data-i18n="advancedTimeSettings">Advanced Time Settings</h3>
+                <ul id="weekday-list" class="weekday-list">
+                    <!-- Weekday rows will be generated by JavaScript -->
+                </ul>
+                <div class="button-group modal-buttons">
+                    <button id="time-modal-save-btn" data-i18n="save">Save</button>
+                    <button id="time-modal-clear-btn" data-i18n="clear">Clear</button>
+                    <button id="time-modal-cancel-btn" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Initial Modal -->
+        <div id="modal-backdrop" class="modal hidden">rs
+            <div id="modal-dialog" class="modal-dialog card">
                 <h3 data-i18n="initialPasswordTitle">Initial Password</h3>
                 <p data-i18n="initialPasswordDesc">This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.</p>
                 <div class="password-display-wrapper">

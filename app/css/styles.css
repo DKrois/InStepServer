@@ -12,10 +12,6 @@ body {
     flex-direction: column;
 }
 
-a {
-    color: #cba8ff;
-}
-
 .top-bar {
     height: 61px;
     padding: 0 20px;
@@ -104,21 +100,17 @@ a {
 }
 
 .cards-container {
-    display: flex;
-    flex-wrap: wrap; /* Allows cards to wrap to the next line */
+    display: grid;
+    /* Create 2 columns of equal (1fr) size */
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
-.cards-container > .card {
-    flex-grow: 1;
-    min-width: 300px;
-}
 
 .card {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    max-width: 48%;
 }
 
 .card-header {
@@ -208,12 +200,28 @@ button:disabled:active {
     flex-grow: 1;
 }
 
+.input-with-icon {
+    position: relative; /* This is the anchor for the absolute-positioned icon */
+    display: flex; /* Helps contain the elements */
+    align-items: center;
+    width: 100%;
+}
+
+.input-with-icon input {
+    /* Keep all your input styling */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+
+    /* IMPORTANT: Add padding on the right to make space for the button */
+    padding: 8px 40px 8px 8px;
+    box-sizing: border-box; /* Ensures padding is included in the width */
+    width: 100%;
+}
+
 .password-toggle {
     position: absolute;
-    /* Position relative to the wrapper, not the card */
+    /* Position relative to the .input-with-icon wrapper */
     right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
 
     width: 30px;
     height: 30px;
@@ -238,6 +246,15 @@ button:disabled:active {
 }
 .password-toggle:not(.password-shown) .eye-closed-icon {
     display: none;
+}
+
+input[type="time"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+input[type="time"]:focus {
+    outline: none;
 }
 
 .sidebar {
@@ -336,7 +353,6 @@ body.logs-visible .main-content {
 
 .toast {
     padding: 12px 20px;
-    color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-bottom: 10px;
@@ -357,16 +373,7 @@ body.logs-visible .main-content {
     transform: translateY(0);
 }
 
-/* Styling for different toast types */
-.toast-info {
-    background-color: #2c3e50; /* A dark blue/grey */
-}
-
-.toast-error {
-    background-color: #c0392b; /* A strong red */
-}
-
-#modal-backdrop {
+.modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -381,14 +388,40 @@ body.logs-visible .main-content {
     visibility: hidden;
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 }
-#modal-backdrop:not(.hidden) {
+.modal:not(.hidden) {
     opacity: 1;
     visibility: visible;
 }
 
-#modal-dialog {
-    max-width: 400px;
+.modal-dialog {
+    max-width: 500px;
     width: 90%;
+}
+
+.weekday-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+.weekday-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+}
+.weekday-row:last-child {
+    border-bottom: none;
+}
+.weekday-name {
+    flex-basis: 100px;
+    flex-shrink: 0;
+}
+.weekday-mode-select {
+    padding: 8px;
+    border-radius: 5px;
+}
+.modal-buttons {
+    justify-content: flex-end;
 }
 
 .password-display-wrapper {

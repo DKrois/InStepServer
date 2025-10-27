@@ -30,8 +30,8 @@ const config: ForgeConfig = {
         new MakerSquirrel({
             setupExe: `${setupExeName}.exe`,
             setupIcon: iconPath,
-            exe: `${exeName}.exe`,
-
+            iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/app/assets/icon.ico',
+            exe: `${exeName}.exe`
         }),
         new MakerWix({
             name: name,
@@ -42,7 +42,7 @@ const config: ForgeConfig = {
             },
             features: {
                 autoLaunch: false,
-                autoUpdate: false, // TODO
+                autoUpdate: true,
             }
         }),
         new MakerZIP({}, ['darwin']),

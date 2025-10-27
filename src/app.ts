@@ -1,10 +1,13 @@
 import { app, BrowserWindow, Menu, nativeTheme, screen, shell, Tray } from 'electron';
-import { join } from 'node:path';
+import log from 'electron-log';
+import electron_log from 'electron-log';
+import * as fs from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../config.json';
-import { handleStartServer, handleStopServer, initStore, registerIPCHandlers, store } from './ipc';
+import { handleStartServer, handleStopServer, initStore, registerIPCHandlers, startScheduler, store } from './ipc';
 import { projectDB } from './database.js';
-import { initLogging } from './util.js';
+import { errorWithMessage, info, initLogging } from './util.js';
 
 const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'app/assets/icon.ico');
 const projectStoragePath = projectDB.path;
@@ -29,6 +32,7 @@ function createWindow() {
         show: false, // prevent visual flash of resize
 
         webPreferences: {
+            contextIsolation: true,
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
         },
     });
@@ -117,6 +121,20 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    mainWindow.webContents.on('did-finish-load', () => {
+        info('Renderer finished loading...');
+
+        const timeSettings = store.get('timeSettings') as any;
+        // Time management takes precedence over the simple "start on open" setting
+        if (timeSettings?.enabled) {
+            startScheduler();
+        } else if (store.get('startServerOnOpen')) {
+            handleStartServer();
+        } else {
+            mainWindow?.webContents.send('server-status-changed', { isRunning: false, port: null });
+        }
+    });
 }
 
 function createTray() {
@@ -145,7 +163,8 @@ function createTray() {
 }
 
 export function initApp() {
-    updateElectronApp();
+    log.transports.console.level = false;
+    initUpdater();
     if (require('electron-squirrel-startup')) {
         app.quit();
         return;
@@ -161,12 +180,6 @@ export function initApp() {
 
         initStore();
         registerIPCHandlers();
-
-        if (store.get('startServerOnOpen')) {
-            handleStartServer();
-        } else {
-            mainWindow?.webContents.send('server-status-changed', { isRunning: false, port: null });
-        }
     });
 
     app.on('before-quit', () => {
@@ -180,6 +193,34 @@ export function initApp() {
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
+}
+
+function initUpdater() {
+    if (!app.isPackaged) {
+        info('Development mode: Auto-updater disabled.');
+        return;
+    }
+
+    // 2. The updater only works on Windows
+    if (process.platform !== 'win32' && process.platform !== 'darwin') {
+        info('Non-Windows / MacOS platform: Auto-updater disabled.');
+        return;
+    }
+
+    const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
+    if (!fs.existsSync(updateExe)) {
+        info('Auto-updater disabled.');
+        return;
+    }
+
+    try {
+        updateElectronApp({
+            updateInterval: '1 hour',
+            logger: electron_log,
+        });
+    } catch (error) {
+        errorWithMessage('Failed to initialize auto-updater', error);
+    }
 }
 
 export function sendLog(message: string) {

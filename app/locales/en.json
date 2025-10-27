@@ -34,6 +34,25 @@
   "hideLogs": "Hide Logs",
   "clearLogs": "Clear Logs",
 
+  "timeManagement": "Time Management",
+  "enableAt": "Enable At:",
+  "disableAt": "Disable At:",
+  "advanced": "Advanced",
+  "clear": "Clear",
+  "cancel": "Cancel",
+  "advancedTimeSettings": "Advanced Time Settings",
+  "customTime": "Custom Time",
+  "wholeday": "Entire day",
+  "off": "Off",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "confirmClearTimeSettings": "Are you sure you want to clear all time management settings? This cannot be undone.",
+
   "initialPasswordTitle": "Initial Password",
   "initialPasswordDesc": "This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.",
   "copyPassword": "Copy to Clipboard",
@@ -43,14 +62,20 @@
   "createStartMenuShortcut": "Create start menu shortcut",
   "createDesktopShortcut": "Create desktop shortcut",
 
-  "toastInvalidPort": "Invalid port number",
   "toastLangSwitch": "Switched language to {{lang}}",
+
   "toastServerStarted": "Server started on port {{port}}",
   "toastServerStopped": "Server stopped successfully",
+  "toastInvalidPort": "Invalid port number",
+
+  "toastTimeSettingsSaved": "Time settings saved successfully.",
+  "toastTimeSettingsCleared": "Time settings have been cleared.",
+
   "toastPasswordIncorrect": "Incorrect password",
   "toastPasswordEmpty": "New password cannot be empty",
   "toastPasswordUpdated": "Password updated successfully",
   "toastPasswordCopied": "Password copied to clipboard",
+
   "toastShortcutCreated": "Created {{type}} shortcut",
   "toastShortcutFailed": "Failed to create {{type}} shortcut"
 }

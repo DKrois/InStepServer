@@ -9,8 +9,6 @@ export function initLogging() {
     log.errorHandler.startCatching();
     log.eventLogger.startLogging();
 
-    log.transports.console.level = false;
-
     log.info('Logger initialized.');
 }
 
@@ -99,7 +97,7 @@ export function errToString(err: Error | undefined | unknown, formatChalk = fals
 export function formatError(e: Error | string, additional?: any) {
     const message = typeof e === 'string' ? e : e.message;
     return {
-        error: message,
+        message,
         ...additional,
     };
 }

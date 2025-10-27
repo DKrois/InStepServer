@@ -6,21 +6,23 @@ import { initApp } from './app.js';
 import 'source-map-support/register';
 import { errorWithMessage, info } from './util.js';
 
-/*
- * Auto update ? → forge.config / MakerWix : autoUpdate
+/* DONE
+ *
+ * auto time stuff → testing for weekdays
+ *
+ */
+
+/* WIP
+ *
+ * translations
+ *
+ */
+
+/* OTHER
  *
  * Open existing one rather than new instance if shortcut clicked
  * Disable desktop shortcut by default
  * → electron-squirrel-startup, msi template...
- *
- * Storing images
- *
- * Time stuff
- *
- * "Stop Server" button not disabled on startup
- *
- * show pw icon sometimes not working ?
- * translations
  *
  * Installer:
  * Read default template? (msiCreator.wixTemplate)
