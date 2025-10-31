@@ -282,6 +282,12 @@ body.stats-visible .logs-section {
     right: max(27%, 250px); /* Shrinks the section from the right */
 }
 
+.statistics {
+    padding: 20px;
+    line-height: 26px;
+    min-width: max(27%, 250px);
+}
+
 .logs-section {
     position: fixed;
     bottom: 60px; /* Sticks to the top of the footer */
