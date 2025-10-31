@@ -110,7 +110,7 @@ export function registerIPCHandlers() {
         return process.platform === 'win32';
     });
 
-    ipcMain.handle('create-start-menu-shortcut', createStartMenuShortcut);
+    ipcMain.handle('create-start-menu-shortcut', createStartMenuShortcut); // TODO ?
     ipcMain.handle('create-desktop-shortcut', createDesktopShortcut);
 }
 
@@ -159,7 +159,7 @@ function checkSchedule() {
     let shouldBeRunning = false;
     if (rule.mode === 'wholeday') {
         shouldBeRunning = true;
-    } else if ((rule.mode === 'custom' || !rule.mode) && rule.start && rule.end) { // global rule doesn't have a mode
+    } else if ((!('mode' in rule) || rule.mode === 'custom') && rule.start && rule.end) { // global rule doesn't have a mode
         const { start, end } = rule;
         if (start < end) {
             shouldBeRunning = currentTime >= start && currentTime < end;

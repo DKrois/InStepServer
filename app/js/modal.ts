@@ -1,4 +1,7 @@
 import { showTranslatedToast } from './logs';
+import { getTranslation } from './translate';
+
+// Modal, confirmation
 
 const modalBackdrop = document.getElementById('modal-backdrop')!;
 const closeModalBtn = document.getElementById('close-modal-btn')!;
@@ -8,6 +11,12 @@ const createStartMenuShortcutBtn = document.getElementById('create-startMenu-sho
 const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortcut-btn')!;
 
 const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
+
+const confirmModal = document.getElementById('confirm-modal')!;
+const confirmTitle = document.getElementById('confirm-title')!;
+const confirmMessage = document.getElementById('confirm-message')!;
+const confirmBtnOk = document.getElementById('confirm-btn-ok')!;
+const confirmBtnCancel = document.getElementById('confirm-btn-cancel')!;
 
 export async function setupModal() {
     const initialPassword = await window.api.getInitialPassword();
@@ -41,3 +50,35 @@ closeModalBtn.addEventListener('click', () => {
         modalBackdrop.classList.add('hidden');
     }, { once: true });
 });
+
+// --- Confirmation dialog ---
+export function showConfirmation(messageKey: string, titleKey: string = 'confirmTitle'): Promise<boolean> {
+    // Set the text from translation keys
+    confirmTitle.textContent = getTranslation(titleKey);
+    confirmMessage.textContent = getTranslation(messageKey);
+
+    // Show the modal
+    confirmModal.classList.remove('hidden');
+
+    return new Promise((resolve) => {
+        // Define cleanup function to remove listeners
+        const cleanup = () => {
+            confirmModal.classList.add('hidden');
+            confirmBtnOk.removeEventListener('click', handleOk);
+            confirmBtnCancel.removeEventListener('click', handleCancel);
+        };
+
+        const handleOk = () => {
+            cleanup();
+            resolve(true); // User confirmed
+        };
+
+        const handleCancel = () => {
+            cleanup();
+            resolve(false); // User cancelled
+        };
+
+        confirmBtnOk.addEventListener('click', handleOk);
+        confirmBtnCancel.addEventListener('click', handleCancel);
+    });
+}

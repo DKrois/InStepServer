@@ -35,11 +35,13 @@
   "clearLogs": "Protokolle leeren",
 
   "timeManagement": "Zeitmanagement",
+  "countdownLabel": "Server {{nextAction}}",
+  "startup": "start",
+  "shutdown": "shutdown",
   "enableAt": "Einschalten um:",
   "disableAt": "Ausschalten um:",
   "advanced": "Erweitert",
   "clear": "Löschen",
-  "cancel": "Abbrechen",
   "advancedTimeSettings": "Erweiterte Zeiteinstellungen",
   "customTime": "Benutzerdefiniert",
   "wholeday": "Ganztägig",
@@ -60,6 +62,10 @@
   "shortcutsTitle": "Shortcuts erstellen",
   "createStartMenuShortcut": "Startmenü-Shortcut erstellen",
   "createDesktopShortcut": "Desktop-Shortcut erstellen",
+
+  "confirmTitle": "Sind Sie sicher?",
+  "ok": "OK",
+  "cancel": "Abbrechen",
 
   "toastLangSwitch": "Sprache auf {{lang}} geändert",
 

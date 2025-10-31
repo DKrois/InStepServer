@@ -257,6 +257,10 @@ input[type="time"]:focus {
     outline: none;
 }
 
+.time-countdown {
+    pointer-events: none; /* decorative only */
+}
+
 .sidebar {
     width: 0; /* Starts hidden */
     transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
@@ -452,6 +456,16 @@ body.logs-visible .main-content {
 }
 #shortcut-options-container button {
     width: fit-content;
+}
+
+#confirm-modal {
+    z-index: 200;
+}
+
+/* Style the confirmation message */
+#confirm-message {
+    margin: 20px 0;
+    line-height: 1.5;
 }
 
 .hidden {

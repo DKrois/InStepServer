@@ -35,11 +35,13 @@
   "clearLogs": "Clear Logs",
 
   "timeManagement": "Time Management",
+  "countdownLabel": "Server {{nextAction}}",
+  "startup": "startup",
+  "shutdown": "shutdown",
   "enableAt": "Enable At:",
   "disableAt": "Disable At:",
   "advanced": "Advanced",
   "clear": "Clear",
-  "cancel": "Cancel",
   "advancedTimeSettings": "Advanced Time Settings",
   "customTime": "Custom Time",
   "wholeday": "Entire day",
@@ -51,6 +53,7 @@
   "friday": "Friday",
   "saturday": "Saturday",
   "sunday": "Sunday",
+
   "confirmClearTimeSettings": "Are you sure you want to clear all time management settings? This cannot be undone.",
 
   "initialPasswordTitle": "Initial Password",
@@ -61,6 +64,10 @@
   "shortcutsTitle": "Create shortcuts",
   "createStartMenuShortcut": "Create start menu shortcut",
   "createDesktopShortcut": "Create desktop shortcut",
+
+  "confirmTitle": "Are you sure?",
+  "ok": "OK",
+  "cancel": "Cancel",
 
   "toastLangSwitch": "Switched language to {{lang}}",
 

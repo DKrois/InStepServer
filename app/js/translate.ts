@@ -4,6 +4,8 @@ import de from '../locales/de.json';
 import en from '../locales/en.json';
 import { showTranslatedToast } from './logs';
 
+// Translation, Theme
+
 const themeSwitcher = document.getElementById('theme-switcher')!;
 const languageSwitcher = document.getElementById('language-switcher') as HTMLSelectElement;
 
