@@ -19,6 +19,9 @@ export let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let isQuitting = false;
 
+// request single instance lock (only one app instance allowed)
+const gotTheLock = app.requestSingleInstanceLock();
+
 function createWindow() {
     // get primary screens work area
     const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
@@ -164,11 +167,16 @@ function createTray() {
 
 export function initApp() {
     log.transports.console.level = false;
+    if (!gotTheLock) { // ensure single instance
+        app.quit();
+        return;
+    }
     initUpdater();
     if (require('electron-squirrel-startup')) {
         app.quit();
         return;
     }
+
 
     app.on('ready', () => {
         initLogging();
@@ -188,6 +196,17 @@ export function initApp() {
 
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') app.quit();
+    });
+
+    // will be emitted on the first instance when a second instance is launched
+    app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
+        if (mainWindow) {
+            if (!mainWindow.isVisible()) mainWindow.show();
+
+            if (mainWindow.isMinimized()) mainWindow.restore();
+
+            mainWindow.focus();
+        }
     });
 
     app.on('activate', () => {

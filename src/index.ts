@@ -8,7 +8,8 @@ import { errorWithMessage, info } from './util.js';
 
 /* DONE
  *
- * auto time stuff → testing for weekdays
+ * auto time stuff
+ * Open existing one rather than new instance if shortcut clicked
  *
  */
 
@@ -20,8 +21,8 @@ import { errorWithMessage, info } from './util.js';
 
 /* OTHER
  *
- * Open existing one rather than new instance if shortcut clicked
- * Disable desktop shortcut by default
+ *
+ * Disable desktop shortcut by default ?
  * → electron-squirrel-startup, msi template...
  *
  * Installer:
