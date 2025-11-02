@@ -59,6 +59,13 @@
   "copyPassword": "In die Zwischenablage kopieren",
   "close": "Schließen",
   "togglePassword": "Passwort anzeigen/verbergen",
+
+  "projectPathTitle": "Projektspeicherpfad",
+  "projectPathDesc": "Wählen Sie ein Verzeichnis, in dem alle Projektdaten gespeichert werden.",
+  "currentPath": "Aktueller Speicherpfad",
+  "changePath": "Ändern...",
+  "pathPermissionError": "Die Anwendung hat keine Berechtigung, in das ausgewählte Verzeichnis zu schreiben. Bitte wählen Sie einen anderen Ordner.",
+
   "shortcutsTitle": "Shortcuts erstellen",
   "createStartMenuShortcut": "Startmenü-Shortcut erstellen",
   "createDesktopShortcut": "Desktop-Shortcut erstellen",
@@ -66,6 +73,7 @@
   "confirmTitle": "Sind Sie sicher?",
   "ok": "OK",
   "cancel": "Abbrechen",
+  "cancelled": "Abgebrochen",
 
   "toastLangSwitch": "Sprache auf {{lang}} geändert",
 
@@ -73,15 +81,20 @@
   "toastServerStopped": "Server erfolgreich angehalten",
   "toastInvalidPort": "Ungültige Portnummer",
 
-  "toastTimeSettingsSaved": "Zeiteinstellungen erfolgreich gespeichert.",
-  "confirmClearSettings": "Sind Sie sicher, dass Sie alle Zeitmanagement-Einstellungen löschen möchten? Dies kann nicht rückgängig gemacht werden.",
-  "toastSettingsCleared": "Zeiteinstellungen wurden gelöscht.",
+  "toastTimeSettingsSaved": "Zeiteinstellungen erfolgreich gespeichert",
+  "confirmClearTimeSettings": "Sind Sie sicher, dass Sie alle Zeitmanagement-Einstellungen löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+  "toastTimeSettingsCleared": "Zeiteinstellungen wurden gelöscht",
 
   "toastPasswordIncorrect": "Falsches Passwort",
   "toastPasswordEmpty": "Neues Passwort darf nicht leer sein",
   "toastPasswordUpdated": "Passwort erfolgreich aktualisiert",
   "toastPasswordCopied": "Passwort in die Zwischenablage kopiert",
 
+  "toastPathUpdated": "Speicherpfad erfolgreich aktualisiert",
+  "toastPathError": "Speicherpfad konnte nicht aktualisiert werden",
+
   "toastShortcutCreated": "{{type}}-Shortcut erstellt",
-  "toastShortcutFailed": "Erstellen von {{type}}-Shortcut fehlgeschlagen"
+  "toastShortcutFailed": "Erstellen von {{type}}-Shortcut fehlgeschlagen",
+
+  "toastUnknownError": "Ein unbekannter Fehler ist aufgetreten."
 }

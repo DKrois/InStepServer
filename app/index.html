@@ -22,7 +22,10 @@
                 </div>
 
                 <button id="theme-switcher" class="icon-button" data-i18n-title="toggleTheme">
+                    <!-- CSS handles which icon is shown -->
+                    <!-- light mode icon -->
                     <img src="assets/lightMode.png" class="button-image light-icon" alt="☀️">
+                    <!-- dark mode icon -->
                     <img src="assets/darkMode.png" class="button-image dark-icon" alt="🌙">
                 </button>
             </div>
@@ -177,6 +180,18 @@
                         <img src="assets/copy-dark.png" class="light-icon" alt="Copy">
                         <img src="assets/copy-light.png" class="dark-icon" alt="Copy">
                     </button>
+                </div>
+
+                <hr>
+                <div class="path-config-section">
+                    <h3 data-i18n="projectPathTitle">Project Storage Path</h3>
+                    <p data-i18n="projectPathDesc">Choose a directory where all projects will be stored.</p>
+                    <div class="path-display-wrapper">
+                        <!-- updated by JS to show the actual current path -->
+                        <span id="current-project-path" data-i18n-title="currentPath" title="Current storage path">C:\Path\To\Data</span>
+                        <button id="change-path-btn" data-i18n="changePath">Change...</button>
+                    </div>
+                    <p id="path-error-message" class="error-text hidden"></p>
                 </div>
 
                 <hr>

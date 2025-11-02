@@ -1,39 +1,75 @@
 import express from 'express';
+import session from 'express-session';
+import makeStore from 'nedb-promises-session-store';
 import multer from 'multer';
+import crypto from 'node:crypto';
 import { Server } from 'node:http';
-import { tmpdir } from 'os'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path';
-import { projectDB } from './database.js';
-import { errorWithMessage, formatError, getOwnIPs, info } from './util.js';
+import { userDataPath } from './app/app';
+import { store, verifyPassword } from './app/settings';
+import { isDBInitialized, projectDB } from './database.js';
+import { errorWithMessage, formatError, getOwnIPs, info, warn } from './util.js';
 
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
+
+// add isAuthenticated flag to session
+declare module 'express-session' {
+    interface SessionData {
+        isAuthenticated: boolean;
+    }
+}
 
 let server: Server | null = null;
 export function initServer(port: number) {
     if (server) {
         info('Server already running.');
-        return;
+        return false;
+    }
+
+    if (!isDBInitialized()) {
+        warn("Project db isn't initialized");
+        return false;
     }
 
     const app = express();
     app.use(express.json());
 
-    app.use(express.static('public'));
-    // serve db path for image access
-    app.use('/api/static', express.static(projectDB.path));
+    const fileStore = makeStore({
+        connect: session,
+        filename: join(userDataPath, 'sessions.db'),
+    });
 
-    app.put('/api/:id/', handlePUTRequest);
-    app.put('/api/:id/:version', handlePUTRequest);
+    app.use(session({
+        secret: getSessionSecret(), // Used to sign the session ID cookie
+        store: fileStore,
+        resave: false,                                    // Don't save session if unmodified
+        saveUninitialized: false,                         // Don't create session until something stored
+        cookie: { secure: false, httpOnly: true }         // secure: true if using HTTPS
+    }));
 
-    // POST endpoint for uploading floorplan images
-    app.post('/api/:id/:version/floorplans', upload.array('floorplans'), handleFloorplanUpload);
+    app.use('/', (req, res, next) => {
+        if (req.path === '/' && req.method === 'GET' && req.session?.isAuthenticated) return res.redirect('/app');
 
+        next();
+    });
+
+    app.use(express.static('public')); // for login page
+    app.post('/login', handleLogin);
+
+    app.use('/api/static', express.static(projectDB.path)); // serve db path for image access
+    app.use('/app', isAuth, express.static('protected')); // for IMD
+
+    // GET routes without auth
     app.get('/api/:id/list', handleListRequest);
     app.get('/api/:id', handleGETRequest);
     app.get('/api/:id/:version', handleGETRequest);
 
-    app.delete('/api/:id', handleDELETERequest);
-    app.delete('/api/:id/:version', handleDELETERequest);
+    app.put('/api/:id/', isAuth, handlePUTRequest);
+    app.put('/api/:id/:version', isAuth, handlePUTRequest);
+    app.post('/api/:id/:version/floorplans', isAuth, upload.array('floorplans'), handleFloorplanUpload);
+    app.delete('/api/:id', isAuth, handleDELETERequest);
+    app.delete('/api/:id/:version', isAuth, handleDELETERequest);
 
     // handle non-existing routes
     app.use((req: express.Request, res: express.Response) => {
@@ -46,14 +82,18 @@ export function initServer(port: number) {
     // unhandled error
     app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         errorWithMessage('Unhandled http error', err);
-        res.status(err.status || 500).json({
-            error: err.message || 'Internal Server Error',
-        });
+        if (!res.headersSent) {
+            res.status(err.status || 500).send({
+                error: err.message || 'Internal Server Error',
+            });
+        }
     });
 
     server = app.listen(port, '0.0.0.0', () => {
         info(`Server listening on http://${getOwnIPs().pick}:${port}`);
     });
+
+    return true;
 }
 
 export function stopServer() {
@@ -67,6 +107,72 @@ export function stopServer() {
         server = null;
     });
 }
+
+// --- Authentication Middleware ---
+
+function isAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        if (req.session.isAuthenticated) {
+            return next();
+        }
+        res.status(401);
+
+        const userAgent = req.headers['user-agent'] || '';
+        if (userAgent && !userAgent.includes('PostmanRuntime')) { // PostmanRuntime for API testing
+            // likely a browser
+            return res.redirect('/');
+        } else {
+            return res.send(formatError('Unauthorized. Please log in.'));
+        }
+    } catch (e) {
+        next(e);
+    }
+}
+
+async function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        const { password } = req.body;
+        if (!password) return res.status(400).send(formatError('Password is required.'));
+
+        const isValid = await verifyPassword(password);
+        if (isValid) {
+            req.session.isAuthenticated = true; // Set the session flag
+
+            req.session.save((err) => {
+                if (err) {
+                    errorWithMessage('Session save error after login', err);
+                    return next(err);
+                }
+
+                info('User authenticated successfully and session saved.');
+                return res.status(200).json({ message: 'Login successful.' });
+            });
+        } else {
+            warn('Failed login attempt.');
+            return res.status(401).json(formatError('Invalid password.'));
+        }
+    } catch (e) {
+        next(e);
+    }
+}
+
+function getSessionSecret(): string {
+    const key = 'sessionSecret';
+    let secret = store.get(key);
+
+    // If no secret is found, generate a new one
+    if (!secret) {
+        info('No session secret found. Generating a new one.');
+        secret = crypto.randomBytes(64).toString('hex');
+
+        // Save the new secret to the store for future restarts
+        store.set(key, secret);
+    }
+
+    return secret;
+}
+
+// --- API Handlers ---
 
 async function handlePUTRequest(req: express.Request, res: express.Response) {
     const id = parseInt(req.params.id);
@@ -113,6 +219,7 @@ async function handleGETRequest(req: express.Request, res: express.Response) {
         if (v === undefined) return formatError('No versions found for this project.');
 
         const data = await projectDB.get(id, v);
+
         const imageFiles = await projectDB.listImages(id, v);
 
         data.floorplanImages = {};
@@ -169,7 +276,7 @@ async function handle(handler: () => Promise<any>, onSuccess: () => any, res: ex
     }
 }
 
-/* EXAMPLE SAVE ON CLIENT
+/* EXAMPLE SAVE ON CLIENT -- missing auth (?)
  *
 /**
  * Saves the entire project state to the server, including floorplan images.

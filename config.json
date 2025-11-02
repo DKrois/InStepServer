@@ -2,11 +2,10 @@
   "name": "InStep Server",
   "exeBaseName": "InStepServer",
 
-  "dbPath": "data",
   "toastTimeout": 2000,
 
   "defaultWindowWidth": 1200,
-  "defaultWindowHeight": 700,
+  "defaultWindowHeight": 750,
   "minWindowWidth": 700,
   "minWindowHeight": 500
 }

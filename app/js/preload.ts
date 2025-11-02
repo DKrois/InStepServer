@@ -1,8 +1,21 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 const api = {
-    getInitialSettings: () => ipcRenderer.invoke('get-initial-settings'),
+    toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
+    getInitialTheme: (): Promise<boolean> => ipcRenderer.invoke('get-initial-theme'),
+
+    onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
+        // event can only happen once
+        ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
+    },
+    getInitialSettings: (): Promise<any> => ipcRenderer.invoke('get-initial-settings'),
     saveSetting: (key: string, value: any) => ipcRenderer.send('save-setting', { key, value }),
+    saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
+    setProjectDataPath: (currentlySelectedPath?: string): Promise<{ success: boolean, path: string, code?: 'user-canceled' | 'permission-denied' }> => ipcRenderer.invoke('set-project-data-path', currentlySelectedPath),
+
+    getInitialPassword: (): Promise<string> => ipcRenderer.invoke('get-initial-password'),
+    verifyPassword: (password: string): Promise<boolean> => ipcRenderer.invoke('verify-password', password),
+    updatePassword: (oldPassword: string, newPassword: string): Promise<{ success: boolean, error?: string }> => ipcRenderer.invoke('update-password', oldPassword, newPassword),
 
     startServer: (port: number) => ipcRenderer.send('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
@@ -10,23 +23,19 @@ const api = {
         ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },
 
-    saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
-
-    toggleTheme: () => ipcRenderer.invoke('toggle-theme'),
-    getInitialTheme: () => ipcRenderer.invoke('get-initial-theme'),
-
-    getInitialPassword: () => ipcRenderer.invoke('get-initial-password'),
-    verifyPassword: (password: string) => ipcRenderer.invoke('verify-password', password),
-    updatePassword: (oldPassword: string, newPassword: string) => ipcRenderer.invoke('update-password', oldPassword, newPassword),
-
-    createStartMenuShortcut: () => ipcRenderer.invoke('create-start-menu-shortcut'),
-    createDesktopShortcut: () => ipcRenderer.invoke('create-desktop-shortcut'),
-    isWindows: () => ipcRenderer.invoke('is-windows'),
+    createStartMenuShortcut: (): Promise<boolean> => ipcRenderer.invoke('create-start-menu-shortcut'),
+    createDesktopShortcut: (): Promise<boolean> => ipcRenderer.invoke('create-desktop-shortcut'),
+    isWindows: (): Promise<boolean> => ipcRenderer.invoke('is-windows'),
 
     onUpdateStats: (callback: (stats: { uptime: string, memory: string }) => void) => {
         ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
     },
-    getStats: () => ipcRenderer.invoke('get-stats'),
+    getStats: (): Promise<any> => ipcRenderer.invoke('get-stats'),
+
+    closeInitialModal: () => ipcRenderer.send('initial-modal-closed'),
+    onProjectDBInitialized: (callback: () => void) => {
+        ipcRenderer.on('project-db-initialized', () => callback());
+    },
 
     onLog: (callback: (log: string) => void) => {
         ipcRenderer.on('log', (_event, value) => callback(value as string));

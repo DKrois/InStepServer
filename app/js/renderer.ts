@@ -1,15 +1,14 @@
-import { setupModal } from './modal';
 import { setInitialPort } from './serverStatus';
-import { refreshStats } from './stats';
 import { setInitialTimeSettings } from './timeManagement';
 import { setInitialLanguage, setInitialTheme } from './translate';
 import './security'; // to register event listeners
+import './stats'
 
 import '../css/styles.css';
 import '../css/theme.css';
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // Update to stored settings
+    // update to stored settings
     const settings = await window.api.getInitialSettings();
 
     setInitialPort(settings.port);
@@ -17,8 +16,5 @@ window.addEventListener('DOMContentLoaded', async () => {
     setInitialTheme();
     setInitialTimeSettings(settings.timeSettings);
 
-    setupModal();
-
-    // Refresh stats on load
-    await refreshStats();
+    // refresh stats on load → done in stats.ts after projectDB init
 });

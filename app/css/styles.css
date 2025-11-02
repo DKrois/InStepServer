@@ -397,6 +397,7 @@ body.logs-visible .main-content {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    overflow-y: auto; /* Allow scroll */
 }
 .modal:not(.hidden) {
     opacity: 1;
@@ -453,6 +454,51 @@ body.logs-visible .main-content {
 #copy-initial-password-btn img {
     width: 20px;
     height: 20px;
+}
+
+.path-config-section {
+    margin: 20px 0; /* Adds vertical spacing */
+}
+
+.path-config-section h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.path-config-section p {
+    font-size: 0.9em;
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.path-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for dark mode */
+    border-radius: 5px;
+    padding: 8px 12px;
+}
+
+#current-project-path {
+    flex-grow: 1; /* Allows the path to take up available space */
+    font-family: monospace;
+
+    /* These properties handle very long paths gracefully */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: ltr; /* Ensures path is displayed left-to-right */
+    text-align: left;
+    opacity: 0.9;
+}
+
+#change-path-btn {
+    flex-shrink: 0; /* Prevents the button from being squished */
+    padding: 6px 12px; /* Makes the button a bit smaller to fit the context */
+    font-size: 0.9em;
 }
 
 #shortcut-options-container .button-group {

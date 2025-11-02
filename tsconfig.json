@@ -20,6 +20,8 @@
     "paths": {
       "*": ["node_modules/*"],
       "express": ["node_modules/@types/express/index.d.ts"],
+      "express-session": ["node_modules/@types/express-session/index.d.ts"],
+      "nedb-promises-session-store": ["node_modules/nedb-promises-session-store/index.d.ts"],
       "multer": ["node_modules/@types/multer/index.d.ts"]
     }
   },

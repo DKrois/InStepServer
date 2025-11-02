@@ -23,6 +23,11 @@ function setLockedState(locked: boolean) {
 
 // --- Event Listeners ---
 
+window.api.onFirstTimeRunning(async () => {
+    const initialPassword = await window.api.getInitialPassword();
+    if (initialPassword) initialPasswordDisplay.value = initialPassword;
+});
+
 unlockBtn.addEventListener('click', handleUnlock);
 currentPasswordInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {

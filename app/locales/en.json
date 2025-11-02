@@ -61,6 +61,13 @@
   "copyPassword": "Copy to Clipboard",
   "close": "Close",
   "togglePassword": "Show/Hide Password",
+
+  "projectPathTitle": "Project Storage Path",
+  "projectPathDesc": "Choose a directory where all project data will be stored.",
+  "currentPath": "Current storage path",
+  "changePath": "Change...",
+  "pathPermissionError": "The application does not have permission to write to the selected directory. Please choose a different folder.",
+
   "shortcutsTitle": "Create shortcuts",
   "createStartMenuShortcut": "Create start menu shortcut",
   "createDesktopShortcut": "Create desktop shortcut",
@@ -68,6 +75,7 @@
   "confirmTitle": "Are you sure?",
   "ok": "OK",
   "cancel": "Cancel",
+  "cancelled": "Cancelled",
 
   "toastLangSwitch": "Switched language to {{lang}}",
 
@@ -75,14 +83,19 @@
   "toastServerStopped": "Server stopped successfully",
   "toastInvalidPort": "Invalid port number",
 
-  "toastTimeSettingsSaved": "Time settings saved successfully.",
-  "toastTimeSettingsCleared": "Time settings have been cleared.",
+  "toastTimeSettingsSaved": "Time settings saved successfully",
+  "toastTimeSettingsCleared": "Time settings cleared",
 
   "toastPasswordIncorrect": "Incorrect password",
   "toastPasswordEmpty": "New password cannot be empty",
   "toastPasswordUpdated": "Password updated successfully",
   "toastPasswordCopied": "Password copied to clipboard",
 
+  "toastPathUpdated": "Storage path updated successfully",
+  "toastPathError": "Error updating the storage path",
+
   "toastShortcutCreated": "Created {{type}} shortcut",
-  "toastShortcutFailed": "Failed to create {{type}} shortcut"
+  "toastShortcutFailed": "Failed to create {{type}} shortcut",
+
+  "toastUnknownError": "An unknown error occurred."
 }

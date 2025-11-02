@@ -1,28 +1,21 @@
-import { app, BrowserWindow, Menu, nativeTheme, screen, shell, Tray } from 'electron';
-import log from 'electron-log';
-import electron_log from 'electron-log';
-import * as fs from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { updateElectronApp } from 'update-electron-app';
-import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../config.json';
-import { handleStartServer, handleStopServer, initStore, registerIPCHandlers, startScheduler, store } from './ipc';
-import { projectDB } from './database.js';
-import { errorWithMessage, info, initLogging } from './util.js';
+import { app, BrowserWindow, Menu, screen, shell, Tray } from 'electron';
+import { join } from 'node:path';
+import { defaultDBPath, ProjectDatabase, projectDB } from '../database';
+import { attempt, info } from '../util';
+import { isQuitting } from './app';
+import { handleStartServer, handleStopServer } from './ipc';
+import { setInitialPassword, startScheduler, store } from './settings';
+import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../config.json';
 
 const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'app/assets/icon.ico');
-const projectStoragePath = projectDB.path;
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 export let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
-let isQuitting = false;
 
-// request single instance lock (only one app instance allowed)
-const gotTheLock = app.requestSingleInstanceLock();
-
-function createWindow() {
+export function createWindow() {
     // get primary screens work area
     const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
     const shouldMaximize = screenWidth < defaultWindowWidth || screenHeight < defaultWindowHeight;
@@ -49,8 +42,12 @@ function createWindow() {
                 {
                     label: 'Open Project Storage Path',
                     click: async () => {
-                        // Use the shell module to open the defined path
-                        await shell.openPath(projectStoragePath);
+                        // Use the shell module to open defined path
+                        const desc = Object.getOwnPropertyDescriptor(ProjectDatabase.prototype, 'path');
+                        const pathGetter = desc?.get?.bind(projectDB) as () => string ?? (() => '');
+                        const path = attempt(pathGetter);
+                        if (!path) return;
+                        await shell.openPath(path);
                     }
                 },
                 { type: 'separator' },
@@ -128,6 +125,14 @@ function createWindow() {
     mainWindow.webContents.on('did-finish-load', () => {
         info('Renderer finished loading...');
 
+        if (store.get('firstTimeRunning')) {
+            info('First time running, sending first-time-running IPC and generating password...');
+            setInitialPassword();
+
+            mainWindow?.webContents.send('first-time-running', defaultDBPath);
+            // reset firstTimeRunning flag on initial modal close in case of program crash
+        }
+
         const timeSettings = store.get('timeSettings') as any;
         // Time management takes precedence over the simple "start on open" setting
         if (timeSettings?.enabled) {
@@ -140,7 +145,7 @@ function createWindow() {
     });
 }
 
-function createTray() {
+export function createTray() {
     // Create the tray icon
     tray = new Tray(iconPath);
 
@@ -163,85 +168,4 @@ function createTray() {
     tray.on('click', () => {
         mainWindow?.show();
     });
-}
-
-export function initApp() {
-    log.transports.console.level = false;
-    if (!gotTheLock) { // ensure single instance
-        app.quit();
-        return;
-    }
-    initUpdater();
-    if (require('electron-squirrel-startup')) {
-        app.quit();
-        return;
-    }
-
-
-    app.on('ready', () => {
-        initLogging();
-        // set stored theme
-        nativeTheme.themeSource = store.get('theme') as 'system' | 'light' | 'dark';
-
-        createWindow();
-        createTray();
-
-        initStore();
-        registerIPCHandlers();
-    });
-
-    app.on('before-quit', () => {
-        isQuitting = true;
-    });
-
-    app.on('window-all-closed', () => {
-        if (process.platform !== 'darwin') app.quit();
-    });
-
-    // will be emitted on the first instance when a second instance is launched
-    app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
-        if (mainWindow) {
-            if (!mainWindow.isVisible()) mainWindow.show();
-
-            if (mainWindow.isMinimized()) mainWindow.restore();
-
-            mainWindow.focus();
-        }
-    });
-
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
-    });
-}
-
-function initUpdater() {
-    if (!app.isPackaged) {
-        info('Development mode: Auto-updater disabled.');
-        return;
-    }
-
-    // 2. The updater only works on Windows
-    if (process.platform !== 'win32' && process.platform !== 'darwin') {
-        info('Non-Windows / MacOS platform: Auto-updater disabled.');
-        return;
-    }
-
-    const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
-    if (!fs.existsSync(updateExe)) {
-        info('Auto-updater disabled.');
-        return;
-    }
-
-    try {
-        updateElectronApp({
-            updateInterval: '1 hour',
-            logger: electron_log,
-        });
-    } catch (error) {
-        errorWithMessage('Failed to initialize auto-updater', error);
-    }
-}
-
-export function sendLog(message: string) {
-    if (mainWindow) mainWindow.webContents.send('log', message);
 }

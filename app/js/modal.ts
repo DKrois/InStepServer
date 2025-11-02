@@ -6,6 +6,10 @@ import { getTranslation } from './translate';
 const modalBackdrop = document.getElementById('modal-backdrop')!;
 const closeModalBtn = document.getElementById('close-modal-btn')!;
 
+const changePathBtn = document.getElementById('change-path-btn')!;
+const currentPathSpan = document.getElementById('current-project-path')!;
+const pathErrorMessage = document.getElementById('path-error-message')!;
+
 const shortcutOptionsContainer = document.getElementById('shortcut-options-container')!;
 const createStartMenuShortcutBtn = document.getElementById('create-startMenu-shortcut-btn')!;
 const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortcut-btn')!;
@@ -18,19 +22,48 @@ const confirmMessage = document.getElementById('confirm-message')!;
 const confirmBtnOk = document.getElementById('confirm-btn-ok')!;
 const confirmBtnCancel = document.getElementById('confirm-btn-cancel')!;
 
-export async function setupModal() {
-    const initialPassword = await window.api.getInitialPassword();
-    if (initialPassword) { // first open
-        initialPasswordDisplay.value = initialPassword;
+window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
+    const isWindows = await window.api.isWindows();
+    if (isWindows) shortcutOptionsContainer.classList.remove('hidden');
 
-        const isWindows = await window.api.isWindows();
-        if (isWindows) {
-            shortcutOptionsContainer.classList.remove('hidden');
+    currentPathSpan.textContent = defaultDBPath;
+    currentPathSpan.title = defaultDBPath;
+
+    modalBackdrop.classList.remove('hidden');
+});
+
+changePathBtn.addEventListener('click', async () => {
+    // Hide previous error message when user tries again
+    pathErrorMessage.classList.add('hidden');
+    const result = await window.api.setProjectDataPath(currentPathSpan.textContent ?? undefined);
+
+    // show toast if cancelled
+    if (result.code === 'user-canceled') showTranslatedToast('cancelled');
+
+    if (result.success) {
+        // Update UI with new path
+        currentPathSpan.textContent = result.path;
+        currentPathSpan.title = result.path;
+
+        // only show additional toast if not cancelled
+        if (!result.code) showTranslatedToast('toastPathUpdated');
+        pathErrorMessage.textContent = '';
+    } else { // not writeable (admin perms, ...)
+        switch (result.code) {
+            case 'permission-denied':
+                showTranslatedToast('toastPathError', undefined, 'error');
+
+                pathErrorMessage.textContent = getTranslation('pathPermissionError');
+                pathErrorMessage.classList.remove('hidden');
+                break;
+
+            default:
+                showTranslatedToast('toastUnknownError', undefined, 'error');
+                break;
         }
 
-        modalBackdrop.classList.remove('hidden');
     }
-}
+});
 
 createStartMenuShortcutBtn.addEventListener('click', async () => {
     const success = await window.api.createStartMenuShortcut();
@@ -46,6 +79,10 @@ createDesktopShortcutsBtn.addEventListener('click', async () => {
 closeModalBtn.addEventListener('click', () => {
     modalBackdrop.classList.remove('hidden');
     initialPasswordDisplay.value = ''; // clear password
+
+    // tell main process that the modal is closed → init db using chosen path
+    window.api.closeInitialModal();
+
     modalBackdrop.addEventListener('transitionend', () => {
         modalBackdrop.classList.add('hidden');
     }, { once: true });
@@ -53,15 +90,15 @@ closeModalBtn.addEventListener('click', () => {
 
 // --- Confirmation dialog ---
 export function showConfirmation(messageKey: string, titleKey: string = 'confirmTitle'): Promise<boolean> {
-    // Set the text from translation keys
+    // set text from translation keys
     confirmTitle.textContent = getTranslation(titleKey);
     confirmMessage.textContent = getTranslation(messageKey);
 
-    // Show the modal
+    // show modal
     confirmModal.classList.remove('hidden');
 
     return new Promise((resolve) => {
-        // Define cleanup function to remove listeners
+        // define cleanup function to remove listeners
         const cleanup = () => {
             confirmModal.classList.add('hidden');
             confirmBtnOk.removeEventListener('click', handleOk);

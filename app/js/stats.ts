@@ -11,9 +11,9 @@ const projectsAmountDisplay = document.getElementById('projects-amount')!;
 const filesAmountDisplay = document.getElementById('files-amount')!;
 const storageUsed = document.getElementById('storage-used')!;
 
-// const resourceCount = document.getElementById('resource-count')!;
+window.api.onProjectDBInitialized(refreshStats);
 
-export async function refreshStats() {
+async function refreshStats() {
     const stats = await window.api.getStats();
     const { projectsCount, fileCount, sizeUsed } = stats;
 
@@ -23,6 +23,7 @@ export async function refreshStats() {
 }
 
 refreshStatsBtn.addEventListener('click', refreshStats);
+
 toggleStatsBtn.addEventListener('click', () => {
     const isVisible = statsSidebar.classList.toggle('visible');
     document.body.classList.toggle('stats-visible', isVisible);

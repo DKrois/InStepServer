@@ -1,8 +1,12 @@
-import { app } from 'electron';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { dbPath } from '../config.json';
-import { errorWithMessage } from './util.js';
+import { userDataPath } from './app/app';
+import { mainWindow } from './app/window';
+import { errorWithMessage, info, warn, writeJSON } from './util.js';
+
+export const defaultDBPath = join(userDataPath, 'data');
+
+let _db: ProjectDatabase | null = null;
 
 export interface DirectoryStats {
     directoryCount: number;
@@ -10,7 +14,7 @@ export interface DirectoryStats {
     size: number;
 }
 
-class ProjectDatabase {
+export class ProjectDatabase {
     constructor(private dbPath: string) {
         fs.mkdir(dbPath, { recursive: true }); // nothing happens if dir already exists
     }
@@ -22,7 +26,7 @@ class ProjectDatabase {
     private _createPath(id: number, version?: number, ...additional: string[]): string {
         const base = join(this.dbPath, id.toString());
         const fullPath = version !== null && version !== undefined ? join(base, `v${version}`) : base;
-        return additional.length ? fullPath : join(fullPath, ...additional);
+        return additional.length ? join(fullPath, ...additional) : fullPath;
     }
 
     /**
@@ -49,7 +53,7 @@ class ProjectDatabase {
         const versionPath = this._createPath(id, version);
         const newPath = join(versionPath, file.originalname); // Use originalname as filename
 
-        // Multer saves to a temporary path, so we move it to the final destination.
+        // Multer saves to a temporary path, so move it to the final destination
         await fs.rename(file.path, newPath);
     }
 
@@ -70,7 +74,7 @@ class ProjectDatabase {
      * @param version version to read. If absent, uses most recent one
      */
     async get(id: number, version?: number) {
-        const v = version ? `v${version}.json` : (await this.getLatestVersion(id))?.path;
+        const v = version ? `v${version}` : (await this.getLatestVersion(id))?.path;
         if (!v) throw new Error(`${id}/@latest not found.`);
 
         const filePath = this._createPath(id, version, 'data.json');
@@ -167,16 +171,33 @@ class ProjectDatabase {
     }
 }
 
-/**
- * Safely writes a JSON file at `path`.
- * This avoids corrupted or half-written files in case of a crash.
- */
-async function writeJSON(path: string, data: any) {
-    const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
 
-    const tmp = `${path}.tmp`;
-    await fs.writeFile(tmp, dataStr, { encoding: 'utf8'});
-    await fs.rename(tmp, path);
+/**
+ * Initializes the database with a specific path. This should only be
+ * called once at startup from the main process.
+ * @param path absolute path to the project data folder
+ */
+export function initDB(path: string) {
+    if (_db) {
+        warn('Database has already been initialized.');
+        return;
+    }
+    info(`Initializing database at path: ${path}`);
+    _db = new ProjectDatabase(path);
+
+    // tell the renderer process that the database is initialized → request stats
+    mainWindow?.webContents.send('project-db-initialized');
 }
 
-export const projectDB = new ProjectDatabase(join(app.getPath('userData'), dbPath));
+export function isDBInitialized(): boolean {
+    return _db !== null;
+}
+
+export const projectDB: ProjectDatabase = new Proxy({} as ProjectDatabase, {
+    get(_, prop) {
+        if (!_db) {
+            throw new Error('Database has not been initialized.');
+        }
+        return _db[prop as keyof ProjectDatabase];
+    }
+});
