@@ -1,0 +1,162 @@
+/* --- Server Status Card --- */
+#server-status-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+#port-input {
+    margin: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 80px;
+}
+
+/* remove number input spinners */
+#port-input::-webkit-outer-spin-button,
+#port-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+/* --- Security Card --- */
+#unlock-section {
+    margin-bottom: 20px;
+}
+
+.password-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    padding: 8px 40px 8px 8px; /* space for icon */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    flex-grow: 1;
+}
+
+/* show/hide password toggle */
+.password-toggle {
+    position: absolute;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    background: none;
+    box-shadow: none;
+    opacity: 0.6;
+}
+.password-toggle img {
+    width: 20px;
+    height: 20px;
+}
+
+.password-toggle:not(.password-shown) .eye-open-icon,
+.password-toggle.password-shown .eye-closed-icon {
+    display: block;
+}
+.password-toggle.password-shown .eye-open-icon,
+.password-toggle:not(.password-shown) .eye-closed-icon {
+    display: none;
+}
+
+
+/* --- Time Management Card --- */
+input[type="time"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+input[type="time"]:focus {
+    outline: none;
+}
+
+.time-countdown {
+    pointer-events: none; /* decorative only */
+}
+
+
+/* --- Path Configuration --- */
+.path-config-section {
+    margin: 20px 0;
+}
+
+.path-config-section h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.path-config-section p {
+    font-size: 0.9em;
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.path-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 8px 12px;
+}
+
+#current-project-path {
+    flex-grow: 1;
+    font-family: monospace;
+    white-space: nowrap; /* handle long paths */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: ltr;
+    text-align: left;
+    opacity: 0.9;
+}
+
+#change-path-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 0.9em;
+}
+
+
+/* --- Toast Notifications --- */
+#toast-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column-reverse; /* new toasts at bottom */
+    align-items: center;
+    padding-bottom: 80px; /* above footer */
+    pointer-events: none; /* container not interactive */
+    z-index: 1000;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    font-weight: 500;
+    pointer-events: auto; /* toasts are interactive */
+    opacity: 0; /* animation start */
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1; /* animation end */
+    transform: translateY(0);
+}

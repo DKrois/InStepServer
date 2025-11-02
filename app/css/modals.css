@@ -1,0 +1,131 @@
+/* --- Generic Modal --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* backdrop */
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+
+    opacity: 0; /* animation start */
+    visibility: hidden;
+    transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
+}
+
+.modal-dialog {
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-buttons {
+    justify-content: flex-end;
+}
+
+/* Modal animation */
+.modal.opening {
+    opacity: 1;
+    visibility: visible;
+}
+.modal.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.modal.closing {
+    opacity: 0;
+    visibility: visible; /* keep visible so fade-out can play */
+}
+
+/* --- Initial Modal --- */
+#initial-modal {
+    transition: none;
+}
+#initial-modal.closing {
+    transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
+}
+
+.password-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+#initial-password-display {
+    flex-grow: 1;
+    font-family: monospace;
+    font-size: 1.1em;
+    padding: 6px 8px;
+    border-radius: 5px;
+    border: 1px solid;
+    height: 35px;
+    box-sizing: border-box;
+}
+
+#copy-initial-password-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+
+/* --- Shortcut Options section --- */
+#shortcut-options-container .button-group {
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+#shortcut-options-container button {
+    width: fit-content;
+}
+
+
+/* --- Time Schedule Modal --- */
+.weekday-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.weekday-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.weekday-row:last-child {
+    border-bottom: none;
+}
+
+.weekday-name {
+    flex-basis: 100px;
+    flex-shrink: 0;
+}
+
+.weekday-mode-select {
+    padding: 8px;
+    border-radius: 5px;
+}
+
+
+/* --- Confirmation Modal --- */
+#confirm-modal {
+    z-index: 200; /* above other modals */
+}
+
+#confirm-message {
+    margin: 20px 0;
+    line-height: 1.5;
+}
+
+
+/* --- Utility --- */
+
+.hidden {
+    display: none !important;
+}

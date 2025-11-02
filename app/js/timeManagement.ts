@@ -1,5 +1,5 @@
 import { showTranslatedToast } from './logs';
-import { showConfirmation } from './modal';
+import { closeModal, openModal, showConfirmation } from './modal';
 import { getTranslation } from './translate';
 
 const countdownContainer = document.getElementById('time-countdown')!;
@@ -13,7 +13,7 @@ const advancedBtn = document.getElementById('time-advanced-btn')!;
 const saveBtn = document.getElementById('time-save-btn')!;
 const clearBtn = document.getElementById('time-clear-btn')!;
 
-const modalBackdrop = document.getElementById('time-modal-backdrop')!;
+const timeModalBackdrop = document.getElementById('time-modal-backdrop')!;
 const weekdayList = document.getElementById('weekday-list')!;
 
 const modalSaveBtn = document.getElementById('time-modal-save-btn')!;
@@ -132,7 +132,7 @@ function handleSave() {
     timeSettings = newSettings;
 
     showTranslatedToast('toastTimeSettingsSaved');
-    modalBackdrop.classList.add('hidden');
+    closeModal(timeModalBackdrop);
     startOrUpdateCountdown();
 }
 
@@ -293,14 +293,14 @@ function updateCountdown() {
 }
 
 // --- Event Listeners ---
-advancedBtn.addEventListener('click', () => modalBackdrop.classList.remove('hidden'));
+advancedBtn.addEventListener('click', () => openModal(timeModalBackdrop));
 modalCancelBtn.addEventListener('click', () => {
     populateUI(lastSavedSettings); // Revert to last saved state
-    modalBackdrop.classList.add('hidden');
+    closeModal(timeModalBackdrop);
 });
 saveBtn.addEventListener('click', handleSave);
 modalSaveBtn.addEventListener('click', handleSave);
-clearBtn.addEventListener('click', () => handleClear(true));
+clearBtn.addEventListener('click', () => handleClear(true)); // auto-save if not within modal
 modalClearBtn.addEventListener('click', () => handleClear());
 
 weekdayList.addEventListener('change', handleWeekdayInteraction);

@@ -67,7 +67,6 @@ body {
     left: 10px; /* Position it 10px from the left edge of the wrapper */
     width: 20px; /* Define a size for the icon */
     height: 20px;
-    /* VERY IMPORTANT: This makes clicks go "through" the icon to the select element below */
     pointer-events: none;
 }
 

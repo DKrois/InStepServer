@@ -3,8 +3,8 @@ import { getTranslation } from './translate';
 
 // Modal, confirmation
 
-const modalBackdrop = document.getElementById('modal-backdrop')!;
-const closeModalBtn = document.getElementById('close-modal-btn')!;
+const initialModalBackdrop = document.getElementById('initial-modal')!;
+const closeInitialModalBtn = document.getElementById('close-modal-btn')!;
 
 const changePathBtn = document.getElementById('change-path-btn')!;
 const currentPathSpan = document.getElementById('current-project-path')!;
@@ -29,16 +29,14 @@ window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
     currentPathSpan.textContent = defaultDBPath;
     currentPathSpan.title = defaultDBPath;
 
-    modalBackdrop.classList.remove('hidden');
+    initialModalBackdrop.classList.remove('hidden');
+    initialModalBackdrop.classList.add('visible');
 });
 
 changePathBtn.addEventListener('click', async () => {
     // Hide previous error message when user tries again
     pathErrorMessage.classList.add('hidden');
     const result = await window.api.setProjectDataPath(currentPathSpan.textContent ?? undefined);
-
-    // show toast if cancelled
-    if (result.code === 'user-canceled') showTranslatedToast('cancelled');
 
     if (result.success) {
         // Update UI with new path
@@ -76,17 +74,40 @@ createDesktopShortcutsBtn.addEventListener('click', async () => {
     else showTranslatedToast('toastShortcutFailed', { type: 'Desktop' });
 });
 
-closeModalBtn.addEventListener('click', () => {
-    modalBackdrop.classList.remove('hidden');
+closeInitialModalBtn.addEventListener('click', () => {
+    initialModalBackdrop.classList.remove('hidden');
     initialPasswordDisplay.value = ''; // clear password
 
     // tell main process that the modal is closed → init db using chosen path
     window.api.closeInitialModal();
 
-    modalBackdrop.addEventListener('transitionend', () => {
-        modalBackdrop.classList.add('hidden');
-    }, { once: true });
+    closeModal(initialModalBackdrop);
 });
+
+export function openModal(el: HTMLElement) {
+    el.classList.remove('hidden');
+    el.classList.remove('closing');
+
+    requestAnimationFrame(() => {
+        el.classList.add('opening');
+    });
+
+    // after animation ends → lock state to visible
+    el.addEventListener('transitionend', () => {
+        el.classList.remove('opening');
+        el.classList.add('visible');
+    }, { once: true });
+}
+
+export function closeModal(el: HTMLElement) {
+    el.classList.remove('opening');
+    el.classList.remove('visible');
+    el.classList.add('closing');
+    el.addEventListener('transitionend', () => {
+        el.classList.remove('closing');
+        el.classList.add('hidden');
+    }, { once: true });
+}
 
 // --- Confirmation dialog ---
 export function showConfirmation(messageKey: string, titleKey: string = 'confirmTitle'): Promise<boolean> {
@@ -95,12 +116,12 @@ export function showConfirmation(messageKey: string, titleKey: string = 'confirm
     confirmMessage.textContent = getTranslation(messageKey);
 
     // show modal
-    confirmModal.classList.remove('hidden');
+    openModal(confirmModal);
 
     return new Promise((resolve) => {
         // define cleanup function to remove listeners
         const cleanup = () => {
-            confirmModal.classList.add('hidden');
+            closeModal(confirmModal);
             confirmBtnOk.removeEventListener('click', handleOk);
             confirmBtnCancel.removeEventListener('click', handleCancel);
         };

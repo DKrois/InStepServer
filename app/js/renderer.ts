@@ -4,8 +4,12 @@ import { setInitialLanguage, updateTheme } from './translate';
 import './security'; // to register event listeners
 import './stats';
 
-import '../css/styles.css';
 import '../css/theme.css';
+// import '../css/styles.css';
+import '../css/layout.css';
+import '../css/components.css';
+import '../css/features.css';
+import '../css/modals.css';
 
 window.addEventListener('DOMContentLoaded', async () => {
     // update to stored settings

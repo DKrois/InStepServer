@@ -1,0 +1,143 @@
+/* --- Core Layout --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* prevent page scroll */
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+#app-body {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.main-content {
+    flex-grow: 1;
+    min-width: 0;
+    overflow-y: auto; /* allow scroll */
+    padding: 20px 20px 80px;
+    transition: padding-bottom 0.3s ease-in-out;
+}
+
+/* expand content padding when logs are visible */
+body.logs-visible .main-content {
+    padding-bottom: 240px;
+}
+
+
+/* --- Top Bar --- */
+.top-bar {
+    height: 61px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+.top-bar h1 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+
+/* --- Sidebar (Statistics) --- */
+.sidebar {
+    width: 0; /* starts hidden */
+    transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
+    flex-shrink: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    white-space: nowrap;
+    padding: 20px 0;
+    box-sizing: border-box;
+}
+
+/* reveal sidebar */
+body.stats-visible .sidebar {
+    width: max(27%, 250px);
+    padding: 20px;
+    white-space: normal;
+}
+
+.statistics {
+    padding: 20px;
+    line-height: 26px;
+    min-width: max(27%, 250px);
+}
+
+
+/* --- Logs Section --- */
+.logs-section {
+    position: fixed;
+    bottom: 60px; /* on top of footer */
+    left: 0;
+    right: 0;
+    height: max(30%, 160px);
+    padding: 10px 20px;
+    box-sizing: border-box;
+    display: flex;
+    z-index: 10;
+    transition: right 0.3s ease-in-out; /* resize animation */
+}
+
+/* shrink logs section when stats sidebar is open */
+body.stats-visible .logs-section {
+    right: max(27%, 250px);
+}
+
+#logs-container {
+    display: flex;
+    width: 100%;
+    border-radius: 10px;
+}
+
+#logs-output {
+    flex-grow: 1;
+    margin: 0;
+    border-radius: 5px;
+    overflow-y: auto;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+
+/* --- Footer --- */
+.app-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid;
+    z-index: 20; /* overlap sidebar */
+    flex-shrink: 0;
+}
+
+.footer-left, .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
