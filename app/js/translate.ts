@@ -59,12 +59,7 @@ themeSwitcher.addEventListener('click', async () => {
     updateTheme(isDarkMode);
 });
 
-export async function setInitialTheme() {
-    const isDarkMode = await window.api.getInitialTheme();
-    updateTheme(isDarkMode);
-}
-
-function updateTheme(isDarkMode: boolean) {
+export function updateTheme(isDarkMode: boolean) {
     document.body.classList.toggle('dark-mode', isDarkMode);
     document.body.classList.toggle('light-mode', !isDarkMode);
     // button icon switching handled by css

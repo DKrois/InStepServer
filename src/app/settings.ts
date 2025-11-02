@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { app, dialog, ipcMain } from 'electron';
+import { app, dialog, ipcMain, nativeTheme } from 'electron';
 // @ts-ignore
 import Store from 'electron-store';
 import crypto from 'node:crypto';
@@ -55,9 +55,9 @@ export function initStore() {
 
 export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', () => {
-        // don't send passwordHash
+        // don't send passwordHash but include whether to use dark mode or not
         const { passwordHash, ...settings } = store.store;
-        return settings;
+        return { ...settings, isDarkMode: nativeTheme.shouldUseDarkColors };
     });
 
     ipcMain.on('save-setting', (_event, { key, value }) => store.set(key, value));

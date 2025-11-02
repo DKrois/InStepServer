@@ -2,7 +2,6 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 const api = {
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
-    getInitialTheme: (): Promise<boolean> => ipcRenderer.invoke('get-initial-theme'),
 
     onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
         // event can only happen once

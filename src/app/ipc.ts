@@ -31,8 +31,6 @@ function registerThemeIPC() {
 
         return nativeTheme.shouldUseDarkColors;
     });
-
-    ipcMain.handle('get-initial-theme', () => nativeTheme.shouldUseDarkColors);
 }
 
 function registerServerIPC() {

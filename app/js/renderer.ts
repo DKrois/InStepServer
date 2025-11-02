@@ -1,8 +1,8 @@
 import { setInitialPort } from './serverStatus';
 import { setInitialTimeSettings } from './timeManagement';
-import { setInitialLanguage, setInitialTheme } from './translate';
+import { setInitialLanguage, updateTheme } from './translate';
 import './security'; // to register event listeners
-import './stats'
+import './stats';
 
 import '../css/styles.css';
 import '../css/theme.css';
@@ -13,7 +13,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     setInitialPort(settings.port);
     setInitialLanguage(settings.language);
-    setInitialTheme();
+    updateTheme(settings.isDarkMode);
     setInitialTimeSettings(settings.timeSettings);
 
     // refresh stats on load → done in stats.ts after projectDB init
