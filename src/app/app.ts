@@ -39,7 +39,8 @@ export function initApp() {
         initStore();
         // db init
         // first run already handled by ipc / handleInitialModalClosed
-        if (store.get('projectDataPath')) initDB(store.get('projectDataPath'));
+        const projectDataPath = store.get('projectDataPath');
+        if (projectDataPath) initDB(projectDataPath);
 
         registerIPCHandlers();
     });

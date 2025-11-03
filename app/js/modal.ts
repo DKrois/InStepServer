@@ -6,6 +6,9 @@ import { getTranslation } from './translate';
 const initialModalBackdrop = document.getElementById('initial-modal')!;
 const closeInitialModalBtn = document.getElementById('close-modal-btn')!;
 
+const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
+const copyInitialPasswordBtn = document.getElementById('copy-initial-password-btn')!;
+
 const changePathBtn = document.getElementById('change-path-btn')!;
 const currentPathSpan = document.getElementById('current-project-path')!;
 const pathErrorMessage = document.getElementById('path-error-message')!;
@@ -13,8 +16,6 @@ const pathErrorMessage = document.getElementById('path-error-message')!;
 const shortcutOptionsContainer = document.getElementById('shortcut-options-container')!;
 const createStartMenuShortcutBtn = document.getElementById('create-startMenu-shortcut-btn')!;
 const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortcut-btn')!;
-
-const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
 
 const confirmModal = document.getElementById('confirm-modal')!;
 const confirmTitle = document.getElementById('confirm-title')!;
@@ -26,11 +27,18 @@ window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
     const isWindows = await window.api.isWindows();
     if (isWindows) shortcutOptionsContainer.classList.remove('hidden');
 
+    initialPasswordDisplay.value = await window.api.getInitialPassword();
+
     currentPathSpan.textContent = defaultDBPath;
     currentPathSpan.title = defaultDBPath;
 
     initialModalBackdrop.classList.remove('hidden');
     initialModalBackdrop.classList.add('visible');
+});
+
+copyInitialPasswordBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(initialPasswordDisplay.value);
+    showTranslatedToast('toastPasswordCopied');
 });
 
 changePathBtn.addEventListener('click', async () => {

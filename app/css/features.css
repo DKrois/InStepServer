@@ -7,23 +7,30 @@
     flex-shrink: 0;
 }
 
-#port-input {
-    margin: 10px;
+/* --- Time Management Card --- */
+input[type="time"] {
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    width: 80px;
 }
 
-/* remove number input spinners */
-#port-input::-webkit-outer-spin-button,
-#port-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+input[type="time"]:focus {
+    outline: none;
+}
+
+.time-countdown {
+    pointer-events: none; /* decorative only */
 }
 
 
 /* --- Security Card --- */
+#security-card .requires-unlock {
+    display: block;
+}
+#security-card.is-locked .requires-unlock {
+    display: none;
+}
+
 #unlock-section {
     margin-bottom: 20px;
 }
@@ -67,65 +74,37 @@
     display: none;
 }
 
-
-/* --- Time Management Card --- */
-input[type="time"] {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-input[type="time"]:focus {
-    outline: none;
-}
-
-.time-countdown {
-    pointer-events: none; /* decorative only */
-}
-
-
-/* --- Path Configuration --- */
-.path-config-section {
-    margin: 20px 0;
-}
-
-.path-config-section h3 {
+/* Session config section */
+#session-duration-section h3 {
     margin-top: 0;
     margin-bottom: 5px;
 }
 
-.path-config-section p {
+#session-duration-section p {
     font-size: 0.9em;
     opacity: 0.8;
     line-height: 1.5;
     margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.duration-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 15px;
     margin-bottom: 15px;
 }
 
-.path-display-wrapper {
+.duration-input-group {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    padding: 8px 12px;
+    flex-direction: column;
 }
 
-#current-project-path {
-    flex-grow: 1;
-    font-family: monospace;
-    white-space: nowrap; /* handle long paths */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    direction: ltr;
-    text-align: left;
+.duration-input-group label {
+    font-size: 0.85em;
+    font-weight: 500;
+    margin-bottom: 5px;
     opacity: 0.9;
-}
-
-#change-path-btn {
-    flex-shrink: 0;
-    padding: 6px 12px;
-    font-size: 0.9em;
 }
 
 

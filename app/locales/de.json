@@ -1,23 +1,54 @@
 {
   "title": "Server-Bedienfeld",
   "toggleTheme": "Theme wechseln",
+  "toastLangSwitch": "Sprache auf {{lang}} geändert",
+
 
   "serverControls": "Serversteuerung",
   "startServer": "Server starten",
   "stopServer": "Server anhalten",
   "portLabel": "Port:",
-  "requireStop": "Server muss gestoppt sein, um Port zu ändern",
+
+  "restartServerInfo": "Bitte starten Sie den Server neu, damit Änderungen wirksam werden.",
 
   "serverStarting": "Starten...",
   "serverStopping": "Anhalten...",
   "statusRunning": "Server läuft",
   "statusStopped": "Server gestoppt",
 
+  "toastServerStarted": "Server auf Port {{port}} gestartet",
+  "toastServerStopped": "Server erfolgreich angehalten",
+  "toastInvalidPort": "Ungültige Portnummer",
+
+
   "security": "Sicherheit",
   "currentPassword": "Aktuelles Passwort:",
   "newPassword": "Neues Passwort:",
   "unlock": "Entsperren",
+  "lock": "Sperren",
   "save": "Speichern",
+  "togglePassword": "Passwort anzeigen/verbergen",
+
+  "toastPasswordIncorrect": "Falsches Passwort",
+  "toastPasswordEmpty": "Passwort darf nicht leer sein",
+  "toastPasswordUpdated": "Passwort erfolgreich aktualisiert",
+
+  "initialPasswordTitle": "Initialpasswort",
+  "initialPasswordDesc": "Dies ist das erste Mal, dass Sie die Anwendung ausführen. Bitte kopieren und speichern Sie dieses zufällig generierte Passwort an einem sicheren Ort.",
+  "copyPassword": "In die Zwischenablage kopieren",
+  "toastPasswordCopied": "Passwort in die Zwischenablage kopiert",
+
+
+  "sessionDurationTitle": "Sitzungsdauer",
+  "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",
+  "years": "Jahre",
+  "days": "Tage",
+  "hours": "Stunden",
+  "minutes": "Minuten",
+
+  "toastDurationUpdated": "Sitzungsdauer aktualisiert",
+  "toastInvalidDuration": "Ungültige Dauer eingegeben",
+
 
   "statistics": "Statistiken",
   "uptime": "Laufzeit",
@@ -25,23 +56,27 @@
   "projectsAmount": "Anzahl an Projekten",
   "filesAmount": "Anzahl an Dateien",
   "storageSize": "Belegter Speicher",
-  "refresh": "Aktualisieren",
 
+  "refresh": "Aktualisieren",
   "showStatistics": "Statistiken anzeigen",
   "hideStatistics": "Statistiken ausblenden",
 
+
+  "logs": "Protokolle",
   "showLogs": "Protokolle anzeigen",
   "hideLogs": "Protokolle ausblenden",
   "clearLogs": "Protokolle leeren",
 
+
   "timeManagement": "Zeitmanagement",
-  "countdownLabel": "Server {{nextAction}}",
-  "startup": "start",
-  "shutdown": "shutdown",
+  "countdownLabel": "Server-{{nextAction}}",
+  "startup": "Start",
+  "shutdown": "Shutdown",
   "enableAt": "Einschalten um:",
   "disableAt": "Ausschalten um:",
   "advanced": "Erweitert",
   "clear": "Löschen",
+
   "advancedTimeSettings": "Erweiterte Zeiteinstellungen",
   "customTime": "Benutzerdefiniert",
   "wholeday": "Ganztägig",
@@ -54,11 +89,10 @@
   "saturday": "Samstag",
   "sunday": "Sonntag",
 
-  "initialPasswordTitle": "Initialpasswort",
-  "initialPasswordDesc": "Dies ist das erste Mal, dass Sie die Anwendung ausführen. Bitte kopieren und speichern Sie dieses zufällig generierte Passwort an einem sicheren Ort.",
-  "copyPassword": "In die Zwischenablage kopieren",
-  "close": "Schließen",
-  "togglePassword": "Passwort anzeigen/verbergen",
+  "confirmClearTimeSettings": "Sind Sie sicher, dass Sie alle Zeitmanagement-Einstellungen löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+  "toastTimeSettingsSaved": "Zeiteinstellungen gespeichert",
+  "toastTimeSettingsCleared": "Zeiteinstellungen gelöscht",
+
 
   "projectPathTitle": "Projektspeicherpfad",
   "projectPathDesc": "Wählen Sie ein Verzeichnis, in dem alle Projektdaten gespeichert werden.",
@@ -66,35 +100,21 @@
   "changePath": "Ändern...",
   "pathPermissionError": "Die Anwendung hat keine Berechtigung, in das ausgewählte Verzeichnis zu schreiben. Bitte wählen Sie einen anderen Ordner.",
 
-  "shortcutsTitle": "Shortcuts erstellen",
-  "createStartMenuShortcut": "Startmenü-Shortcut erstellen",
-  "createDesktopShortcut": "Desktop-Shortcut erstellen",
+  "toastPathUpdated": "Speicherpfad erfolgreich aktualisiert",
+  "toastPathError": "Speicherpfad konnte nicht aktualisiert werden",
 
+
+  "shortcutsTitle": "Verknüpfungen erstellen",
+  "createStartMenuShortcut": "Startmenü-Verknüpfung erstellen",
+  "createDesktopShortcut": "Desktop-Verknüpfung erstellen",
+  "toastShortcutCreated": "{{type}}-Verknüpfung erstellt",
+  "toastShortcutFailed": "Erstellen von {{type}}-Verknüpfung fehlgeschlagen",
+
+
+  "close": "Schließen",
   "confirmTitle": "Sind Sie sicher?",
   "ok": "OK",
   "cancel": "Abbrechen",
   "cancelled": "Abgebrochen",
-
-  "toastLangSwitch": "Sprache auf {{lang}} geändert",
-
-  "toastServerStarted": "Server auf Port {{port}} gestartet",
-  "toastServerStopped": "Server erfolgreich angehalten",
-  "toastInvalidPort": "Ungültige Portnummer",
-
-  "toastTimeSettingsSaved": "Zeiteinstellungen erfolgreich gespeichert",
-  "confirmClearTimeSettings": "Sind Sie sicher, dass Sie alle Zeitmanagement-Einstellungen löschen möchten? Dies kann nicht rückgängig gemacht werden.",
-  "toastTimeSettingsCleared": "Zeiteinstellungen wurden gelöscht",
-
-  "toastPasswordIncorrect": "Falsches Passwort",
-  "toastPasswordEmpty": "Neues Passwort darf nicht leer sein",
-  "toastPasswordUpdated": "Passwort erfolgreich aktualisiert",
-  "toastPasswordCopied": "Passwort in die Zwischenablage kopiert",
-
-  "toastPathUpdated": "Speicherpfad erfolgreich aktualisiert",
-  "toastPathError": "Speicherpfad konnte nicht aktualisiert werden",
-
-  "toastShortcutCreated": "{{type}}-Shortcut erstellt",
-  "toastShortcutFailed": "Erstellen von {{type}}-Shortcut fehlgeschlagen",
-
-  "toastUnknownError": "Ein unbekannter Fehler ist aufgetreten."
+  "toastUnknownError": "Ein unbekannter Fehler ist aufgetreten"
 }

@@ -8,6 +8,7 @@ body.light-mode {
     --button-text: #050505;
     --primary-button-bg: #1877f2;
     --primary-button-text: #ffffff;
+    --secondary-button-bg: color-mix(in srgb, var(--primary-button-bg) 70%, var(--button-bg));
 }
 
 /* Dark Mode */
@@ -20,6 +21,7 @@ body.dark-mode {
     --button-text: #e4e6eb;
     --primary-button-bg: #2d88ff;
     --primary-button-text: #ffffff;
+    --secondary-button-bg: color-mix(in srgb, var(--primary-button-bg) 65%, var(--button-bg));
 }
 
 /* Apply variables */
@@ -151,6 +153,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .password-wrapper input:focus, #initial-password-display:focus {
     outline: none;
     border-color: var(--accent-color);
+}
+
+#save-security-btn {
+    background-color: var(--secondary-button-bg);
+    color: var(--primary-button-text);
 }
 
 .path-display-wrapper {

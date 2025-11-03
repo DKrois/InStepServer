@@ -14,7 +14,10 @@ const api = {
 
     getInitialPassword: (): Promise<string> => ipcRenderer.invoke('get-initial-password'),
     verifyPassword: (password: string): Promise<boolean> => ipcRenderer.invoke('verify-password', password),
-    updatePassword: (oldPassword: string, newPassword: string): Promise<{ success: boolean, error?: string }> => ipcRenderer.invoke('update-password', oldPassword, newPassword),
+    updatePassword: (oldPassword: string, newPassword: string): Promise<{ success: boolean }> => ipcRenderer.invoke('update-password', oldPassword, newPassword),
+
+    getSessionDuration: (): Promise<number> => ipcRenderer.invoke('get-session-duration'),
+    updateSessionDuration: (ms: number, password: string): Promise<{ success: boolean }> => ipcRenderer.invoke('update-session-duration', ms, password),
 
     startServer: (port: number) => ipcRenderer.send('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),

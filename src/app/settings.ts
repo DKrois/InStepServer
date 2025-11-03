@@ -5,7 +5,7 @@ import Store from 'electron-store';
 import crypto from 'node:crypto';
 import { defaultDBPath } from '../database';
 import { handleStartServer, handleStopServer, manualTimeOverride, serverStartTime, setManualTimeOverride } from './ipc';
-import { canWriteToPath, info } from '../util';
+import { canWriteToPath, info, warn } from '../util';
 
 let schedulerInterval: NodeJS.Timeout | null = null;
 let lastActionWasStart = false;
@@ -34,7 +34,8 @@ export const store = new Store({
         },
         firstTimeRunning: true,
         passwordHash: '', // set on startup or update ipc
-        sessionSecret: '',
+        sessionSecret: '', // set on server init
+        sessionMaxAge: 1000 * 60 * 60 * 24 * 30, // 30d
         projectDataPath: '', // set on initial modal close
     }
 });
@@ -53,20 +54,36 @@ export function initStore() {
 
 // --- Settings / time scheduling ---
 
+function getUnprotectedProperties() {
+    const { passwordHash, sessionSecret, sessionMaxAge, ...others } = store.store;
+    return others;
+}
+
 export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', () => {
-        // don't send passwordHash but include whether to use dark mode or not
-        const { passwordHash, ...settings } = store.store;
+        // don't send passwordHash and sessionSecret
+        const settings = getUnprotectedProperties();
+
+        // include whether to use dark mode or not
         return { ...settings, isDarkMode: nativeTheme.shouldUseDarkColors };
     });
 
-    ipcMain.on('save-setting', (_event, { key, value }) => store.set(key, value));
+    ipcMain.on('save-setting', (_event, { key, value }) => {
+        // don't allow setting password, secret, ... through save-setting ipc (can be triggered through DevTools)
+        const unprotected = Object.keys(getUnprotectedProperties());
+        if (!unprotected.includes(key)) {
+            warn(`Attempted overwrite of protected property ${key}.`);
+            return;
+        }
 
-    ipcMain.on('save-time-settings', (_event, settings) => {
+        store.set(key, value);
+    });
+
+    ipcMain.on('save-time-settings', async (_event, settings) => {
         store.set('timeSettings', settings);
         setManualTimeOverride(false); // Saving new settings resets any manual override
-        checkSchedule(); // Immediately check the new schedule
-        if (settings.enabled) startScheduler();
+        await checkSchedule(); // Immediately check the new schedule
+        if (settings.enabled) await startScheduler();
     });
 
     ipcMain.handle('set-project-data-path', (_event, currentlySelectedPath?: string) => handleUpdatePath(currentlySelectedPath));
@@ -98,7 +115,7 @@ async function handleUpdatePath(currentlySelected?: string): Promise<{ success: 
     }
 }
 
-function checkSchedule() {
+async function checkSchedule() {
     const settings = store.get('timeSettings') as any;
 
     if (!settings?.enabled || manualTimeOverride) return;
@@ -142,7 +159,7 @@ function checkSchedule() {
         // Prevent re-triggering a stop command every minute
         if (lastActionWasStart) {
             info(`[Scheduler] Time matches. Stopping server.`);
-            handleStopServer();
+            await handleStopServer();
             lastActionWasStart = false;
         }
     }
@@ -153,14 +170,14 @@ function checkSchedule() {
     }
 }
 
-export function startScheduler() {
+export async function startScheduler() {
     info('Starting time settings scheduler...');
     if (schedulerInterval) clearInterval(schedulerInterval);
 
-    schedulerInterval = setInterval(checkSchedule, 5000); //60 * 1000); TODO
+    schedulerInterval = setInterval(checkSchedule, 20000); // once every 20s
 
     // Run once on startup as well
-    checkSchedule();
+    await checkSchedule();
 }
 
 // --- Password ---
@@ -172,8 +189,10 @@ export function registerSecurityIPC() {
     });
 
     ipcMain.handle('verify-password',  (_event, password) => verifyPassword(password));
-
     ipcMain.handle('update-password', async (_event, oldPassword, newPassword) => handleUpdatePassword(oldPassword, newPassword));
+
+    ipcMain.handle('get-session-duration', () => store.get('sessionMaxAge'));
+    ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
 }
 
 export function setInitialPassword() {
@@ -205,12 +224,20 @@ export function verifyPassword(password: string) {
 
 async function handleUpdatePassword(oldPassword: string, newPassword: string) {
     // First, verify the old password
-    if (!verifyPassword(oldPassword)) return { success: false, error: 'Incorrect current password.' };
+    if (!verifyPassword(oldPassword)) return { success: false };
 
     // If it matches, hash and save the new password
     const salt = await bcrypt.genSalt(10);
     const newHash = await bcrypt.hash(newPassword, salt);
     store.set('passwordHash', newHash);
 
+    return { success: true };
+}
+
+async function handleUpdateSessionDuration(durationMs: number, currentPassword: string) {
+    const isPasswordCorrect = await verifyPassword(currentPassword);
+    if (!isPasswordCorrect) return { success: false };
+
+    store.set('sessionMaxAge', durationMs);
     return { success: true };
 }

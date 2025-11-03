@@ -4,7 +4,7 @@ process.env.FORCE_COLOR = '1';
 
 import { initApp } from './app/app.js';
 import 'source-map-support/register';
-import { errorWithMessage, info } from './util.js';
+import { errorWithMessage, info, normalizeSize } from './util.js';
 
 /* DONE
  *
@@ -12,6 +12,7 @@ import { errorWithMessage, info } from './util.js';
  * Open existing one rather than new instance if shortcut clicked
  * implement security
  * options → change data path (startup modal → IPC after close to init db ?)
+ * organize files
  *
  */
 
@@ -19,13 +20,17 @@ import { errorWithMessage, info } from './util.js';
  *
  * translations
  *
+ * memory leak?
+ * test auto update
+ *
  * → require password for each time opening IMD / starting server? (set in options → "dropdown"?)
+ * test if change actually takes effect (→ restart server!)
+ *
+ * time: overnight & 'entire day' → only end, ...
  *
  */
 
 /* TODO
- *
- * restructure code (more files: css; documentation)
  *
  * Disable desktop shortcut by default ?
  * → electron-squirrel-startup, msi template...
@@ -50,6 +55,8 @@ import { errorWithMessage, info } from './util.js';
 
 async function main() {
     initApp();
+
+    // setInterval(() => console.log(normalizeSize(process.memoryUsage().heapUsed)), 1000)
 
     process.on('SIGINT', () => exit());
     process.on('SIGTERM', () => exit());

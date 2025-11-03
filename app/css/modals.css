@@ -113,6 +113,51 @@
 }
 
 
+/* --- Path Configuration --- */
+.path-config-section {
+    margin: 20px 0;
+}
+
+.path-config-section h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.path-config-section p {
+    font-size: 0.9em;
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.path-display-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 8px 12px;
+}
+
+#current-project-path {
+    flex-grow: 1;
+    font-family: monospace;
+    white-space: nowrap; /* handle long paths */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: ltr;
+    text-align: left;
+    opacity: 0.9;
+}
+
+#change-path-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 0.9em;
+}
+
+
 /* --- Confirmation Modal --- */
 #confirm-modal {
     z-index: 200; /* above other modals */

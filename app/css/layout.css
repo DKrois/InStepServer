@@ -31,6 +31,12 @@ body.logs-visible .main-content {
     padding-bottom: 240px;
 }
 
+hr {
+    border: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.2); /* Subtle line */
+    margin: 10px 0; /* Space above and below */
+}
+
 
 /* --- Top Bar --- */
 .top-bar {
@@ -54,6 +60,11 @@ body.logs-visible .main-content {
     display: flex;
     align-items: center;
     gap: 15px;
+}
+
+/* Generic right align helper */
+.ml-auto {
+    margin-left: auto;
 }
 
 

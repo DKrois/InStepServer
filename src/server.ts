@@ -10,6 +10,7 @@ import { userDataPath } from './app/app';
 import { store, verifyPassword } from './app/settings';
 import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, formatError, getOwnIPs, info, warn } from './util.js';
+import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
 
@@ -21,9 +22,10 @@ declare module 'express-session' {
 }
 
 let server: Server | null = null;
+let httpTerminator: HttpTerminator | null = null;
 export function initServer(port: number) {
     if (server) {
-        info('Server already running.');
+        warn('Server already running.');
         return false;
     }
 
@@ -32,6 +34,29 @@ export function initServer(port: number) {
         return false;
     }
 
+    const app = createExpressApp();
+    server = app.listen(port, '0.0.0.0', () => {
+        info(`Server listening on http://${getOwnIPs().pick}:${port}`);
+    });
+
+    httpTerminator = createHttpTerminator({ server });
+
+    return true;
+}
+
+export async function stopServer() {
+    if (!server) {
+        info('Server not running.');
+        return;
+    }
+
+    await httpTerminator?.terminate();
+    info('Server closed.');
+    server = null;
+    httpTerminator = null;
+}
+
+function createExpressApp() {
     const app = express();
     app.use(express.json());
 
@@ -45,7 +70,11 @@ export function initServer(port: number) {
         store: fileStore,
         resave: false,                                    // Don't save session if unmodified
         saveUninitialized: false,                         // Don't create session until something stored
-        cookie: { secure: false, httpOnly: true }         // secure: true if using HTTPS
+        cookie: {
+            secure: false, // true if using HTTPS
+            httpOnly: true,
+            maxAge: store.get('sessionMaxAge') || undefined, // sessions don't expire if sessionMaxAge is 0
+        }
     }));
 
     app.use('/', (req, res, next) => {
@@ -78,7 +107,7 @@ export function initServer(port: number) {
             path: req.originalUrl,
         });
     });
-    
+
     // unhandled error
     app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
         errorWithMessage('Unhandled http error', err);
@@ -89,23 +118,7 @@ export function initServer(port: number) {
         }
     });
 
-    server = app.listen(port, '0.0.0.0', () => {
-        info(`Server listening on http://${getOwnIPs().pick}:${port}`);
-    });
-
-    return true;
-}
-
-export function stopServer() {
-    if (!server) {
-        info('Server not running.');
-        return;
-    }
-
-    server.close(() => {
-        info('Server closed.');
-        server = null;
-    });
+    return app;
 }
 
 // --- Authentication Middleware ---

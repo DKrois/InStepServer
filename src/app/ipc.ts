@@ -39,9 +39,9 @@ function registerServerIPC() {
         handleStartServer(port);
     });
 
-    ipcMain.on('stop-server', () => {
+    ipcMain.on('stop-server', async () => {
         manualTimeOverride = true;
-        handleStopServer();
+        await handleStopServer();
     });
 }
 
@@ -61,8 +61,8 @@ export function handleStartServer(port?: number) {
     mainWindow?.webContents.send('server-status-changed', { isRunning: true, port: p });
 }
 
-export function handleStopServer() {
-    stopServer();
+export async function handleStopServer() {
+    await stopServer();
 
     serverStartTime = null;
     if (statsInterval) clearInterval(statsInterval);
@@ -75,8 +75,13 @@ export function setManualTimeOverride(override: boolean) {
 }
 
 function handleInitialModalClosed() {
-    const projectDataPath = store.get('projectDataPath') || defaultDBPath;
-    initDB(projectDataPath);
+    const projectDataPath = store.get('projectDataPath');
+    if (!projectDataPath) {
+        store.set('projectDataPath', defaultDBPath);
+        initDB(defaultDBPath);
+    } else {
+        initDB(projectDataPath);
+    }
     store.set('firstTimeRunning', false);
 }
 

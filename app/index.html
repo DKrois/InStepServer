@@ -49,6 +49,8 @@
                             <label for="port-input" data-i18n="portLabel">Port:</label>
                             <input type="number" id="port-input" value="5000" min="80" max="65535">
                         </div>
+
+                        <p id="restart-server-info" data-i18n="restartServerInfo" class="error-text hidden">Please restart the server for changes to take effect.</p>
                     </div>
 
                     <div class="card">
@@ -74,7 +76,7 @@
                         </div>
                     </div>
 
-                    <div class="card">
+                    <div id="security-card" class="card is-locked"> <!-- let css handle showing locked elements -->
                         <div class="card-header">
                             <h2 data-i18n="security">Security</h2>
                         </div>
@@ -82,8 +84,8 @@
                         <!-- This section is for unlocking the form -->
                         <div id="unlock-section">
                             <div class="form-group password-wrapper">
-                                <label for="current-password-input" data-i18n="currentPassword">Current Password:</label>
                                 <div class="input-with-icon">
+                                    <label for="current-password-input" data-i18n="currentPassword">Current Password:</label>
                                     <input type="password" id="current-password-input" autocomplete="current-password">
                                     <button id="toggle-current-password" class="icon-button password-toggle" data-i18n-title="togglePassword">
                                         <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
@@ -93,11 +95,15 @@
                                     </button>
                                 </div>
                             </div>
-                            <button id="unlock-btn" data-i18n="unlock">Unlock</button>
+                            <div class="button-group">
+                                <button id="unlock-btn" data-i18n="unlock">Unlock</button>
+                                <button id="lock-btn" data-i18n="lock" class="requires-unlock ml-auto">Lock</button>
+                                <button id="save-security-btn" data-i18n="save" class="requires-unlock">Save</button>
+                            </div>
                         </div>
 
-                        <!-- This section is for setting a new password, hidden by default -->
-                        <div id="change-password-section" class="hidden">
+                        <!-- setting a new password, hidden by default -->
+                        <div class="requires-unlock">
                             <div class="form-group password-wrapper">
                                 <div class="input-with-icon">
                                     <label for="new-password-input" data-i18n="newPassword">New Password:</label>
@@ -110,7 +116,31 @@
                                     </button>
                                 </div>
                             </div>
-                            <button id="save-password-btn" data-i18n="save">Save</button>
+                        </div>
+
+                        <hr class="requires-unlock">
+                        <div id="session-duration-section" class="requires-unlock">
+                            <h3 data-i18n="sessionDurationTitle">Session Duration</h3>
+                            <p data-i18n="sessionDurationDesc">Configure how long users stay logged in. This will apply to new logins.</p>
+
+                            <div class="duration-controls">
+                                <div class="duration-input-group">
+                                    <label for="session-years-input" data-i18n="years">Years</label>
+                                    <input type="number" id="session-years-input" min="0" value="0">
+                                </div>
+                                <div class="duration-input-group">
+                                    <label for="session-days-input" data-i18n="days">Days</label>
+                                    <input type="number" id="session-days-input" min="0" value="30">
+                                </div>
+                                <div class="duration-input-group">
+                                    <label for="session-hours-input" data-i18n="hours">Hours</label>
+                                    <input type="number" id="session-hours-input" min="0" max="23" value="0">
+                                </div>
+                                <div class="duration-input-group">
+                                    <label for="session-minutes-input" data-i18n="minutes">Minutes</label>
+                                    <input type="number" id="session-minutes-input" min="0" max="59" value="0">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- add more cards here -->

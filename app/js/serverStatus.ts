@@ -6,13 +6,18 @@ const stopBtn = document.getElementById('stop-btn')! as HTMLButtonElement;
 const portInput = document.getElementById('port-input') as HTMLInputElement;
 const serverStatusIndicator = document.getElementById('server-status-indicator')!;
 
+const restartServerInfo = document.getElementById('restart-server-info')!;
+
+let previousPortValue: number | null = null;
 startBtn.addEventListener('click', () => {
     const port = parseInt(portInput.value, 10);
+
     if (port && port > 79 && port < 65536) {
         startBtn.disabled = true;
         startBtn.textContent = 'Starting...';
+
         window.api.startServer(port);
-        window.api.saveSetting('port', port); // Save the port on start
+        window.api.saveSetting('port', port); // save port on start
     } else {
         showTranslatedToast('toastInvalidPort', undefined, 'error');
     }
@@ -24,10 +29,10 @@ stopBtn.addEventListener('click', () => {
     window.api.stopServer();
 });
 
-
-export function setInitialPort(port: any) {
-    portInput.value = port;
-}
+portInput.addEventListener('focusout', () => {
+    // only show warning if port was actually changed since last start
+    if (previousPortValue !== parseInt(portInput.value, 10)) setRestartServerInfoVisible(true);
+});
 
 window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | null }) => {
     const { isRunning, port } = status;
@@ -39,15 +44,16 @@ window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | 
         ? getTranslation('statusRunning')
         : getTranslation('statusStopped');
 
-    portInput.disabled = isRunning;
     startBtn.disabled = isRunning;
     stopBtn.disabled = !isRunning;
 
-    portInput.title = isRunning ? getTranslation('requireStop') : '';
-
-    // Revert button text from "Starting..." / "Stopping..."
+    // revert button text from "Starting..." / "Stopping..."
     startBtn.textContent = getTranslation('startServer');
     stopBtn.textContent = getTranslation('stopServer');
+
+    // remove restart-server-info
+    setRestartServerInfoVisible(false);
+    if (port) previousPortValue = port;
 
     // don't show toast if port is null (in case of startup)
     if (port !== null) {
@@ -55,3 +61,12 @@ window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | 
         else showTranslatedToast('toastServerStopped');
     }
 });
+
+export function setInitialPort(port: any) {
+    portInput.value = port;
+}
+
+export function setRestartServerInfoVisible(visible: boolean) {
+    // only show warning if server is running rn; always disable if server isn't running
+    if (serverStatusIndicator.classList.contains('status-running') || !visible) restartServerInfo.classList.toggle('hidden', !visible);
+}

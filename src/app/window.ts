@@ -122,7 +122,7 @@ export function createWindow() {
         mainWindow = null;
     });
 
-    mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.on('did-finish-load', async () => {
         info('Renderer finished loading...');
 
         if (store.get('firstTimeRunning')) {
@@ -136,7 +136,7 @@ export function createWindow() {
         const timeSettings = store.get('timeSettings') as any;
         // Time management takes precedence over the simple "start on open" setting
         if (timeSettings?.enabled) {
-            startScheduler();
+            await startScheduler();
         } else if (store.get('startServerOnOpen')) {
             handleStartServer();
         } else {

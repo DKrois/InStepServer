@@ -4,8 +4,8 @@
 
   "toastTimeout": 2000,
 
-  "defaultWindowWidth": 1200,
-  "defaultWindowHeight": 750,
+  "defaultWindowWidth": 1300,
+  "defaultWindowHeight": 850,
   "minWindowWidth": 700,
   "minWindowHeight": 500
 }

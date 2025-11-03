@@ -1,23 +1,54 @@
 {
   "title": "Server Control Panel",
   "toggleTheme": "Toggle Theme",
+  "toastLangSwitch": "Switched language to {{lang}}",
+
 
   "serverControls": "Server Controls",
   "startServer": "Start Server",
   "stopServer": "Stop Server",
   "portLabel": "Port:",
-  "requireStop": "Server has to be stopped to change port",
+
+  "restartServerInfo": "Please restart the server for changes to take effect.",
 
   "serverStarting": "Starting...",
   "serverStopping": "Stopping...",
   "statusRunning": "Server is running",
   "statusStopped": "Server is stopped",
 
+  "toastServerStarted": "Server started on port {{port}}",
+  "toastServerStopped": "Server stopped successfully",
+  "toastInvalidPort": "Invalid port number",
+
+
   "security": "Security",
   "currentPassword": "Current Password:",
   "newPassword": "New Password:",
   "unlock": "Unlock",
+  "lock": "Lock",
   "save": "Save",
+  "togglePassword": "Show/Hide Password",
+
+  "toastPasswordIncorrect": "Incorrect password",
+  "toastPasswordEmpty": "Password cannot be empty",
+  "toastPasswordUpdated": "Password updated successfully",
+
+  "initialPasswordTitle": "Initial Password",
+  "initialPasswordDesc": "This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.",
+  "copyPassword": "Copy to Clipboard",
+  "toastPasswordCopied": "Password copied to clipboard",
+
+
+  "sessionDurationTitle": "Session Duration",
+  "sessionDurationDesc": "Set how long a user remains logged in before needing to sign in again. Changes will apply to all new logins; currently active sessions will keep their original expiry time.",
+  "years": "Years",
+  "days": "Days",
+  "hours": "Hours",
+  "minutes": "Minutes",
+
+  "toastDurationUpdated": "Session duration updated",
+  "toastInvalidDuration": "Invalid duration entered",
+
 
   "statistics": "Statistics",
   "uptime": "Uptime",
@@ -25,14 +56,17 @@
   "projectsAmount": "Amount of projects",
   "filesAmount": "Amount of files",
   "storageSize": "Storage used",
-  "refresh": "Refresh",
 
+  "refresh": "Refresh",
   "showStatistics": "Show Statistics",
   "hideStatistics": "Hide Statistics",
 
+
+  "logs": "Logs",
   "showLogs": "Show Logs",
   "hideLogs": "Hide Logs",
   "clearLogs": "Clear Logs",
+
 
   "timeManagement": "Time Management",
   "countdownLabel": "Server {{nextAction}}",
@@ -42,6 +76,7 @@
   "disableAt": "Disable At:",
   "advanced": "Advanced",
   "clear": "Clear",
+
   "advancedTimeSettings": "Advanced Time Settings",
   "customTime": "Custom Time",
   "wholeday": "Entire day",
@@ -55,12 +90,8 @@
   "sunday": "Sunday",
 
   "confirmClearTimeSettings": "Are you sure you want to clear all time management settings? This cannot be undone.",
-
-  "initialPasswordTitle": "Initial Password",
-  "initialPasswordDesc": "This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.",
-  "copyPassword": "Copy to Clipboard",
-  "close": "Close",
-  "togglePassword": "Show/Hide Password",
+  "toastTimeSettingsSaved": "Time settings saved",
+  "toastTimeSettingsCleared": "Time settings cleared",
 
   "projectPathTitle": "Project Storage Path",
   "projectPathDesc": "Choose a directory where all project data will be stored.",
@@ -68,34 +99,21 @@
   "changePath": "Change...",
   "pathPermissionError": "The application does not have permission to write to the selected directory. Please choose a different folder.",
 
+  "toastPathUpdated": "Storage path updated successfully",
+  "toastPathError": "Error updating storage path",
+
+
   "shortcutsTitle": "Create shortcuts",
   "createStartMenuShortcut": "Create start menu shortcut",
   "createDesktopShortcut": "Create desktop shortcut",
+  "toastShortcutCreated": "Created {{type}} shortcut",
+  "toastShortcutFailed": "Failed to create {{type}} shortcut",
 
+
+  "close": "Close",
   "confirmTitle": "Are you sure?",
   "ok": "OK",
   "cancel": "Cancel",
   "cancelled": "Cancelled",
-
-  "toastLangSwitch": "Switched language to {{lang}}",
-
-  "toastServerStarted": "Server started on port {{port}}",
-  "toastServerStopped": "Server stopped successfully",
-  "toastInvalidPort": "Invalid port number",
-
-  "toastTimeSettingsSaved": "Time settings saved successfully",
-  "toastTimeSettingsCleared": "Time settings cleared",
-
-  "toastPasswordIncorrect": "Incorrect password",
-  "toastPasswordEmpty": "New password cannot be empty",
-  "toastPasswordUpdated": "Password updated successfully",
-  "toastPasswordCopied": "Password copied to clipboard",
-
-  "toastPathUpdated": "Storage path updated successfully",
-  "toastPathError": "Error updating the storage path",
-
-  "toastShortcutCreated": "Created {{type}} shortcut",
-  "toastShortcutFailed": "Failed to create {{type}} shortcut",
-
-  "toastUnknownError": "An unknown error occurred."
+  "toastUnknownError": "An unknown error occurred"
 }
