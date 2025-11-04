@@ -129,3 +129,41 @@ export function createDuration(duration: Partial<SplitDuration> | number[]): Spl
         }
     }
 }
+
+// --- Scheduler ---
+export type Time = `${number}:${number}` | '';
+export type Mode = 'custom' | 'wholeday' | 'off';
+export interface GlobalRule {
+    start: Time;
+    end: Time;
+    mode: 'custom';
+}
+export interface WeekdayRule {
+    enabled: boolean;
+    mode: Mode;
+    start: Time;
+    end: Time;
+}
+export interface TimeSettings {
+    enabled: boolean;
+    global: GlobalRule;
+    weekdays: { [key: number]: WeekdayRule };
+}
+
+export const defaultTimeSettings: TimeSettings = {
+    enabled: false,
+    global: { start: '' as Time, end: '' as Time, mode: 'custom' },
+    weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', end: '' }])) as TimeSettings['weekdays']
+};
+
+export function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const date = new Date(referenceDate);
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+}
+
+export function convertJsDayToCustom(jsDay: number): number {
+    // JS: 0 (Sun) - 6 (Sat) → 0 (Mon) - 6 (Sun)
+    return jsDay === 0 ? 6 : jsDay - 1;
+}

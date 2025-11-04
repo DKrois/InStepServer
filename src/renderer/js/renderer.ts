@@ -15,9 +15,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     // update to stored settings
     const settings = await window.api.getInitialSettings();
 
-    setInitialPort(settings.port);
-    setInitialLanguage(settings.language);
     updateTheme(settings.isDarkMode);
+    setInitialLanguage(settings.language);
+    setInitialPort(settings.port);
     setInitialTimeSettings(settings.timeSettings);
 
     // refresh stats on load → done in stats.ts after projectDB init

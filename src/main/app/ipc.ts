@@ -43,6 +43,8 @@ function registerServerIPC() {
         manualTimeOverride = true;
         await handleStopServer();
     });
+
+    ipcMain.on('save-port', (_event, port: number) => store.set('port', port));
 }
 
 function registerStatsIPC() {

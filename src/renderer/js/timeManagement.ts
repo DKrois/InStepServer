@@ -1,3 +1,12 @@
+import {
+    convertJsDayToCustom,
+    defaultTimeSettings,
+    GlobalRule,
+    Mode, parseTimeToDate,
+    Time,
+    TimeSettings,
+    WeekdayRule
+} from '../../common/time';
 import { showTranslatedToast } from './logs';
 import { closeModal, openModal, showConfirmation } from './modal';
 import { getTranslation } from './translate';
@@ -20,35 +29,8 @@ const modalSaveBtn = document.getElementById('time-modal-save-btn')!;
 const modalClearBtn = document.getElementById('time-modal-clear-btn')!;
 const modalCancelBtn = document.getElementById('time-modal-cancel-btn')!;
 
-// --- Type definitions ---
-type Time = `${number}:${number}` | '';
-type Mode = 'custom' | 'wholeday' | 'off';
-interface GlobalRule {
-    start: Time;
-    end: Time;
-    mode: 'custom';
-}
-interface WeekdayRule {
-    enabled: boolean;
-    mode: Mode;
-    start: Time;
-    end: Time;
-}
-interface TimeSettings {
-    enabled: boolean;
-    global: GlobalRule;
-    weekdays: { [key: number]: WeekdayRule };
-}
-
-// --- State management ---
-const defaultState: TimeSettings = {
-    enabled: false,
-    global: { start: '' as Time, end: '' as Time, mode: 'custom' },
-    weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', end: '' }])) as TimeSettings['weekdays']
-};
-
-let timeSettings: TimeSettings = JSON.parse(JSON.stringify(defaultState));
-let lastSavedSettings: TimeSettings = JSON.parse(JSON.stringify(defaultState));
+let timeSettings: TimeSettings = JSON.parse(JSON.stringify(defaultTimeSettings));
+let lastSavedSettings: TimeSettings = JSON.parse(JSON.stringify(defaultTimeSettings));
 const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export function setInitialTimeSettings(settings: TimeSettings) {
@@ -140,7 +122,7 @@ async function handleClear(save = false) {
     const confirmation = await showConfirmation('confirmClearTimeSettings');
 
     if (confirmation) {
-        populateUI(defaultState);
+        populateUI(defaultTimeSettings);
         if (save) handleSave();
         showTranslatedToast('toastTimeSettingsCleared');
     }
@@ -192,13 +174,6 @@ function isScheduleConfigured(settings: TimeSettings): boolean {
     return false;
 }
 
-function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const date = new Date(referenceDate);
-    date.setHours(hours, minutes, 0, 0);
-    return date;
-}
-
 function formatTimeDiff(ms: number): string {
     if (ms < 0) return '00:00:00';
     const totalSeconds = Math.floor(ms / 1000);
@@ -206,11 +181,6 @@ function formatTimeDiff(ms: number): string {
     const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
     const seconds = (totalSeconds % 60).toString().padStart(2, '0');
     return `${hours}:${minutes}:${seconds}`;
-}
-
-function convertJsDayToCustom(jsDay: number): number {
-    // JS: 0 (Sun) - 6 (Sat) → 0 (Mon) - 6 (Sun)
-    return jsDay === 0 ? 6 : jsDay - 1;
 }
 
 // --- Countdown ---

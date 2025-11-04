@@ -2,13 +2,13 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 const api = {
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
+    saveLanguage: (lang: string): void => ipcRenderer.send('save-language', lang),
 
     onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
         // event can only happen once
         ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
     },
     getInitialSettings: (): Promise<any> => ipcRenderer.invoke('get-initial-settings'),
-    saveSetting: (key: string, value: any) => ipcRenderer.send('save-setting', { key, value }),
     saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
     setProjectDataPath: (currentlySelectedPath?: string): Promise<{ success: boolean, path: string, code?: 'user-canceled' | 'permission-denied' }> => ipcRenderer.invoke('set-project-data-path', currentlySelectedPath),
 
@@ -21,6 +21,7 @@ const api = {
 
     startServer: (port: number) => ipcRenderer.send('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
+    savePort: (port: number) => ipcRenderer.send('save-port', port),
     onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number | null }) => void) => {
         ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },

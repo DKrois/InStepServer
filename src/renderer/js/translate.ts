@@ -24,7 +24,7 @@ languageSwitcher.addEventListener('change', async () => {
     const newLang = languageSwitcher.value;
     await i18next.changeLanguage(newLang);
     updateUIText();
-    window.api.saveSetting('language', newLang);
+    window.api.saveLanguage(newLang);
 
     const fullLang = languageSwitcher.selectedOptions.item(0)?.innerText;
     showTranslatedToast('toastLangSwitch', { lang: fullLang });
