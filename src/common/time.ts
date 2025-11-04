@@ -2,28 +2,13 @@ export function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
 }
 
-export function formatNumber(x: number, fractionDigits = 0, useGrouping = true) {
-    const [intPart, fracPart = ''] = x
-        .toFixed(fractionDigits)
-        .split('.');
-
-    const groupedInt = useGrouping
-        ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-        : intPart;
-
-    // Remove trailing 0s
-    const cleanedFrac = fracPart?.replace(/0+$/, '');
-
-    return cleanedFrac ? `${groupedInt}.${cleanedFrac}` : groupedInt;
-}
-
-// noinspection DuplicatedCode
 function timeToString(time: number | Date | null, gmt = false, includeMillis = true): string {
     if (time === null) return 'time null';
 
     let dt;
     if (typeof time === 'number') {
         const isMillis = time.toString().length > 12;
+        dt = isMillis ? new Date(time) : new Date(time * 1000);
         dt = isMillis ? new Date(time) : new Date(time * 1000);
     } else {
         dt = time;

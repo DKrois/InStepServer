@@ -25,6 +25,6 @@
       "multer": ["node_modules/@types/multer/index.d.ts"]
     }
   },
-  "include": ["src/**/*", "app"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

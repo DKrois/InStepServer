@@ -1,4 +1,6 @@
-import { join } from 'node:path';
+import { resolve } from 'node:path';
+
+const assetsFolder = resolve('src/renderer/assets');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
@@ -14,7 +16,7 @@ export const plugins = [
     new CopyWebpackPlugin({
         patterns: [
             {
-                from: join(__dirname, 'app', 'assets'),
+                from: assetsFolder,
                 to: 'main_window/assets', // will be available at http://localhost:3000/assets/
             },
         ],

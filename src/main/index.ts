@@ -4,7 +4,7 @@ process.env.FORCE_COLOR = '1';
 
 import { initApp } from './app/app.js';
 import 'source-map-support/register';
-import { errorWithMessage, info, normalizeSize } from './util.js';
+import { errorWithMessage, info } from './util.js';
 
 /* DONE
  *
@@ -18,13 +18,7 @@ import { errorWithMessage, info, normalizeSize } from './util.js';
 
 /* WIP
  *
- * translations
- *
- * memory leak?
  * test auto update
- *
- * → require password for each time opening IMD / starting server? (set in options → "dropdown"?)
- * test if change actually takes effect (→ restart server!)
  *
  * time: overnight & 'entire day' → only end, ...
  *
@@ -55,8 +49,7 @@ import { errorWithMessage, info, normalizeSize } from './util.js';
 
 async function main() {
     initApp();
-
-    // setInterval(() => console.log(normalizeSize(process.memoryUsage().heapUsed)), 1000)
+    //setInterval(() => console.log(normalizeSize(process.memoryUsage().heapUsed)), 1000)
 
     process.on('SIGINT', () => exit());
     process.on('SIGTERM', () => exit());

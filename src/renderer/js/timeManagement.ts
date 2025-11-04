@@ -275,7 +275,7 @@ function updateCountdown() {
                 isNextEventAStart = false;
                 break;
             }
-            // If server is off, we continue to the next day
+            // If server is off, continue to the next day
         }
     }
 

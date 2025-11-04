@@ -5,9 +5,9 @@ import { attempt, info } from '../util';
 import { isQuitting } from './app';
 import { handleStartServer, handleStopServer } from './ipc';
 import { setInitialPassword, startScheduler, store } from './settings';
-import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../config.json';
+import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
 
-const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'app/assets/icon.ico');
+const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'src/renderer/assets/icon.ico');
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -163,8 +163,7 @@ export function createTray() {
     tray.setToolTip('InStep Server Control Panel');
     tray.setContextMenu(contextMenu);
 
-    // --- Add a 'click' event listener to the tray icon ---
-    // This makes the app re-open when the user clicks the icon
+    // re-open app when user clicks tray icon
     tray.on('click', () => {
         mainWindow?.show();
     });

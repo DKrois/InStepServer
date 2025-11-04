@@ -12,7 +12,9 @@ import { exeBaseName, name } from './config.json';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
-const iconPath = './app/assets/icon.ico';
+const appBaseDir = './src/renderer';
+
+const iconPath = `${appBaseDir}/assets/icon.ico`;
 const exeName = `${exeBaseName}-$\{version}`;
 const setupExeName = `${exeBaseName}-Setup-$\{version}`;
 
@@ -67,11 +69,11 @@ const config: ForgeConfig = {
                 config: rendererConfig,
                 entryPoints: [
                     {
-                        html: './app/index.html',
-                        js: './app/js/renderer.ts',
+                        html: `${appBaseDir}/index.html`,
+                        js: `${appBaseDir}/js/renderer.ts`,
                         name: 'main_window',
                         preload: {
-                            js: './app/js/preload.ts',
+                            js: `${appBaseDir}/js/preload.ts`,
                         },
                     },
                 ],

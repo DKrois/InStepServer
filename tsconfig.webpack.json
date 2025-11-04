@@ -3,7 +3,9 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
   },
-  "include": ["app/js/**/*"]
+  "include": [
+    "src/renderer/js/**/*"
+  ]
 }

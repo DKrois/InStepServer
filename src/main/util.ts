@@ -4,6 +4,8 @@ import log from 'electron-log';
 import fs from 'node:fs/promises';
 import { networkInterfaces } from 'node:os';
 import { join } from 'node:path';
+import { getCurrentTime } from '../common/time';
+import { formatNumber } from '../common/util';
 import { sendLog } from './app/app.js';
 
 export function initLogging() {
@@ -108,38 +110,6 @@ export function formatError(e: Error | string, additional?: any) {
     };
 }
 
-// noinspection DuplicatedCode
-function getCurrentTime(includeMillis = false, gmt = false): string {
-    return timeToString(new Date(), gmt, includeMillis);
-}
-
-// noinspection DuplicatedCode
-function timeToString(time: number | Date | null, gmt = false, includeMillis = true): string {
-    if (time === null) return 'time null';
-
-    let dt;
-    if (typeof time === 'number') {
-        const isMillis = time.toString().length > 12;
-        dt = isMillis ? new Date(time) : new Date(time * 1000);
-    } else {
-        dt = time;
-    }
-
-    const year = addZeroes(gmt ? dt.getUTCFullYear() : dt.getFullYear(), 2);
-    const month = addZeroes((gmt ? dt.getUTCMonth() : dt.getMonth()) + 1, 2);
-    const day = addZeroes(gmt ? dt.getUTCDate() : dt.getDate(), 2);
-    const hours = addZeroes(gmt ? dt.getUTCHours() : dt.getHours(), 2);
-    const minutes = addZeroes(gmt ? dt.getUTCMinutes() : dt.getMinutes(), 2);
-    const seconds = addZeroes(gmt ? dt.getUTCSeconds() : dt.getSeconds(), 2);
-    const millis = includeMillis ? `.${addZeroes(gmt ? dt.getUTCMilliseconds() : dt.getMilliseconds(), 3)}` : '';
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
-}
-
-function addZeroes(str: number, padAmount: number, radix: number = 10): string {
-    return str.toString(radix).padStart(padAmount, '0');
-}
-
 export function normalizeSize(bytes: number, decimals: number = 2): string {
     if (bytes === 0) return '0 Bytes';
 
@@ -154,21 +124,6 @@ export function normalizeSize(bytes: number, decimals: number = 2): string {
     // Return a string that formats the number of bytes according to the given number of decimal places
     // and then appends the corresponding unit from the sizes array
     return `${formatNumber(bytes / Math.pow(k, i), dm)} ${sizes[i]}`
-}
-
-export function formatNumber(x: number, fractionDigits = 0, useGrouping = true) {
-    const [intPart, fracPart = ''] = x
-        .toFixed(fractionDigits)
-        .split('.');
-
-    const groupedInt = useGrouping
-        ? intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-        : intPart;
-
-    // Remove trailing 0s
-    const cleanedFrac = fracPart?.replace(/0+$/, '');
-
-    return cleanedFrac ? `${groupedInt}.${cleanedFrac}` : groupedInt;
 }
 
 export function attempt<T>(fn: () => T): T | undefined;

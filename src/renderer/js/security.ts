@@ -1,5 +1,5 @@
 import { showTranslatedToast } from './logs';
-import { createDuration, getTotalMs, normalizeDuration } from './util';
+import { createDuration, getTotalMs, normalizeDuration } from '../../common/time';
 import { setRestartServerInfoVisible } from './serverStatus';
 
 const securityCard = document.getElementById('security-card')!;
