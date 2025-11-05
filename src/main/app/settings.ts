@@ -3,20 +3,10 @@ import { app, dialog, ipcMain, nativeTheme } from 'electron';
 // @ts-ignore
 import Store from 'electron-store';
 import crypto from 'node:crypto';
-import {
-    convertJsDayToCustom,
-    defaultTimeSettings,
-    GlobalRule,
-    parseTimeToDate,
-    TimeSettings,
-    WeekdayRule
-} from '../../common/time';
+import { defaultTimeSettings, Durations } from '../../common/time';
 import { defaultDBPath } from '../database';
-import { handleStartServer, handleStopServer, manualTimeOverride, serverStartTime, setManualTimeOverride } from './ipc';
-import { canWriteToPath, info, warn } from '../util';
+import { canWriteToPath, info } from '../util';
 
-let schedulerInterval: NodeJS.Timeout | null = null;
-let lastActionWasStart = false;
 
 let initialPassword: string | null = null;
 
@@ -31,7 +21,7 @@ export const store = new Store({
         firstTimeRunning: true,
         passwordHash: '', // set on startup or update ipc
         sessionSecret: '', // set on server init
-        sessionMaxAge: 1000 * 60 * 60 * 24 * 30, // 30d
+        sessionMaxAge: 30 * Durations.msInDay,
         projectDataPath: '', // set on initial modal close
     }
 });
@@ -48,7 +38,6 @@ export function initStore() {
     }
 }
 
-// --- Settings / time scheduling ---
 export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', () => {
         const { port, language, timeSettings } = store.store;
@@ -58,18 +47,6 @@ export function registerSettingsIPC() {
     });
 
     ipcMain.on('save-lang', (_event, language: string) => store.set('language', language));
-
-    ipcMain.on('save-time-settings', async (_event, settings) => {
-        if (!isValidTimeSettings(settings)) {
-            warn('Rejected invalid time settings payload');
-            return;
-        }
-
-        store.set('timeSettings', settings);
-        setManualTimeOverride(false); // Saving new settings resets any manual override
-        await checkSchedule(); // Immediately check the new schedule
-        if (settings.enabled) await startScheduler();
-    });
 
     ipcMain.handle('set-project-data-path', (_event, currentlySelectedPath?: string) => handleUpdatePath(currentlySelectedPath));
 }
@@ -160,139 +137,4 @@ async function handleUpdateSessionDuration(durationMs: number, currentPassword: 
 
     store.set('sessionMaxAge', durationMs);
     return { success: true };
-}
-
-// --- Scheduling ---
-function isValidTimeSettings(x: any): x is TimeSettings {
-    return (
-        typeof x === 'object'
-        && typeof x.enabled === 'boolean'
-        && typeof x.global === 'object'
-        && x.weekdays && typeof x.weekdays === 'object'
-    );
-}
-
-export async function startScheduler() {
-    info('Starting time settings scheduler...');
-    if (schedulerInterval) clearInterval(schedulerInterval);
-
-    schedulerInterval = setInterval(checkSchedule, 20000); // once every 20s
-
-    // Run once on startup as well
-    await checkSchedule();
-}
-
-async function checkSchedule() {
-    const settings = store.get('timeSettings');
-
-    if (!settings?.enabled || manualTimeOverride) return;
-
-    const now = new Date();
-    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1; // default: 0 = Sunday; change so 0 = Monday
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-    // determine if global or specific day
-    let rule: GlobalRule | WeekdayRule = settings.global;
-    const dayRule = settings.weekdays?.[dayOfWeek];
-
-    // specific, enabled rule for today exists → override global
-    if (dayRule && dayRule.enabled) rule = dayRule;
-
-    // decide if the server should be running right now based on rule
-    let shouldBeRunning = false;
-    if (rule.mode === 'wholeday') {
-        shouldBeRunning = true;
-    } else if ((!('mode' in rule) || rule.mode === 'custom') && rule.start && rule.end) { // global rule doesn't have a mode
-        const { start, end } = rule;
-        if (start < end) {
-            shouldBeRunning = currentTime >= start && currentTime < end;
-        } else { // handle overnight schedules (e.g., 22:00 to 02:00)
-            shouldBeRunning = currentTime >= start || currentTime < end;
-        }
-    }
-    // shouldBeRunning is false if mode is 'off'
-
-    // start / stop if needed
-    const isActuallyRunning = serverStartTime !== null;
-
-    if (shouldBeRunning && !isActuallyRunning) {
-        // Prevent re-triggering a start command every minute
-        if (!lastActionWasStart) {
-            info(`[Scheduler] Time matches. Starting server.`);
-            handleStartServer();
-            lastActionWasStart = true;
-        }
-    } else if (!shouldBeRunning && isActuallyRunning) {
-        // Prevent re-triggering a stop command every minute
-        if (lastActionWasStart) {
-            info(`[Scheduler] Time matches. Stopping server.`);
-            await handleStopServer();
-            lastActionWasStart = false;
-        }
-    }
-
-    // Reset the last action state when we cross a time boundary
-    if (currentTime === rule.start || currentTime === rule.end) {
-        lastActionWasStart = !shouldBeRunning;
-    }
-}
-
-/**
- * Generates a chronological list of start/stop events based on time settings.
- * @param {object} timeSettings - The full time settings object
- * @returns {{time: Date, type: 'start' | 'stop'}[]} A sorted array of event objects.
- */
-function generateScheduleEvents(timeSettings: any) {
-    if (!timeSettings?.enabled) return [];
-
-    const events = [];
-    const now = new Date();
-
-    // Generate events for a wide window to catch all relevant past/future events
-    // (-7 days to +14 days is very safe)
-    for (let i = -7; i < 14; i++) {
-        const date = new Date(now);
-        date.setDate(now.getDate() + i);
-        date.setHours(0, 0, 0, 0); // Start of the day
-
-        const dayIndex = convertJsDayToCustom(date.getDay());
-
-        // Determine the effective rule for this day
-        let rule = timeSettings.global;
-        const dayRule = timeSettings.weekdays?.[dayIndex];
-        if (dayRule && dayRule.enabled) {
-            rule = dayRule;
-        }
-
-        // --- Translate rules into discrete start/stop events ---
-        if (rule.mode === 'wholeday') {
-            // 'wholeday' is equivalent to a 'start' at the beginning of the day.
-            // The server stays on until a 'stop' event is found on a subsequent day.
-            events.push({ time: date, type: 'start' });
-
-        } else if (rule.mode === 'off') {
-            // 'off' is equivalent to a 'stop' at the beginning of the day.
-            events.push({ time: date, type: 'stop' });
-
-        } else if (rule.mode === 'custom' || !rule.mode) { // Catches global rule and custom rules
-            if (rule.start) {
-                events.push({ time: parseTimeToDate(rule.start, date), type: 'start' });
-            }
-            if (rule.end) {
-                // To handle overnight logic correctly, a 'stop' event belongs to the day it occurs on.
-                // If start is 22:00 and end is 02:00, the 'stop' is on the *next* day.
-                const startDate = rule.start ? parseTimeToDate(rule.start, date) : null;
-                const endDate = parseTimeToDate(rule.end, date);
-
-                if (startDate && endDate < startDate) {
-                    // This is an overnight schedule, move the end date to the next day
-                    endDate.setDate(endDate.getDate() + 1);
-                }
-                events.push({ time: endDate, type: 'stop' });
-            }
-        }
-    }
-
-    // Sort all events chronologically, which is crucial for the logic to work
-    return events.sort((a, b) => a.time.getTime() - b.time.getTime());
 }

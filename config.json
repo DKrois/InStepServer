@@ -3,9 +3,10 @@
   "exeBaseName": "InStepServer",
 
   "toastTimeout": 2000,
+  "schedulerIntervalTime": 20000,
 
   "defaultWindowWidth": 1300,
-  "defaultWindowHeight": 850,
-  "minWindowWidth": 700,
+  "defaultWindowHeight": 800,
+  "minWindowWidth": 730,
   "minWindowHeight": 500
 }

@@ -4,8 +4,9 @@ import { defaultDBPath, ProjectDatabase, projectDB } from '../database';
 import { attempt, info } from '../util';
 import { isQuitting } from './app';
 import { handleStartServer, handleStopServer } from './ipc';
-import { setInitialPassword, startScheduler, store } from './settings';
+import { setInitialPassword, store } from './settings';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
+import { startScheduler } from './timeScheduler';
 
 const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'src/renderer/assets/icon.ico');
 
@@ -17,7 +18,7 @@ let tray: Tray | null = null;
 
 export function createWindow() {
     // get primary screens work area
-    const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+    const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size;
     const shouldMaximize = screenWidth < defaultWindowWidth || screenHeight < defaultWindowHeight;
 
     mainWindow = new BrowserWindow({

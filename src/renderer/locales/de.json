@@ -18,6 +18,7 @@
 
   "toastServerStarted": "Server auf Port {{port}} gestartet",
   "toastServerStopped": "Server erfolgreich angehalten",
+  "toastStartFailed": "Server konnte nicht gestartet werden",
   "toastInvalidPort": "Ungültige Portnummer",
 
 
@@ -76,11 +77,15 @@
   "disableAt": "Ausschalten um:",
   "advanced": "Erweitert",
   "clear": "Löschen",
+  "export": "Exportieren",
+  "import": "Importieren",
 
   "advancedTimeSettings": "Erweiterte Zeiteinstellungen",
   "customTime": "Benutzerdefiniert",
   "wholeday": "Ganztägig",
   "off": "Aus",
+  "clearDaySettings": "Einstellungen für diesen Tag löschen",
+
   "monday": "Montag",
   "tuesday": "Dienstag",
   "wednesday": "Mittwoch",
@@ -92,6 +97,11 @@
   "confirmClearTimeSettings": "Sind Sie sicher, dass Sie alle Zeitmanagement-Einstellungen löschen möchten? Dies kann nicht rückgängig gemacht werden.",
   "toastTimeSettingsSaved": "Zeiteinstellungen gespeichert",
   "toastTimeSettingsCleared": "Zeiteinstellungen gelöscht",
+
+  "toastExportSuccess": "Zeiteinstellungen erfolgreich exportiert",
+  "toastExportFailed": "Fehler beim Exportieren",
+  "toastImportSuccess": "Zeiteinstellungen importiert. Klicken Sie auf Speichern, um sie zu übernehmen.",
+  "toastImportFailed": "Fehler beim Importieren",
 
 
   "projectPathTitle": "Projektspeicherpfad",

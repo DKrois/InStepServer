@@ -47,7 +47,6 @@ export function errorWithMessage(message: string, err: Error | unknown, includeT
     console.error(errorObj);
 
     log.error(message, errorObj);
-
     sendLog(errToString(errorObj, true));
 }
 

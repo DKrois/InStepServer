@@ -4,6 +4,7 @@ import { initServer, stopServer } from '../server';
 import { registerShortcutsIPC } from './installer';
 import { registerSecurityIPC, registerSettingsIPC, store } from './settings';
 import { normalizeSize } from '../util';
+import { registerTimeSettingsIPC } from './timeScheduler';
 import { mainWindow } from './window';
 
 export let serverStartTime: number | null = null;
@@ -14,6 +15,7 @@ export let manualTimeOverride = false;
 export function registerIPCHandlers() {
     registerThemeIPC();
     registerSettingsIPC();
+    registerTimeSettingsIPC();
     registerSecurityIPC();
     registerServerIPC();
     registerShortcutsIPC();
@@ -34,9 +36,9 @@ function registerThemeIPC() {
 }
 
 function registerServerIPC() {
-    ipcMain.on('start-server', (_event, port: number) => {
+    ipcMain.handle('start-server', (_event, port: number) => {
         manualTimeOverride = true;
-        handleStartServer(port);
+        return handleStartServer(port);
     });
 
     ipcMain.on('stop-server', async () => {
@@ -61,6 +63,7 @@ export function handleStartServer(port?: number) {
     statsInterval = setInterval(sendUsageStats, 1000);
 
     mainWindow?.webContents.send('server-status-changed', { isRunning: true, port: p });
+    return true;
 }
 
 export async function handleStopServer() {

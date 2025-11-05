@@ -22,6 +22,18 @@ input[type="time"]:focus {
     pointer-events: none; /* decorative only */
 }
 
+.time-buttons {
+    justify-content: space-between; /* This is the key: pushes the two subgroups apart */
+    align-items: center;            /* Vertically aligns the groups if they wrap */
+    flex-wrap: wrap;                /* This is crucial for responsiveness */
+}
+
+.button-subgroup {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 
 /* --- Security Card --- */
 #security-card .requires-unlock {

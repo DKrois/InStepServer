@@ -18,6 +18,7 @@
 
   "toastServerStarted": "Server started on port {{port}}",
   "toastServerStopped": "Server stopped successfully",
+  "toastStartFailed": "Error starting server",
   "toastInvalidPort": "Invalid port number",
 
 
@@ -76,11 +77,15 @@
   "disableAt": "Disable At:",
   "advanced": "Advanced",
   "clear": "Clear",
+  "export": "Export",
+  "import": "Import",
 
   "advancedTimeSettings": "Advanced Time Settings",
   "customTime": "Custom Time",
   "wholeday": "Entire day",
   "off": "Off",
+  "clearDaySettings": "Clear settings for this day",
+
   "monday": "Monday",
   "tuesday": "Tuesday",
   "wednesday": "Wednesday",
@@ -92,6 +97,11 @@
   "confirmClearTimeSettings": "Are you sure you want to clear all time management settings? This cannot be undone.",
   "toastTimeSettingsSaved": "Time settings saved",
   "toastTimeSettingsCleared": "Time settings cleared",
+
+  "toastExportSuccess": "Time settings exported successfully",
+  "toastExportFailed": "Failed to export settings",
+  "toastImportSuccess": "Time settings imported. Click Save to apply them.",
+  "toastImportFailed": "Failed to import settings",
 
   "projectPathTitle": "Project Storage Path",
   "projectPathDesc": "Choose a directory where all project data will be stored.",

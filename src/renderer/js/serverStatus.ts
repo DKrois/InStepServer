@@ -16,7 +16,8 @@ startBtn.addEventListener('click', () => {
         startBtn.disabled = true;
         startBtn.textContent = 'Starting...';
 
-        window.api.startServer(port);
+        const success = window.api.startServer(port);
+        if (!success) showTranslatedToast('toastStartFailed', undefined, 'error');
         window.api.savePort(port); // save port on start
     } else {
         showTranslatedToast('toastInvalidPort', undefined, 'error');

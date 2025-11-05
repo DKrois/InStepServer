@@ -14,23 +14,23 @@ function timeToString(time: number | Date | null, gmt = false, includeMillis = t
         dt = time;
     }
 
-    const year = addZeroes(gmt ? dt.getUTCFullYear() : dt.getFullYear(), 2);
-    const month = addZeroes((gmt ? dt.getUTCMonth() : dt.getMonth()) + 1, 2);
-    const day = addZeroes(gmt ? dt.getUTCDate() : dt.getDate(), 2);
-    const hours = addZeroes(gmt ? dt.getUTCHours() : dt.getHours(), 2);
-    const minutes = addZeroes(gmt ? dt.getUTCMinutes() : dt.getMinutes(), 2);
-    const seconds = addZeroes(gmt ? dt.getUTCSeconds() : dt.getSeconds(), 2);
+    const year = addZeroes(gmt ? dt.getUTCFullYear() : dt.getFullYear());
+    const month = addZeroes((gmt ? dt.getUTCMonth() : dt.getMonth()) + 1);
+    const day = addZeroes(gmt ? dt.getUTCDate() : dt.getDate());
+    const hours = addZeroes(gmt ? dt.getUTCHours() : dt.getHours());
+    const minutes = addZeroes(gmt ? dt.getUTCMinutes() : dt.getMinutes());
+    const seconds = addZeroes(gmt ? dt.getUTCSeconds() : dt.getSeconds());
     const millis = includeMillis ? `.${addZeroes(gmt ? dt.getUTCMilliseconds() : dt.getMilliseconds(), 3)}` : '';
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
 }
-function addZeroes(str: number, padAmount: number, radix: number = 10): string {
+export function addZeroes(str: number, padAmount: number = 2, radix: number = 10): string {
     return str.toString(radix).padStart(padAmount, '0');
 }
 
 type SplitDuration = { years: number, months: number, weeks: number, days: number, hours: number, minutes: number, seconds: number, milliseconds: number }
-type DurationUnits = 'y' | 'M' | 'w' | 'd' | 'h' | 'm' | 's' | 'ms';
-const DurationUnits: DurationUnits[] = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
+const DurationUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'] as const;
+type DurationUnit = typeof DurationUnits[number];
 export enum Durations {
     msInSecond = 1000,
     secondsInMinute = 60,
@@ -62,10 +62,10 @@ export function getTotalMs(duration: SplitDuration | number[]) {
         + duration.years * Durations.msInYear);
 }
 
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: false, highest?: DurationUnits, exclude?: DurationUnits[]): SplitDuration;
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: true, highest?: DurationUnits, exclude?: DurationUnits[]): number[];
+export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: false, highest?: DurationUnit, exclude?: DurationUnit[]): SplitDuration;
+export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: true, highest?: DurationUnit, exclude?: DurationUnit[]): number[];
 
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: boolean, highest: DurationUnits = 'y', exclude: DurationUnits[] = []): number[] | SplitDuration {
+export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: boolean, highest: DurationUnit = 'y', exclude: DurationUnit[] = []): number[] | SplitDuration {
     let remainingMs = typeof duration === 'number' ? duration : getTotalMs(duration);
     const highestIndex = DurationUnits.indexOf(highest);
 
@@ -155,6 +155,8 @@ export const defaultTimeSettings: TimeSettings = {
     global: { start: '' as Time, end: '' as Time, mode: 'custom' },
     weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', end: '' }])) as TimeSettings['weekdays']
 };
+// Define a default rule for when no other configuration applies
+const DEFAULT_RULE = { mode: 'off', enabled: true };
 
 export function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -166,4 +168,62 @@ export function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
 export function convertJsDayToCustom(jsDay: number): number {
     // JS: 0 (Sun) - 6 (Sat) → 0 (Mon) - 6 (Sun)
     return jsDay === 0 ? 6 : jsDay - 1;
+}
+
+/**
+ * Generates a chronological list of start/stop events based on time settings.
+ * @param {object} timeSettings - The full time settings object
+ * @returns {{time: Date, type: 'start' | 'stop'}[]} A sorted array of event objects.
+ */
+export function generateScheduleEvents(timeSettings: any): { time: Date; type: 'start' | 'stop'; }[] {
+    if (!timeSettings?.enabled) return [];
+
+    const events: { time: Date, type: 'start' | 'stop' }[] = [];
+    const now = new Date();
+
+    // Generate events for a wide window to catch all relevant past/future events
+    for (let i = -7; i < 14; i++) {
+        const date = new Date(now);
+        date.setDate(now.getDate() + i);
+        date.setHours(0, 0, 0, 0); // Start of the day
+
+        const dayIndex = convertJsDayToCustom(date.getDay());
+
+        let rule = timeSettings.weekdays?.[dayIndex];
+        if (!rule?.enabled) rule = timeSettings.global; // fallback to global
+        if (!rule?.enabled) rule = DEFAULT_RULE; // fallback to default
+
+        const { mode, start, end } = rule;
+
+        // --- Translate the effective rule into events ---
+        if (mode === 'wholeday') {
+            events.push({ time: date, type: 'start' });
+        } else if (mode === 'off') {
+            events.push({ time: date, type: 'stop' });
+        } else if (mode === 'custom' || !mode) { // Catches global and custom rules
+
+            // treat undefined rules as off day
+            if (!start && !end) {
+                events.push({ time: date, type: 'stop' });
+                continue; // move to next day
+            }
+
+            if (start && end) {
+                const startDate = parseTimeToDate(start, date);
+                const endDate = parseTimeToDate(end, date);
+                events.push({ time: startDate, type: 'start' });
+                if (endDate < startDate) {
+                    endDate.setDate(endDate.getDate() + 1);
+                }
+                events.push({ time: endDate, type: 'stop' });
+            } else if (start) {
+                events.push({ time: parseTimeToDate(start, date), type: 'start' });
+            } else if (end) {
+                events.push({ time: parseTimeToDate(end, date), type: 'stop' });
+            }
+        }
+    }
+
+    // sort all events chronologically
+    return events.sort((a, b) => a.time.getTime() - b.time.getTime());
 }

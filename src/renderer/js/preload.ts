@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import { TimeSettings } from '../../common/time';
 
 const api = {
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
@@ -9,8 +10,15 @@ const api = {
         ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
     },
     getInitialSettings: (): Promise<any> => ipcRenderer.invoke('get-initial-settings'),
-    saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
     setProjectDataPath: (currentlySelectedPath?: string): Promise<{ success: boolean, path: string, code?: 'user-canceled' | 'permission-denied' }> => ipcRenderer.invoke('set-project-data-path', currentlySelectedPath),
+
+    saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
+    exportTimeSettings: (): Promise<{ success: boolean, code?: 'cancelled' }> => ipcRenderer.invoke('export-time-settings'), // auto saves settings
+    importTimeSettings: (): Promise<{ success: boolean, data?: TimeSettings, code?: 'cancelled' }> => ipcRenderer.invoke('import-time-settings'),
+    showClearTimeContextMenu: (inputId: string) => ipcRenderer.send('show-clear-time-context-menu', inputId),
+    onClearTimeInput: (callback: (inputId: string) => void) => {
+        ipcRenderer.on('clear-time-input', (_event, inputId) => callback(inputId as string));
+    },
 
     getInitialPassword: (): Promise<string> => ipcRenderer.invoke('get-initial-password'),
     verifyPassword: (password: string): Promise<boolean> => ipcRenderer.invoke('verify-password', password),
@@ -19,7 +27,7 @@ const api = {
     getSessionDuration: (): Promise<number> => ipcRenderer.invoke('get-session-duration'),
     updateSessionDuration: (ms: number, password: string): Promise<{ success: boolean }> => ipcRenderer.invoke('update-session-duration', ms, password),
 
-    startServer: (port: number) => ipcRenderer.send('start-server', port),
+    startServer: (port: number): Promise<boolean> => ipcRenderer.invoke('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
     savePort: (port: number) => ipcRenderer.send('save-port', port),
     onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number | null }) => void) => {

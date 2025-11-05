@@ -112,6 +112,17 @@
     border-radius: 5px;
 }
 
+.weekday-clear-btn {
+    /* Make it smaller than normal buttons */
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    line-height: 1; /* Helps center text/icons */
+
+    /* Push it to the far right */
+    margin-left: auto;
+}
+
 
 /* --- Path Configuration --- */
 .path-config-section {
