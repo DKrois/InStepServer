@@ -4,7 +4,7 @@ import log from 'electron-log';
 // variable needs to be set before importing projectDB as it uses it during initialization
 export const userDataPath = app.getPath('userData');
 import { initDB } from '../database.js';
-import { initUpdater } from './installer';
+import { handleSquirrelCommands, initUpdater } from './installer';
 import { registerIPCHandlers } from './ipc';
 import { initLogging } from '../util.js';
 import { initStore, store } from './settings';
@@ -22,11 +22,10 @@ export function initApp() {
         return;
     }
     initUpdater();
-    if (require('electron-squirrel-startup')) {
+    if (handleSquirrelCommands()) {
         app.quit();
         return;
     }
-
 
     app.on('ready', () => {
         initLogging();

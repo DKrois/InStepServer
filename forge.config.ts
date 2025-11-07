@@ -11,6 +11,8 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { exeBaseName, name } from './config.json';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const appBaseDir = './src/renderer';
 
@@ -38,14 +40,24 @@ const config: ForgeConfig = {
         new MakerWix({
             name: name,
             exe: exeName,
-            icon: iconPath, // https://stackoverflow.com/questions/19271862/wix-how-to-run-exe-files-after-installation-from-installed-directory, icons, name (Machine)
+            icon: iconPath,
             ui: {
                 chooseDirectory: true,
+                /*images: {
+                    background: resolve(iconPath),
+                    banner: resolve(iconPath),
+                }*/
             },
             features: {
-                autoLaunch: false,
+                autoLaunch: true,
                 autoUpdate: true,
-            }
+            },
+            beforeCreate: msiCreator => {
+                msiCreator.wixTemplate = getTemplate('wixTemplate');
+                msiCreator.autoLaunchTemplate = getTemplate('auto-launch-feature', true);
+                msiCreator.updaterTemplate = getTemplate('updater-feature', true);
+            },
+            autoRun: true,
         }),
         new MakerZIP({}, ['darwin']),
         new MakerRpm({
@@ -92,5 +104,11 @@ const config: ForgeConfig = {
         }),
     ],
 };
+
+function getTemplate(name: string, trimTrailingNewLine: boolean = false) {
+    const path = join(__dirname, `./src/main/app/wxs/${name}.wxs`);
+    const content = readFileSync(path, 'utf-8');
+    return trimTrailingNewLine ? content.replace(/[\r\n]+$/g, '') : content;
+}
 
 export default config;

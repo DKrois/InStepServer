@@ -19,15 +19,15 @@ import { errorWithMessage, info } from './util.js';
 /* WIP
  *
  * test auto update
- *
- * time: overnight & 'entire day' → only end, ...
+ * test shortcuts
  *
  */
 
 /* TODO
  *
- * Disable desktop shortcut by default ?
- * → electron-squirrel-startup, msi template...
+ * installer: banner / bg?
+ *
+ * code sign?
  *
  */
 
@@ -35,15 +35,12 @@ import { errorWithMessage, info } from './util.js';
  * cookie { secure: true } if https
  *
  * Installer:
- * Read default template? (msiCreator.wixTemplate)
- * github.com/markmorris/electron-wix-msi ??
- * "ui": {
- *     ...,
- *     "images": {
- *         "background": "[...]/path/to/background-493x312.bmp",
- *         "banner": "[...]/path/to/banner-493x58.bmp"
- *     }
- * }
+ * https://stackoverflow.com/questions/19271862/wix-how-to-run-exe-files-after-installation-from-installed-directory
+ * https://skjoldrun.github.io/docs/other/wix-v3-installer.html
+ * icons / images
+ * (Machine)
+ * https://github.com/electron-userland/electron-wix-msi/tree/master/src
+ * https://github.com/electron-userland/electron-wix-msi/blob/master/src/creator.ts#L426
  */
 
 
