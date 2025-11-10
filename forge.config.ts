@@ -17,12 +17,11 @@ import { join } from 'node:path';
 const appBaseDir = './src/renderer';
 
 const iconPath = `${appBaseDir}/assets/icon.ico`;
-const exeName = `${exeBaseName}-$\{version}`;
 const setupExeName = `${exeBaseName}-Setup-$\{version}`;
 
 const config: ForgeConfig = {
     packagerConfig: {
-        executableName: exeName,
+        executableName: exeBaseName,
         icon: iconPath,
         asar: true,
         extraResource: [
@@ -35,11 +34,11 @@ const config: ForgeConfig = {
             setupExe: `${setupExeName}.exe`,
             setupIcon: iconPath,
             iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/app/assets/icon.ico',
-            exe: `${exeName}.exe`
+            exe: `${exeBaseName}.exe`
         }),
         new MakerWix({
             name: name,
-            exe: exeName,
+            exe: exeBaseName,
             icon: iconPath,
             ui: {
                 chooseDirectory: true,
@@ -64,12 +63,14 @@ const config: ForgeConfig = {
             options: {
                 name: name,
                 icon: iconPath,
+                bin: exeBaseName,
             }
         }),
         new MakerDeb({
             options: {
                 name: name,
                 icon: iconPath,
+                bin: exeBaseName,
             }
         }),
     ],
