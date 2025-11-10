@@ -17,6 +17,9 @@ jobs:
     # Use the OS from the matrix for the runner
     runs-on: ${{ matrix.os }}
 
+    permissions:
+      contents: write
+
     steps:
       - name: Check out git repository
         uses: actions/checkout@v3
