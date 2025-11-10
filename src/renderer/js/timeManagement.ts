@@ -108,6 +108,7 @@ export function setInitialTimeSettings(settings: TimeSettings) {
 
 function createWeekdayRows() {
     weekdayList.innerHTML = ''; // Clear existing
+
     weekdays.forEach((day, index) => {
         const li = document.createElement('li');
         li.className = 'weekday-row';
@@ -123,7 +124,10 @@ function createWeekdayRows() {
             </select>
             <input type="time" class="weekday-start-time">
             <input type="time" class="weekday-end-time">
-            <button class="weekday-clear-btn" data-i18n-title="clearDaySettings">X</button>
+            <button class="weekday-clear-btn icon-button" data-i18n-title="clearDaySettings">
+                <img src="assets/cross-dark.png" class="button-image light-icon" alt="X">
+                <img src="assets/cross-light.png" class="button-image dark-icon" alt="X">
+            </button>
         `;
         weekdayList.appendChild(li);
     });

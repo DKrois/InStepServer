@@ -17,6 +17,13 @@ const shortcutOptionsContainer = document.getElementById('shortcut-options-conta
 const createStartMenuShortcutBtn = document.getElementById('create-startMenu-shortcut-btn')!;
 const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortcut-btn')!;
 
+const updateModal = document.getElementById('update-modal')!;
+const updateVersionNumber = document.getElementById('update-version-number')!;
+const currentVersionNumber = document.getElementById('current-version-number')!;
+const updateReleaseNotes = document.getElementById('update-release-notes')!;
+const updateLaterBtn = document.getElementById('update-later-btn')!;
+const updateDownloadBtn = document.getElementById('update-download-btn')!;
+
 const confirmModal = document.getElementById('confirm-modal')!;
 const confirmTitle = document.getElementById('confirm-title')!;
 const confirmMessage = document.getElementById('confirm-message')!;
@@ -92,6 +99,17 @@ closeInitialModalBtn.addEventListener('click', () => {
     closeModal(initialModalBackdrop);
 });
 
+window.api.onUpdateAvailable(showUpdateModal);
+
+updateLaterBtn.addEventListener('click', () => {
+    closeModal(updateModal);
+});
+
+updateDownloadBtn.addEventListener('click', () => {
+    window.api.openDownloadURL();
+    closeModal(updateModal);
+});
+
 export function openModal(el: HTMLElement) {
     el.classList.remove('hidden');
     el.classList.remove('closing');
@@ -115,6 +133,15 @@ export function closeModal(el: HTMLElement) {
         el.classList.remove('closing');
         el.classList.add('hidden');
     }, { once: true });
+}
+
+// --- Update modal ---
+function showUpdateModal(details: { version: string, oldVersion: string, releaseNotes: string, url: string }) {
+    // populate modal with version info
+    updateVersionNumber.textContent = details.version;
+    currentVersionNumber.textContent = details.oldVersion;
+    updateReleaseNotes.textContent = details.releaseNotes || 'No release notes provided.';
+    openModal(updateModal);
 }
 
 // --- Confirmation dialog ---

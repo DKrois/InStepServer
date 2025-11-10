@@ -1,13 +1,23 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, shell } from 'electron';
 import electron_log from 'electron-log';
 import { spawn, spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import { basename,  dirname, resolve } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
 import { name } from '../../../config.json'
-import { errorWithMessage, info, warn } from '../util';
+import { error, errorWithMessage, info, warn } from '../util';
+import { Durations } from '../../common/time';
+import { mainWindow } from './window';
 
 // not much installer, just what happens on first run after install & updater
+let updateUrl = '';
+
+export function registerUpdateIPC() {
+    ipcMain.on('open-download-url', () => {
+        if (!updateUrl) return;
+        shell.openExternal(updateUrl);
+    });
+}
 
 export function initUpdater() {
     if (!app.isPackaged) {
@@ -15,9 +25,14 @@ export function initUpdater() {
         return;
     }
 
-    // 2. The updater only works on Windows
+    // updater only works on Windows & macos
     if (process.platform !== 'win32' && process.platform !== 'darwin') {
-        info('Non-Windows / MacOS platform: Auto-updater disabled.');
+        // show notification instead
+        setTimeout(checkForUpdate, 5000); // short delay to ensure renderer is ready
+
+        // Then check periodically (e.g., every 4 hours)
+        setInterval(checkForUpdate, 3 * Durations.msInHour);
+
         return;
     }
 
@@ -34,6 +49,35 @@ export function initUpdater() {
         });
     } catch (error) {
         errorWithMessage('Failed to initialize auto-updater', error);
+    }
+}
+
+async function checkForUpdate() {
+    if (!mainWindow) return; // Can't send a message if the window doesn't exist
+
+    try {
+        const response = await fetch('https://api.github.com/repos/DKrois/InStepServer/releases/latest');
+        if (!response.ok) {
+            error(`Failed to fetch releases: ${response.statusText}`);
+            return;
+        }
+
+        const release = await response.json();
+        const latestVersion = release.tag_name.replace('v', '');
+        const currentVersion = app.getVersion();
+
+        if (latestVersion > currentVersion) {
+            info(`Update found: ${latestVersion}. Current: ${currentVersion}`);
+
+            mainWindow.webContents.send('update-available', {
+                version: latestVersion,
+                oldVersion: currentVersion,
+                releaseNotes: release.body, // release notes
+                url: release.html_url
+            });
+        }
+    } catch (error) {
+        errorWithMessage('Failed to check for updates', error);
     }
 }
 
@@ -98,10 +142,10 @@ function createShortcut(script: string, type: 'Desktop' | 'Start Menu') {
         warn("Didn't create shortcut due to non-Windows OS");
         return false;
     }
-    /*if (!app.isPackaged) {
+    if (!app.isPackaged) {
         warn("Didn't create shortcut due to dev environment");
         return false;
-    }*/
+    }
 
     try {
         const fullCommand = `

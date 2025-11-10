@@ -7,7 +7,6 @@ import { defaultTimeSettings, Durations } from '../../common/time';
 import { defaultDBPath } from '../database';
 import { canWriteToPath, info } from '../util';
 
-
 let initialPassword: string | null = null;
 
 export const store = new Store({

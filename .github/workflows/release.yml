@@ -1,0 +1,49 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # Run this workflow when you push a new version tag
+
+jobs:
+  build-and-release:
+    strategy:
+      matrix:
+        # Run a job for each OS
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    # Use the OS from the matrix
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build/make the application
+        # This command runs Electron Forge and builds for the current OS of the runner
+        run: npm run make
+        env:
+          # This is required for macOS notarization and publishing to GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # FOR MACOS SIGNING/NOTARIZATION (you would add these as repo secrets)
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v1
+        with:
+          # This tells the action to upload all files from the 'out/make' directory
+          files: |
+            out/make/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

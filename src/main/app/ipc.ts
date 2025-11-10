@@ -1,7 +1,7 @@
 import { ipcMain, nativeTheme } from 'electron';
 import { defaultDBPath, initDB, projectDB } from '../database';
 import { initServer, stopServer } from '../server';
-import { registerShortcutsIPC } from './installer';
+import { registerShortcutsIPC, registerUpdateIPC } from './installer';
 import { registerSecurityIPC, registerSettingsIPC, store } from './settings';
 import { normalizeSize } from '../util';
 import { registerTimeSettingsIPC } from './timeScheduler';
@@ -16,6 +16,7 @@ export function registerIPCHandlers() {
     registerThemeIPC();
     registerSettingsIPC();
     registerTimeSettingsIPC();
+    registerUpdateIPC();
     registerSecurityIPC();
     registerServerIPC();
     registerShortcutsIPC();

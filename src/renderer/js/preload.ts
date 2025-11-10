@@ -5,6 +5,11 @@ const api = {
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
     saveLanguage: (lang: string): void => ipcRenderer.send('save-language', lang),
 
+    onUpdateAvailable: (callback: (details: { version: string, oldVersion: string, releaseNotes: string, url: string }) => void) => {
+        ipcRenderer.on('update-available', (_event, details) => callback(details));
+    },
+    openDownloadURL: () => ipcRenderer.send('open-download-url'),
+
     onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
         // event can only happen once
         ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
