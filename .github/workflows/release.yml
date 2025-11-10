@@ -24,7 +24,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Or your preferred Node.js version
+          node-version: 22.18.0
 
       - name: Install dependencies
         # 'npm ci' is recommended for CI as it's faster and stricter than 'npm install'
