@@ -17,8 +17,8 @@ export let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
 export function createWindow() {
-    // get primary screens work area
     const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size;
+    // maximize if screen is too small
     const shouldMaximize = screenWidth < defaultWindowWidth || screenHeight < defaultWindowHeight;
 
     mainWindow = new BrowserWindow({
@@ -35,8 +35,48 @@ export function createWindow() {
     });
 
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+    Menu.setApplicationMenu(createMenu());
+    if (shouldMaximize) mainWindow.maximize();
 
-    const menu = Menu.buildFromTemplate([
+    // once window is ready, show it. This avoids the flash
+    mainWindow.once('ready-to-show', mainWindow?.show);
+
+    mainWindow.on('close', event => {
+        if (!isQuitting && store.get('hideToTray')) {
+            // hide window to tray rather than full close
+            event.preventDefault();
+            mainWindow?.hide();
+        }
+    });
+    mainWindow.on('closed', () => mainWindow = null);
+
+    mainWindow.webContents.on('did-finish-load', finishedLoad);
+}
+
+async function finishedLoad() {
+    info('Renderer finished loading...');
+
+    if (store.get('firstTimeRunning')) {
+        info('First time running, sending first-time-running IPC and generating password...');
+        setInitialPassword();
+
+        mainWindow?.webContents.send('first-time-running', defaultDBPath);
+        // reset firstTimeRunning flag on initial modal close in case of program crash
+    }
+
+    const timeSettings = store.get('timeSettings') as any;
+    // time management takes precedence over "start on open" setting
+    if (timeSettings?.enabled) {
+        await startScheduler();
+    } else if (store.get('startServerOnOpen')) {
+        handleStartServer();
+    } else {
+        mainWindow?.webContents.send('server-status-changed', { isRunning: false, port: null });
+    }
+}
+
+function createMenu() {
+    return Menu.buildFromTemplate([
         {
             label: 'File',
             submenu: [
@@ -106,44 +146,6 @@ export function createWindow() {
             ]
         }
     ]);
-    Menu.setApplicationMenu(menu);
-
-    if (shouldMaximize) mainWindow.maximize();
-    // Once window is ready, show it. This avoids the flash
-    mainWindow.once('ready-to-show', mainWindow?.show);
-
-    mainWindow.on('close', event => {
-        if (!isQuitting && store.get('hideToTray')) {
-            // hide window to tray rather than full close
-            event.preventDefault();
-            mainWindow?.hide();
-        }
-    });
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
-
-    mainWindow.webContents.on('did-finish-load', async () => {
-        info('Renderer finished loading...');
-
-        if (store.get('firstTimeRunning')) {
-            info('First time running, sending first-time-running IPC and generating password...');
-            setInitialPassword();
-
-            mainWindow?.webContents.send('first-time-running', defaultDBPath);
-            // reset firstTimeRunning flag on initial modal close in case of program crash
-        }
-
-        const timeSettings = store.get('timeSettings') as any;
-        // Time management takes precedence over the simple "start on open" setting
-        if (timeSettings?.enabled) {
-            await startScheduler();
-        } else if (store.get('startServerOnOpen')) {
-            handleStartServer();
-        } else {
-            mainWindow?.webContents.send('server-status-changed', { isRunning: false, port: null });
-        }
-    });
 }
 
 export function createTray() {

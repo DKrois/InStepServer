@@ -1,16 +1,16 @@
 import express from 'express';
 import session from 'express-session';
-import makeStore from 'nedb-promises-session-store';
+import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import multer from 'multer';
-import crypto from 'node:crypto';
+import makeStore from 'nedb-promises-session-store';
 import { Server } from 'node:http';
-import { tmpdir } from 'node:os'
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import * as api from './api';
 import { userDataPath } from './app/app';
-import { store, verifyPassword } from './app/settings';
+import { store } from './app/settings';
 import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, formatError, getOwnIPs, info, warn } from './util.js';
-import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
 
@@ -66,7 +66,7 @@ function createExpressApp() {
     });
 
     app.use(session({
-        secret: getSessionSecret(), // Used to sign the session ID cookie
+        secret: api.getSessionSecret(), // Used to sign the session ID cookie
         store: fileStore,
         resave: false,                                    // Don't save session if unmodified
         saveUninitialized: false,                         // Don't create session until something stored
@@ -84,21 +84,21 @@ function createExpressApp() {
     });
 
     app.use(express.static('public')); // for login page
-    app.post('/login', handleLogin);
+    app.post('/login', api.handleLogin);
 
     app.use('/api/static', express.static(projectDB.path)); // serve db path for image access
     app.use('/app', isAuth, express.static('protected')); // for IMD
 
     // GET routes without auth
-    app.get('/api/:id/list', handleListRequest);
-    app.get('/api/:id', handleGETRequest);
-    app.get('/api/:id/:version', handleGETRequest);
+    app.get('/api/:id/list', api.handleListRequest);
+    app.get('/api/:id', api.handleGETRequest);
+    app.get('/api/:id/:version', api.handleGETRequest);
 
-    app.put('/api/:id/', isAuth, handlePUTRequest);
-    app.put('/api/:id/:version', isAuth, handlePUTRequest);
-    app.post('/api/:id/:version/floorplans', isAuth, upload.array('floorplans'), handleFloorplanUpload);
-    app.delete('/api/:id', isAuth, handleDELETERequest);
-    app.delete('/api/:id/:version', isAuth, handleDELETERequest);
+    app.put('/api/:id/', isAuth, api.handlePUTRequest);
+    app.put('/api/:id/:version', isAuth, api.handlePUTRequest);
+    app.post('/api/:id/:version/floorplans', isAuth, upload.array('floorplans'), api.handleFloorplanUpload);
+    app.delete('/api/:id', isAuth, api.handleDELETERequest);
+    app.delete('/api/:id/:version', isAuth, api.handleDELETERequest);
 
     // handle non-existing routes
     app.use((req: express.Request, res: express.Response) => {
@@ -121,8 +121,6 @@ function createExpressApp() {
     return app;
 }
 
-// --- Authentication Middleware ---
-
 function isAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         if (req.session.isAuthenticated) {
@@ -139,153 +137,6 @@ function isAuth(req: express.Request, res: express.Response, next: express.NextF
         }
     } catch (e) {
         next(e);
-    }
-}
-
-async function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
-    try {
-        const { password } = req.body;
-        if (!password) return res.status(400).send(formatError('Password is required.'));
-
-        const isValid = await verifyPassword(password);
-        if (isValid) {
-            req.session.isAuthenticated = true; // Set the session flag
-
-            req.session.save((err) => {
-                if (err) {
-                    errorWithMessage('Session save error after login', err);
-                    return next(err);
-                }
-
-                info('User authenticated successfully and session saved.');
-                return res.status(200).json({ message: 'Login successful.' });
-            });
-        } else {
-            warn('Failed login attempt.');
-            return res.status(401).json(formatError('Invalid password.'));
-        }
-    } catch (e) {
-        next(e);
-    }
-}
-
-function getSessionSecret(): string {
-    const key = 'sessionSecret';
-    let secret = store.get(key);
-
-    // If no secret is found, generate a new one
-    if (!secret) {
-        info('No session secret found. Generating a new one.');
-        secret = crypto.randomBytes(64).toString('hex');
-
-        // Save the new secret to the store for future restarts
-        store.set(key, secret);
-    }
-
-    return secret;
-}
-
-// --- API Handlers ---
-
-async function handlePUTRequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = req.params.version ? parseInt(req.params.version) : undefined;
-
-    // keys === 0 checks if body is empty
-    const data = req.body;
-    if (!data || Object.keys(data).length === 0) return res.status(400).send(formatError('No data provided.'));
-
-    const v = version ?? ((await projectDB.getLatestVersion(id))?.version ?? 0) + 1;
-
-    const handler = async () => {
-        await projectDB.add(id, v, data);
-        res.sendStatus(204);
-    };
-    const onSuccess = () => info(`Added / updated ${id}/v${v}`);
-
-    return handle(handler, onSuccess, res, id, v, true);
-}
-
-async function handleFloorplanUpload(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = parseInt(req.params.version);
-
-    const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) return res.status(400).send(formatError('No files provided.'));
-
-    const handler = async () => {
-        for (const file of files) await projectDB.addImage(id, version, file);
-
-        res.sendStatus(204);
-    };
-    const onSuccess = () => info(`Added ${files.length} floorplans to ${id}/v${version}`);
-
-    return handle(handler, onSuccess, res, id, version, false); // don't require version in case of multiple requests sent at once
-}
-
-async function handleGETRequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = req.params.version ? parseInt(req.params.version) : undefined;
-
-    const handler = async () => {
-        const v = version ?? (await projectDB.getLatestVersion(id))?.version;
-        if (v === undefined) return formatError('No versions found for this project.');
-
-        const data = await projectDB.get(id, v);
-
-        const imageFiles = await projectDB.listImages(id, v);
-
-        data.floorplanImages = {};
-        for (const filename of imageFiles) {
-            // The filename is the floor name (e.g., 'floor1.png')
-            // Construct the static URL
-            data.floorplanImages[filename] = `/api/static/${id}/v${v}/${filename}`;
-        }
-
-        res.status(200).send(data);
-    };
-    const onSuccess = () => info(`Requested ${id}/${(version ? `v${version}` : '@latest')}`);
-
-    return handle(handler, onSuccess, res, id, version, false);
-}
-
-async function handleListRequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-
-    const handler = async () => {
-        const versions = await projectDB.list(id);
-        res.status(200).send({ versions });
-    };
-    const onSuccess = () => info(`Listed ${id}/`);
-
-    return handle(handler, onSuccess, res, id);
-}
-
-async function handleDELETERequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = req.params.version ? parseInt(req.params.version) : undefined;
-
-    const handler = async () => {
-        await projectDB.delete(id, version);
-        res.sendStatus(204);
-    };
-    const onSuccess = () => info(`Deleted ${id}/${version ? `v${version}` : ''}`);
-
-    return handle(handler, onSuccess, res, id, version, false);
-}
-
-async function handle(handler: () => Promise<any>, onSuccess: () => any, res: express.Response, id: number, version?: number, requireVersion?: boolean) {
-    res.setHeader('Content-Type', 'application/json');
-
-    if (isNaN(id)) return res.status(400).send(formatError('No / invalid ID provided.'));
-    if (version !== undefined && isNaN(version)) return res.status(400).send(formatError('Invalid version provided.'));
-    if (requireVersion && (version === undefined || version === null)) return res.status(400).send(formatError('No version provided.'));
-
-    try {
-        return await handler().then(onSuccess);
-    } catch (e: any) {
-        if (e.code === 'ENOENT') return res.status(400).send(formatError('File not found.', { path: e.path }));
-        return res.status(500).send(formatError(e))
     }
 }
 

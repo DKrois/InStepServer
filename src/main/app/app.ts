@@ -34,8 +34,8 @@ export function initApp() {
 
         createWindow();
         createTray();
-
         initStore();
+
         // db init
         // first run already handled by ipc / handleInitialModalClosed
         const projectDataPath = store.get('projectDataPath');
