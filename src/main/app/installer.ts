@@ -35,8 +35,7 @@ export function initUpdater() {
         return;
     }
 
-
-    // updater only works on Windows & macos
+    // updater only works on Windows & macOS
     if (process.platform !== 'win32' && process.platform !== 'darwin') {
         // show notification instead
         setTimeout(() => {
@@ -56,7 +55,7 @@ export function initUpdater() {
 
     try {
         updateElectronApp({
-            updateInterval: '1 hour',
+            updateInterval: '5 minutes', // '1 hour', // TODO
             logger: electron_log,
         });
     } catch (error) {
