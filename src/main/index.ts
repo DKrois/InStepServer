@@ -1,29 +1,15 @@
+import { app } from 'electron';
 import process from 'node:process';
 // force color support before imports as electron breaks it otherwise
 process.env.FORCE_COLOR = '1';
 
 import { initApp } from './app/app.js';
+import { name } from '../../config.json';
 import 'source-map-support/register';
 import { errorWithMessage, info } from './util.js';
 
-/* DONE
- *
- * auto time stuff
- * Open existing one rather than new instance if shortcut clicked
- * implement security
- * options → change data path (startup modal → IPC after close to init db ?)
- * organize files
- *
- */
-
-/* WIP
- *
+/*
  * test auto update
- * test shortcuts
- *
- */
-
-/* TODO
  *
  * installer: banner / bg?
  *
@@ -42,6 +28,7 @@ import { errorWithMessage, info } from './util.js';
 
 
 async function main() {
+    console.log(`${name} v${app.getVersion()} (electron v${process.versions.electron}, node v${process.versions.node})`);
     initApp();
     //setInterval(() => console.log(normalizeSize(process.memoryUsage().heapUsed)), 1000)
 

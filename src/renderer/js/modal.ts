@@ -1,5 +1,7 @@
 import { showTranslatedToast } from './logs';
 import { getTranslation } from './translate';
+// @ts-ignore
+import { marked } from 'marked';
 
 // Modal, confirmation
 
@@ -18,8 +20,7 @@ const createStartMenuShortcutBtn = document.getElementById('create-startMenu-sho
 const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortcut-btn')!;
 
 const updateModal = document.getElementById('update-modal')!;
-const updateVersionNumber = document.getElementById('update-version-number')!;
-const currentVersionNumber = document.getElementById('current-version-number')!;
+const updateVersionParagraph = document.getElementById('update-version-paragraph')!;
 const updateReleaseNotes = document.getElementById('update-release-notes')!;
 const updateLaterBtn = document.getElementById('update-later-btn')!;
 const updateDownloadBtn = document.getElementById('update-download-btn')!;
@@ -138,9 +139,14 @@ export function closeModal(el: HTMLElement) {
 // --- Update modal ---
 function showUpdateModal(details: { version: string, oldVersion: string, releaseNotes: string, url: string }) {
     // populate modal with version info
-    updateVersionNumber.textContent = details.version;
-    currentVersionNumber.textContent = details.oldVersion;
-    updateReleaseNotes.textContent = details.releaseNotes || 'No release notes provided.';
+    updateVersionParagraph.textContent = getTranslation('newVersionAvailable', {
+        version: details.version,
+        oldVersion: details.oldVersion
+    });
+
+    const releaseNotes = details.releaseNotes || getTranslation('noReleaseNotes');
+    updateReleaseNotes.innerHTML = marked.parse(releaseNotes, { async: false});
+
     openModal(updateModal);
 }
 

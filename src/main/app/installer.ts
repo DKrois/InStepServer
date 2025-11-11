@@ -53,7 +53,7 @@ export function initUpdater() {
 }
 
 async function checkForUpdate() {
-    if (!mainWindow) return; // Can't send a message if the window doesn't exist
+    if (!mainWindow) return;
 
     try {
         const response = await fetch('https://api.github.com/repos/DKrois/InStepServer/releases/latest');
@@ -69,12 +69,16 @@ async function checkForUpdate() {
         if (latestVersion > currentVersion) {
             info(`Update found: ${latestVersion}. Current: ${currentVersion}`);
 
+            updateUrl = release.html_url;
+
             mainWindow.webContents.send('update-available', {
                 version: latestVersion,
                 oldVersion: currentVersion,
                 releaseNotes: release.body, // release notes
-                url: release.html_url
+                url: updateUrl
             });
+
+            console.log({ updateUrl })
         }
     } catch (error) {
         errorWithMessage('Failed to check for updates', error);
@@ -90,6 +94,10 @@ export function handleSquirrelCommands() {
         info(`processing squirrel command \`${cmd}\``);
         const target = basename(process.execPath);
 
+        if (cmd === '--squirrel-install' || cmd === '--squirrel-updated') {
+            // don't create shortcuts
+            return true;
+        }
         if (cmd === '--squirrel-uninstall') {
             run(['--removeShortcut=' + target + ''], app.quit);
             return true;
@@ -161,7 +169,10 @@ function createShortcut(script: string, type: 'Desktop' | 'Start Menu') {
             '-Command', fullCommand,
         ], { encoding: 'utf-8' });
 
-        if (result.error) throw result.error;
+        if (result.error) {
+            errorWithMessage(`Failed to create ${type} shortcut`, result.error);
+            return false;
+        }
     } catch (e) {
         errorWithMessage(`Failed to create ${type} shortcut`, e);
         return false;

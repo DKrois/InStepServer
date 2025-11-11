@@ -121,6 +121,14 @@
   "toastShortcutFailed": "Erstellen von {{type}}-Verknüpfung fehlgeschlagen",
 
 
+  "updateAvailableTitle": "Update verfügbar",
+  "newVersionAvailable": "Eine neue Version ({{version}}) ist verfügbar. Sie verwenden aktuell Version {{oldVersion}}.",
+  "releaseNotes": "Versionshinweise",
+  "noReleaseNotes": "Keine Versionshinweise vorhanden.",
+  "updateLater": "Später",
+  "updateDownload": "Herunterladen",
+
+
   "close": "Schließen",
   "confirmTitle": "Sind Sie sicher?",
   "ok": "OK",

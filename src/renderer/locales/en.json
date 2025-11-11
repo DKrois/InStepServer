@@ -120,6 +120,14 @@
   "toastShortcutFailed": "Failed to create {{type}} shortcut",
 
 
+  "updateAvailableTitle": "Update Available",
+  "newVersionAvailable": "A new version ({{version}}) is available. You are currently on version {{oldVersion}}.",
+  "releaseNotes": "Release Notes",
+  "noReleaseNotes": "No release notes provided.",
+  "updateLater": "Later",
+  "updateDownload": "Download",
+
+
   "close": "Close",
   "confirmTitle": "Are you sure?",
   "ok": "OK",
