@@ -55,7 +55,7 @@ jobs:
         # This action finds the release corresponding to your tag and uploads files to it
         uses: softprops/action-gh-release@v1
         with:
-          generate_release_notes: true
+          body_path: docs/RELEASE_NOTES.md
           files: |
             out/make/**/RELEASES
             out/make/**/*.nupkg
