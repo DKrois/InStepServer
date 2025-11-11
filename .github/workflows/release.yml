@@ -1,6 +1,9 @@
 # .github/workflows/release.yml
+# git tag v1.x.x
+# git push origin v1.x.x
 
 name: Build & Release
+run-name: Release ${{ github.ref_name }}
 
 on:
   push:
@@ -53,16 +56,14 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
-          # This tells the action to upload everything from the 'out/make' directory
-          # The glob pattern `**/*` means all files in all subdirectories.
           files: |
-            out/make/squirrel.windows/x64/RELEASES
-            out/make/squirrel.windows/x64/*.nupkg
-            out/make/squirrel.windows/x64/*.exe
-            out/make/wix/x64/*.msi
-            out/make/*.dmg
-            out/make/*.zip
-            out/make/*.deb
-            out/make/*.rpm
+            out/make/**/RELEASES
+            out/make/**/*.nupkg
+            out/make/**/*.exe
+            out/make/**/*.msi
+            out/make/**/*.dmg
+            out/make/**/*.zip
+            out/make/**/*.deb
+            out/make/**/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

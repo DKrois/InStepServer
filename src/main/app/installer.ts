@@ -5,9 +5,9 @@ import * as fs from 'node:fs';
 import { basename,  dirname, resolve } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
 import { name } from '../../../config.json'
-import { error, errorWithMessage, info, warn } from '../util';
-import { Durations } from '../../common/time';
-import { mainWindow } from './window';
+import { error, errorWithMessage, info, warn } from '../logging.js';
+import { Durations } from '../../common/time.js';
+import { mainWindow } from './window.js';
 
 // not much installer, just what happens on first run after install & updater
 let updateUrl = '';

@@ -3,9 +3,10 @@ import { app, dialog, ipcMain, nativeTheme } from 'electron';
 // @ts-ignore
 import Store from 'electron-store';
 import crypto from 'node:crypto';
-import { defaultTimeSettings, Durations } from '../../common/time';
-import { defaultDBPath } from '../database';
-import { canWriteToPath, info } from '../util';
+import { defaultTimeSettings, Durations } from '../../common/time.js';
+import { defaultDBPath } from '../database.js';
+import { info } from '../logging.js';
+import { canWriteToPath } from '../util.js';
 
 let initialPassword: string | null = null;
 

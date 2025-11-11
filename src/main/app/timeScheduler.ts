@@ -1,10 +1,10 @@
 import { dialog, ipcMain, Menu } from 'electron';
-import { generateScheduleEvents, TimeSettings } from '../../common/time';
+import { generateScheduleEvents, TimeSettings } from '../../common/time.js';
 import { schedulerIntervalTime } from '../../../config.json';
-import { error, errorWithMessage, info, infoWithBackground, warn } from '../util';
-import { handleStartServer, handleStopServer, manualTimeOverride, serverStartTime, setManualTimeOverride } from './ipc';
-import { store } from './settings';
-import { mainWindow } from './window';
+import { error, errorWithMessage, info, infoWithBackground, warn } from '../logging.js';
+import { handleStartServer, handleStopServer, manualTimeOverride, serverStartTime, setManualTimeOverride } from './ipc.js';
+import { store } from './settings.js';
+import { mainWindow } from './window.js';
 import { writeFile, readFile } from 'node:fs/promises';
 let schedulerInterval: NodeJS.Timeout | null = null;
 
