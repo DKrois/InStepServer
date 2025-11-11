@@ -1,8 +1,8 @@
 // force color support before imports as electron breaks it otherwise
+import process from 'node:process';
 process.env.FORCE_COLOR = '1';
 
 import { app } from 'electron';
-import process from 'node:process';
 import { name } from '../../config.json';
 import 'source-map-support/register';
 import { initApp } from './app/app.js';
