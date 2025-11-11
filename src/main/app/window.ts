@@ -1,10 +1,12 @@
 import { app, BrowserWindow, Menu, screen, shell, Tray } from 'electron';
+import type { MenuItemConstructorOptions, MenuItem } from 'electron';
 import { join } from 'node:path';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
 import { defaultDBPath, ProjectDatabase, projectDB } from '../database.js';
 import { info } from '../logging.js';
 import { attempt } from '../util.js';
-import { isQuitting } from './app.js';
+import { isQuitting, showToast } from './app.js';
+import { createShortcut } from './installer';
 import { handleStartServer, handleStopServer } from './ipc.js';
 import { setInitialPassword, store } from './settings.js';
 import { startScheduler } from './timeScheduler.js';
@@ -77,7 +79,7 @@ async function finishedLoad() {
 }
 
 function createMenu() {
-    return Menu.buildFromTemplate([
+    const menu: (MenuItemConstructorOptions | MenuItem)[] = [
         {
             label: 'File',
             submenu: [
@@ -95,9 +97,7 @@ function createMenu() {
                 { type: 'separator' },
                 {
                     label: 'Hide to Tray',
-                    click: () => {
-                        mainWindow?.hide();
-                    }
+                    click: () => mainWindow?.hide()
                 },
                 {
                     label: 'Restart',
@@ -132,21 +132,44 @@ function createMenu() {
                     label: 'Hide to tray on close',
                     type: 'checkbox',
                     checked: store.get('hideToTray'),
-                    click: (menuItem) => {
-                        store.set('hideToTray', menuItem.checked);
-                    }
+                    click: menuItem => store.set('hideToTray', menuItem.checked)
                 },
                 {
                     label: 'Start server when starting app',
                     type: 'checkbox',
                     checked: store.get('startServerOnOpen'),
-                    click: (menuItem) => {
-                        store.set('startServerOnOpen', menuItem.checked);
-                    }
+                    click: menuItem => store.set('startServerOnOpen', menuItem.checked)
                 },
             ]
         }
-    ]);
+    ];
+
+    if (process.platform === 'win32') {
+        const options: MenuItemConstructorOptions[] = [
+            { type: 'separator' },
+            {
+                label: 'Create Start Menu Shortcut',
+                click: () => {
+                    const success = createShortcut('StartMenu');
+                    if (success) showToast('toastShortcutCreated', { type: 'Start Menu' });
+                    else showToast('toastShortcutFailed', { type: 'Start Menu' });
+                }
+            },
+            {
+                label: 'Create Desktop Shortcut',
+                click: () => {
+                    const success = createShortcut('Desktop');
+                    if (success) showToast('toastShortcutCreated', { type: 'Desktop' });
+                    else showToast('toastShortcutFailed', { type: 'Desktop' });
+                }
+            }
+        ];
+
+        const optionsMenu = menu.find(m => m.label === 'Options');
+        (optionsMenu?.submenu as MenuItemConstructorOptions[]).push(...options);
+    }
+
+    return Menu.buildFromTemplate(menu);
 }
 
 export function createTray() {
@@ -168,7 +191,5 @@ export function createTray() {
     tray.setContextMenu(contextMenu);
 
     // re-open app when user clicks tray icon
-    tray.on('click', () => {
-        mainWindow?.show();
-    });
+    tray.on('click', () => mainWindow?.show());
 }

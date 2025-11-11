@@ -125,8 +125,9 @@
   "newVersionAvailable": "Eine neue Version ({{version}}) ist verfügbar. Sie verwenden aktuell Version {{oldVersion}}.",
   "releaseNotes": "Versionshinweise",
   "noReleaseNotes": "Keine Versionshinweise vorhanden.",
-  "updateLater": "Später",
-  "updateDownload": "Herunterladen",
+  "download": "Herunterladen",
+  "later": "Später",
+  "dontAskAgain": "Nicht erneut fragen",
 
 
   "close": "Schließen",

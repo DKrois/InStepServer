@@ -1,5 +1,6 @@
 import { app, BrowserWindow, nativeTheme } from 'electron';
 import log from 'electron-log';
+import type { TOptions } from 'i18next';
 
 // variable needs to be set before importing projectDB as it uses it during initialization
 export const userDataPath = app.getPath('userData');
@@ -68,5 +69,9 @@ export function initApp() {
 }
 
 export function sendLog(message: string) {
-    if (mainWindow) mainWindow.webContents.send('log', message);
+    mainWindow?.webContents.send('log', message);
+}
+
+export function showToast(key: string, options?: TOptions, type: 'info' | 'error' = 'info') {
+    mainWindow?.webContents.send('show-toast', key, options, type);
 }

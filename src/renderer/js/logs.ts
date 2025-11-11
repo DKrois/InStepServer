@@ -15,6 +15,9 @@ const toastContainer = document.getElementById('toast-container')!;
 
 let isAutoScrollActive = true;
 
+window.api.onLog(addLogMessage);
+window.api.onShowToast(showTranslatedToast);
+
 toggleLogsBtn.addEventListener('click', () => {
     const isHidden = logsSection.classList.toggle('hidden');
     logActions.classList.toggle('hidden', isHidden);
@@ -27,19 +30,22 @@ clearLogsBtn.addEventListener('click', () => {
     logsOutput.innerHTML = '';
 });
 
-window.api.onLog(addLogMessage);
+logsOutput.addEventListener('scroll', () => {
+    // Using a small threshold to account for fractional pixel values
+    const scrollThreshold = 5;
+
+    // Calculate how close the user is to the bottom and autoscroll if at bottom
+    isAutoScrollActive = logsOutput.scrollHeight - logsOutput.scrollTop - logsOutput.clientHeight < scrollThreshold;
+});
 
 function addLogMessage(message: string) {
     const formatted = formatLog(message);
     logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n`);
 
     if (isAutoScrollActive) scrollToBottom();
-    /*const isScrolledToBottom = logsContainer.scrollHeight - logsContainer.clientHeight <= logsContainer.scrollTop + 1;
-    logsOutput.innerHTML += formatLog(log, true) + '\n';
-    if (isScrolledToBottom) logsContainer.scrollTop = logsContainer.scrollHeight;*/
 }
 
-// ** Log formatting **
+// - Log formatting -
 function formatLog(message: string, fromServer = false) {
     const base = `${getCurrentTime()}${fromServer ? ' [Server]' : ''}`;
     const baseFormatted = formatBackground(base);
@@ -67,28 +73,18 @@ function escapeHtml(unsafe: string): string {
         .replace(/'/g, "&#039;");
 }
 
-// *** Scroll behaviour
-
 function scrollToBottom() {
     logsOutput.scrollTop = logsOutput.scrollHeight;
 }
 
-logsOutput.addEventListener('scroll', () => {
-    // Using a small threshold to account for fractional pixel values
-    const scrollThreshold = 5;
-
-    // Calculate how close the user is to the bottom and autoscroll if at bottom
-    isAutoScrollActive = logsOutput.scrollHeight - logsOutput.scrollTop - logsOutput.clientHeight < scrollThreshold;
-});
-
-// *** Notification toasts ***
-export function showToast(message: string, type: 'info' | 'error' = 'info') {
-    // Get the container element
+// --- Notification toasts ---
+function showToast(message: string, type: 'info' | 'error' = 'info') {
+    // create container element
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
 
-    // Add the toast to the container
+    // add toast to container
     toastContainer.appendChild(toast);
 
     // Trigger the "show" animation shortly after adding the element

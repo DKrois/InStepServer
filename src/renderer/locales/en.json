@@ -124,8 +124,9 @@
   "newVersionAvailable": "A new version ({{version}}) is available. You are currently on version {{oldVersion}}.",
   "releaseNotes": "Release Notes",
   "noReleaseNotes": "No release notes provided.",
-  "updateLater": "Later",
-  "updateDownload": "Download",
+  "download": "Download",
+  "later": "Later",
+  "dontAskAgain": "Don't ask again",
 
 
   "close": "Close",

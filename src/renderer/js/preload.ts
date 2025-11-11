@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type { TOptions } from 'i18next';
 import { TimeSettings } from '../../common/time';
 
 const api = {
@@ -9,6 +10,7 @@ const api = {
         ipcRenderer.on('update-available', (_event, details) => callback(details));
     },
     openDownloadURL: () => ipcRenderer.send('open-download-url'),
+    setUpdateNotification: (notificationType: 'never' | 'later') => ipcRenderer.send('set-notification-update', notificationType),
 
     onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
         // event can only happen once
@@ -55,6 +57,9 @@ const api = {
 
     onLog: (callback: (log: string) => void) => {
         ipcRenderer.on('log', (_event, value) => callback(value as string));
+    },
+    onShowToast: (callback: (key: string, options?: TOptions, type?: 'info' | 'error') => void) => {
+        ipcRenderer.on('show-toast', (_event, key: string, options?: TOptions, type: 'info' | 'error' = 'info') => callback(key, options, type));
     },
 };
 

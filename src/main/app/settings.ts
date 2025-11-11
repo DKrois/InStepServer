@@ -14,11 +14,12 @@ export const store = new Store({
     defaults: {
         port: 5000,
         theme: 'system',
-        language: '', // init in initStore
+        language: '', // set in initStore
         hideToTray: true,
         startServerOnOpen: false,
         timeSettings: defaultTimeSettings,
         firstTimeRunning: true,
+        blockUpdateNotification: false,
         passwordHash: '', // set on startup or update ipc
         sessionSecret: '', // set on server init
         sessionMaxAge: 30 * Durations.msInDay,

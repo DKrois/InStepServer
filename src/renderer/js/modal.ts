@@ -22,8 +22,9 @@ const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortc
 const updateModal = document.getElementById('update-modal')!;
 const updateVersionParagraph = document.getElementById('update-version-paragraph')!;
 const updateReleaseNotes = document.getElementById('update-release-notes')!;
-const updateLaterBtn = document.getElementById('update-later-btn')!;
 const updateDownloadBtn = document.getElementById('update-download-btn')!;
+const updateLaterBtn = document.getElementById('update-later-btn')!;
+const updateNeverBtn = document.getElementById('update-never-btn')!;
 
 const confirmModal = document.getElementById('confirm-modal')!;
 const confirmTitle = document.getElementById('confirm-title')!;
@@ -102,13 +103,17 @@ closeInitialModalBtn.addEventListener('click', () => {
 
 window.api.onUpdateAvailable(showUpdateModal);
 
-updateLaterBtn.addEventListener('click', () => {
-    closeModal(updateModal);
-});
-
 updateDownloadBtn.addEventListener('click', () => {
     window.api.openDownloadURL();
     closeModal(updateModal);
+});
+updateLaterBtn.addEventListener('click', () => {
+    closeModal(updateModal);
+    window.api.setUpdateNotification('later');
+});
+updateNeverBtn.addEventListener('click', () => {
+    closeModal(updateModal);
+    window.api.setUpdateNotification('never');
 });
 
 export function openModal(el: HTMLElement) {
@@ -159,7 +164,7 @@ export function showConfirmation(messageKey: string, titleKey: string = 'confirm
     // show modal
     openModal(confirmModal);
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         // define cleanup function to remove listeners
         const cleanup = () => {
             closeModal(confirmModal);
