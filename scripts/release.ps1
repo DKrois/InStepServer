@@ -10,7 +10,9 @@ if (-not $Version.StartsWith('v')) {
     $Version = "v$Version"
 }
 
-# make sure repo is up-to-date
+# make sure repo & packages are up-to-date
+npm i
+
 git add .
 git commit -m "Release $Version"
 git push origin master
