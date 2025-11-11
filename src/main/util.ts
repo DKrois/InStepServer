@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { networkInterfaces } from 'node:os';
 import { join } from 'node:path';
-import { formatNumber } from '../common/util';
+import { formatNumber } from '../common/util.js';
 
 export function formatError(e: Error | string, additional?: any) {
     const message = typeof e === 'string' ? e : e.message;

@@ -6,11 +6,12 @@ import makeStore from 'nedb-promises-session-store';
 import { Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import * as api from './api';
-import { userDataPath } from './app/app';
-import { store } from './app/settings';
+import * as api from './api.js';
+import { userDataPath } from './app/app.js';
+import { store } from './app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
-import { errorWithMessage, formatError, getOwnIPs, info, warn } from './util.js';
+import { errorWithMessage, info, warn } from './logging.js';
+import { formatError, getOwnIPs } from './util.js';
 
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
 

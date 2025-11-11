@@ -1,8 +1,9 @@
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { userDataPath } from './app/app';
-import { mainWindow } from './app/window';
-import { errorWithMessage, info, warn, writeJSON } from './util.js';
+import { userDataPath } from './app/app.js';
+import { mainWindow } from './app/window.js';
+import { errorWithMessage, info, warn } from './logging.js';
+import { writeJSON } from './util.js';
 
 export const defaultDBPath = join(userDataPath, 'data');
 

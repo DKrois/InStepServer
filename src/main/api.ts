@@ -1,8 +1,9 @@
 import crypto from 'crypto';
 import express from 'express';
-import { store, verifyPassword } from './app/settings';
-import { projectDB } from './database';
-import { errorWithMessage, formatError, info, warn } from './util';
+import { store, verifyPassword } from './app/settings.js';
+import { projectDB } from './database.js';
+import { errorWithMessage, info, warn } from './logging.js';
+import { formatError } from './util.js';
 
 // --- Auth ---
 

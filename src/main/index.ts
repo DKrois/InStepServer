@@ -1,12 +1,12 @@
-import { app } from 'electron';
-import process from 'node:process';
 // force color support before imports as electron breaks it otherwise
 process.env.FORCE_COLOR = '1';
 
-import { initApp } from './app/app.js';
+import { app } from 'electron';
+import process from 'node:process';
 import { name } from '../../config.json';
 import 'source-map-support/register';
-import { errorWithMessage, info } from './util.js';
+import { initApp } from './app/app.js';
+import { errorWithMessage, info } from './logging.js';
 
 /*
  * test auto update

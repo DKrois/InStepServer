@@ -1,12 +1,13 @@
 import { app, BrowserWindow, Menu, screen, shell, Tray } from 'electron';
 import { join } from 'node:path';
-import { defaultDBPath, ProjectDatabase, projectDB } from '../database';
-import { attempt, info } from '../util';
-import { isQuitting } from './app';
-import { handleStartServer, handleStopServer } from './ipc';
-import { setInitialPassword, store } from './settings';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
-import { startScheduler } from './timeScheduler';
+import { defaultDBPath, ProjectDatabase, projectDB } from '../database.js';
+import { info } from '../logging.js';
+import { attempt } from '../util.js';
+import { isQuitting } from './app.js';
+import { handleStartServer, handleStopServer } from './ipc.js';
+import { setInitialPassword, store } from './settings.js';
+import { startScheduler } from './timeScheduler.js';
 
 const iconPath = app.isPackaged ? join(process.resourcesPath, 'icon.ico') : join(process.cwd(), 'src/renderer/assets/icon.ico');
 
