@@ -3,7 +3,8 @@ import { getTranslation } from './translate';
 // @ts-ignore
 import { marked } from 'marked';
 
-// Modal, confirmation
+// Initial modal, update modal, confirmation
+marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 
 const initialModalBackdrop = document.getElementById('initial-modal')!;
 const closeInitialModalBtn = document.getElementById('close-modal-btn')!;

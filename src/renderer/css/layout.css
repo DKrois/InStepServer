@@ -91,6 +91,16 @@ body.stats-visible .sidebar {
     padding: 20px;
     line-height: 26px;
     min-width: max(27%, 250px);
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+#app-version {
+    position: absolute;
+    bottom: 50px;
+    right: 0; /* bottom right */
+    font-size: 14px;
 }
 
 

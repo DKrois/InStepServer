@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>InStep Server Control Panel</title>
+        <title id="title">InStep Server Control Panel vx.x.x</title>
         <!--<meta http-equiv="Content-Security-Policy" content="script-src 'self'">-->
         <link rel="icon" type="image/ico" href="assets/icon.ico">
     </head>
@@ -154,7 +154,7 @@
             </main>
 
             <aside id="stats-sidebar" class="sidebar">
-                <div class="statistics"> <!-- class="card" fixes wrap on expand -->
+                <div class="statistics">
                     <h2 data-i18n="statistics">Statistics</h2>
                     <p>
                         <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span><br>
@@ -166,6 +166,8 @@
                         <span data-i18n="storageSize">Total storage size used</span>: <span id="storage-used">0</span>
                     </p>
                     <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
+
+                    <div id="app-version">v1.0.0</div>
                 </div>
             </aside>
         </div>

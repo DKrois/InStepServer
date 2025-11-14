@@ -1,9 +1,9 @@
-import { ipcMain, nativeTheme } from 'electron';
+import { app, ipcMain, nativeTheme } from 'electron';
 import { defaultDBPath, initDB, projectDB } from '../database';
 import { initServer, stopServer } from '../server';
+import { normalizeSize } from '../util';
 import { registerShortcutsIPC, registerUpdateIPC } from './installer';
 import { registerSecurityIPC, registerSettingsIPC, store } from './settings';
-import { normalizeSize } from '../util';
 import { registerTimeSettingsIPC } from './timeScheduler';
 import { mainWindow } from './window';
 
@@ -22,6 +22,7 @@ export function registerIPCHandlers() {
     registerShortcutsIPC();
     registerStatsIPC();
 
+    ipcMain.handle('get-app-version', () => app.getVersion());
     ipcMain.handle('is-windows', () => process.platform === 'win32');
     ipcMain.on('initial-modal-closed', handleInitialModalClosed);
 }
@@ -51,7 +52,11 @@ function registerServerIPC() {
 }
 
 function registerStatsIPC() {
-    ipcMain.handle('get-stats', sendDBStats);
+    ipcMain.handle('get-stats', async () => {
+        const dbStats = await getDBStats();
+        const version = app.getVersion();
+        return { version, ...dbStats };
+    });
 }
 
 // --- Server ---
@@ -109,8 +114,7 @@ function sendUsageStats() {
     });
 }
 
-async function sendDBStats() {
-    if (!mainWindow) return;
+async function getDBStats() {
     const base = await projectDB.getStats();
 
     const { directoryCount: projectsCount, fileCount } = base;

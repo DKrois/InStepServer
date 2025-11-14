@@ -3,6 +3,7 @@ import type { TOptions } from 'i18next';
 import { TimeSettings } from '../../common/time';
 
 const api = {
+    getAppVersion: (): Promise<string> => ipcRenderer.invoke('get-app-version'),
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
     saveLanguage: (lang: string): void => ipcRenderer.send('save-language', lang),
 

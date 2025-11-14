@@ -11,6 +11,8 @@ const projectsAmountDisplay = document.getElementById('projects-amount')!;
 const filesAmountDisplay = document.getElementById('files-amount')!;
 const storageUsed = document.getElementById('storage-used')!;
 
+const versionDisplay = document.getElementById('app-version')!;
+
 window.api.onProjectDBInitialized(refreshStats);
 
 async function refreshStats() {
@@ -20,6 +22,8 @@ async function refreshStats() {
     projectsAmountDisplay.textContent = projectsCount.toString();
     filesAmountDisplay.textContent = fileCount.toString();
     storageUsed.textContent = sizeUsed;
+
+    versionDisplay.textContent = `v${stats.version}`;
 }
 
 refreshStatsBtn.addEventListener('click', refreshStats);

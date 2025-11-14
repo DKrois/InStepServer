@@ -9,10 +9,7 @@ import { initApp } from './app/app.js';
 import { errorWithMessage, info } from './logging.js';
 
 /*
- * test auto update
- *
- * installer: banner / bg?
- *
+ * installer: banner / bg
  */
 
 /* OTHER

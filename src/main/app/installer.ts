@@ -34,9 +34,11 @@ export function initUpdater() {
         info('Development mode: Auto-updater disabled.');
         return;
     }
+    info ('Initializing updater...');
 
     // updater only works on Windows & macOS
     if (process.platform !== 'win32' && process.platform !== 'darwin') {
+        info ('Non-windows / linux install, fallback to update notifications');
         // show notification instead
         setTimeout(() => {
             if (store.get('blockUpdateNotification')) return;
@@ -55,7 +57,7 @@ export function initUpdater() {
 
     try {
         updateElectronApp({
-            updateInterval: '5 minutes', // '1 hour', // TODO
+            updateInterval: '1 hour',
             logger: electron_log,
         });
     } catch (error) {
