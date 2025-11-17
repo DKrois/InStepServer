@@ -8,17 +8,21 @@ import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { exeBaseName, name } from './config.json';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
 const appBaseDir = './src/renderer';
 
 const assetsPath = `${appBaseDir}/assets`;
 const windowsIcon = `${assetsPath}/icon.ico`;
 const linuxIcon = `${assetsPath}/icon.png`;
+
+// /usr/lib/instep-server/resources/icon.ico
+
+const installerAssets = resolve(`./src/main/app/wxs`);
 
 const setupExeName = `${exeBaseName}-Setup-$\{version}`;
 
@@ -46,10 +50,10 @@ const config: ForgeConfig = {
             icon: windowsIcon,
             ui: {
                 chooseDirectory: true,
-                /*images: {
-                    background: resolve(windowsIcon),
-                    banner: resolve(windowsIcon),
-                }*/
+                images: {
+                    background: join(installerAssets, 'background.png'),
+                    banner: join(installerAssets, 'logo.png'),
+                },
             },
             features: {
                 autoLaunch: true,

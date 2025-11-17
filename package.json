@@ -13,8 +13,7 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish"
+    "make": "electron-forge make"
   },
   "dependencies": {
     "ansi-to-html": "^0.7.2",
