@@ -16,35 +16,39 @@ import { join } from 'node:path';
 
 const appBaseDir = './src/renderer';
 
-const iconPath = `${appBaseDir}/assets/icon.ico`;
+const assetsPath = `${appBaseDir}/assets`;
+const windowsIcon = `${assetsPath}/icon.ico`;
+const linuxIcon = `${assetsPath}/icon.png`;
+
 const setupExeName = `${exeBaseName}-Setup-$\{version}`;
 
 const config: ForgeConfig = {
     packagerConfig: {
         executableName: exeBaseName,
-        icon: iconPath,
+        icon: windowsIcon,
         asar: true,
         extraResource: [
-            iconPath,
+            windowsIcon,
+            linuxIcon
         ]
     },
     rebuildConfig: {},
     makers: [
         new MakerSquirrel({
             setupExe: `${setupExeName}.exe`,
-            setupIcon: iconPath,
+            setupIcon: windowsIcon,
             iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/app/assets/icon.ico',
             exe: `${exeBaseName}.exe`
         }),
         new MakerWix({
-            name: name,
+            name,
             exe: exeBaseName,
-            icon: iconPath,
+            icon: windowsIcon,
             ui: {
                 chooseDirectory: true,
                 /*images: {
-                    background: resolve(iconPath),
-                    banner: resolve(iconPath),
+                    background: resolve(windowsIcon),
+                    banner: resolve(windowsIcon),
                 }*/
             },
             features: {
@@ -61,15 +65,15 @@ const config: ForgeConfig = {
         new MakerZIP({}, ['darwin']),
         new MakerRpm({
             options: {
-                name: name,
-                icon: iconPath,
+                name,
+                icon: linuxIcon,
                 bin: exeBaseName,
             }
         }),
         new MakerDeb({
             options: {
-                name: name,
-                icon: iconPath,
+                name,
+                icon: linuxIcon,
                 bin: exeBaseName,
             }
         }),

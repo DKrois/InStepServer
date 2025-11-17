@@ -10,6 +10,7 @@ import { errorWithMessage, info } from './logging.js';
 
 /*
  * installer: banner / bg
+ * http://docs.firegiant.com/wix3/wixui/wixui_customizations/
  */
 
 /* OTHER
@@ -18,7 +19,6 @@ import { errorWithMessage, info } from './logging.js';
  * Installer:
  * https://stackoverflow.com/questions/19271862/wix-how-to-run-exe-files-after-installation-from-installed-directory
  * https://skjoldrun.github.io/docs/other/wix-v3-installer.html
- * icons / images
  * https://github.com/electron-userland/electron-wix-msi/tree/master/src
  * https://github.com/electron-userland/electron-wix-msi/blob/master/src/creator.ts#L426
  */
