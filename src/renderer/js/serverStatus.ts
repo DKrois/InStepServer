@@ -58,7 +58,7 @@ window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | 
 
     // don't show toast if port is null (in case of startup)
     if (port !== null) {
-        if (status.isRunning) showTranslatedToast('toastServerStarted', { port: port });
+        if (status.isRunning) showTranslatedToast('toastServerStarted', { port });
         else showTranslatedToast('toastServerStopped');
     }
 });

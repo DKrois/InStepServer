@@ -110,7 +110,7 @@ function sendUsageStats() {
 
     mainWindow.webContents.send('update-stats', {
         uptime: `${hours}:${minutes}:${seconds}`,
-        memory: memory
+        memory
     });
 }
 
