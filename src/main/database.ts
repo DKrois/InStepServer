@@ -15,7 +15,7 @@ export interface DirectoryStats {
     size: number;
 }
 
-export class ProjectDatabase {
+class ProjectDatabase {
     constructor(private dbPath: string) {
         fs.mkdir(dbPath, { recursive: true }); // nothing happens if dir already exists
     }

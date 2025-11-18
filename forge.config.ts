@@ -20,7 +20,7 @@ const assetsPath = `${appBaseDir}/assets`;
 const windowsIcon = `${assetsPath}/icon.ico`;
 const linuxIcon = `${assetsPath}/icon.png`;
 
-// /usr/lib/instep-server/resources/icon.ico
+const serverAssets = ['public', 'protected'];
 
 const installerAssets = resolve(`./src/main/app/wxs`);
 
@@ -33,7 +33,8 @@ const config: ForgeConfig = {
         asar: true,
         extraResource: [
             windowsIcon,
-            linuxIcon
+            linuxIcon,
+            ...serverAssets,
         ]
     },
     rebuildConfig: {},
@@ -52,7 +53,7 @@ const config: ForgeConfig = {
                 chooseDirectory: true,
                 images: {
                     background: join(installerAssets, 'background.png'),
-                    banner: join(installerAssets, 'logo.png'),
+                    banner: join(installerAssets, 'banner.png'),
                 },
             },
             features: {

@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import fs from 'node:fs/promises';
 import { networkInterfaces } from 'node:os';
 import { join } from 'node:path';
@@ -64,6 +65,10 @@ export function getOwnIPs(): { allResults: string[], pick: string | undefined } 
     return { allResults: results, pick: ethernetIP || wifiIP || mobileDataIP };
 }
 
+
+export function getResource(path: string, nonPackagedBase: string = ''): string {
+    return app.isPackaged ? join(process.resourcesPath, path) : join(process.cwd(), nonPackagedBase, path);
+}
 
 /**
  * Safely writes a JSON file at `path`.

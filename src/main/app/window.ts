@@ -1,17 +1,16 @@
+import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { app, BrowserWindow, Menu, screen, shell, Tray } from 'electron';
-import type { MenuItemConstructorOptions, MenuItem } from 'electron';
-import { join } from 'node:path';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
-import { defaultDBPath, ProjectDatabase, projectDB } from '../database.js';
-import { info } from '../logging.js';
-import { attempt } from '../util.js';
+import { defaultDBPath, projectDB } from '../database.js';
+import { errorWithMessage, info } from '../logging.js';
+import { getResource } from '../util.js';
 import { isQuitting, showToast } from './app.js';
 import { createShortcut } from './installer';
 import { handleStartServer, handleStopServer } from './ipc.js';
 import { setInitialPassword, store } from './settings.js';
 import { startScheduler } from './timeScheduler.js';
 
-const iconPath = app.isPackaged ? join(process.resourcesPath, process.platform === 'win32' ? 'icon.ico' : 'icon.png') : join(process.cwd(), 'src/renderer/assets/icon.ico');
+const iconPath = getResource(process.platform === 'win32' ? 'icon.ico' : 'icon.png', 'src/renderer/assets');
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -86,12 +85,13 @@ function createMenu() {
                 {
                     label: 'Open Project Storage Path',
                     click: async () => {
-                        // Use the shell module to open defined path
-                        const desc = Object.getOwnPropertyDescriptor(ProjectDatabase.prototype, 'path');
-                        const pathGetter = desc?.get?.bind(projectDB) as () => string ?? (() => '');
-                        const path = attempt(pathGetter);
-                        if (!path) return;
-                        await shell.openPath(path);
+                        try {
+                            const path = projectDB.path;
+                            await shell.openPath(path);
+                        } catch (e) {
+                            errorWithMessage('Failed to open project storage path', e);
+                            return;
+                        }
                     }
                 },
                 { type: 'separator' },

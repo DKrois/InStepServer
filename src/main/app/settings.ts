@@ -15,7 +15,7 @@ export const store = new Store({
         port: 5000,
         theme: 'system',
         language: '', // set in initStore
-        hideToTray: true,
+        hideToTray: false,
         startServerOnOpen: false,
         timeSettings: defaultTimeSettings,
         firstTimeRunning: true,

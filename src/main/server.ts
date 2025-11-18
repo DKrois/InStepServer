@@ -11,7 +11,7 @@ import { userDataPath } from './app/app.js';
 import { store } from './app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, info, warn } from './logging.js';
-import { formatError, getOwnIPs } from './util.js';
+import { formatError, getOwnIPs, getResource } from './util.js';
 
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
 
@@ -84,11 +84,11 @@ function createExpressApp() {
         next();
     });
 
-    app.use(express.static('public')); // for login page
+    app.use('/', express.static(getResource('public'))); // for login page
     app.post('/login', api.handleLogin);
 
     app.use('/api/static', express.static(projectDB.path)); // serve db path for image access
-    app.use('/app', isAuth, express.static('protected')); // for IMD
+    app.use('/app', isAuth, express.static(getResource('protected'))); // for IMD
 
     // GET routes without auth
     app.get('/api/:id/list', api.handleListRequest);
@@ -129,8 +129,8 @@ function isAuth(req: express.Request, res: express.Response, next: express.NextF
         }
         res.status(401);
 
-        const userAgent = req.headers['user-agent'] || '';
-        if (userAgent && !userAgent.includes('PostmanRuntime')) { // PostmanRuntime for API testing
+        const userAgent = req.headers['user-agent']?.toLowerCase() || '';
+        if (userAgent && !userAgent.includes('PostmanRuntime') && !userAgent.includes('Node')) { // for API testing
             // likely a browser
             return res.redirect('/');
         } else {

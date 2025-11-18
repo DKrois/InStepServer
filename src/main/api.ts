@@ -94,7 +94,7 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
 
     const handler = async () => {
         const v = version ?? (await projectDB.getLatestVersion(id))?.version;
-        if (v === undefined) return formatError('No versions found for this project.');
+        if (v === undefined) return res.status(500).send(formatError('No versions found for this project.'));
 
         const data = await projectDB.get(id, v);
 
