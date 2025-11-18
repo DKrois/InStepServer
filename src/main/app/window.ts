@@ -1,5 +1,5 @@
 import type { MenuItem, MenuItemConstructorOptions } from 'electron';
-import { app, BrowserWindow, Menu, screen, shell, Tray } from 'electron';
+import { app, BrowserWindow, Menu, screen, session, shell, Tray } from 'electron';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
 import { defaultDBPath, projectDB } from '../database.js';
 import { errorWithMessage, info } from '../logging.js';
@@ -38,6 +38,20 @@ export function createWindow() {
 
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
     Menu.setApplicationMenu(createMenu());
+
+    // set CSP
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        callback({
+            responseHeaders: {
+                ...details.responseHeaders,
+                'Content-Security-Policy': [
+                    // Only allow 'unsafe-eval' in development (webpack-dev-server)
+                    `default-src 'self'; script-src 'self' ${!app.isPackaged ? "'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline'; img-src 'self' data:`
+                ]
+            }
+        });
+    });
+
     if (shouldMaximize) mainWindow.maximize();
 
     // once window is ready, show it. This avoids the flash
