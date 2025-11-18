@@ -1,3 +1,5 @@
-## v1.0.5
+## v1.0.6
 
-linux install test
+bug fixes:
+- fixed static not working after install
+- incorrect error handler for get/@latest in case of no files present
