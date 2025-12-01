@@ -87,6 +87,7 @@ function createExpressApp() {
     app.use('/login', express.static(getResource('public'))); // for login page
     app.post('/login', api.handleLogin);
 
+    app.use('/assets', express.static('assets'));
     app.use('/api/static', express.static(projectDB.path)); // serve db path for image access
     app.use('/', isAuth, express.static(getResource('protected'))); // for IMD
 
@@ -105,7 +106,6 @@ function createExpressApp() {
     app.use((req: express.Request, res: express.Response) => {
         if (isBrowser(req)) {
             res.status(404).sendFile(join(process.cwd(), 'public/404.html'));
-            console.log('gaijsd')
         } else {
             res.status(404).send({
                 error: 'Not Found',

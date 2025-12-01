@@ -16,12 +16,11 @@ import { rendererConfig } from './webpack.renderer.config';
 
 const appBaseDir = './src/renderer';
 
-const assetsPath = `${appBaseDir}/assets`;
+const assetsPath = `assets`;
 const windowsIcon = `${assetsPath}/icon.ico`;
 const linuxIcon = `${assetsPath}/icon.png`;
 
-const serverAssets = ['public', 'protected'];
-
+const serverAssets = ['public', 'protected', 'assets'];
 const installerAssets = resolve(`./src/main/app/wxs`);
 
 const setupExeName = `${exeBaseName}-Setup-$\{version}`;
@@ -42,7 +41,7 @@ const config: ForgeConfig = {
         new MakerSquirrel({
             setupExe: `${setupExeName}.exe`,
             setupIcon: windowsIcon,
-            iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/app/assets/icon.ico',
+            iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/assets/icon.ico',
             exe: `${exeBaseName}.exe`
         }),
         new MakerWix({

@@ -10,7 +10,7 @@ import { handleStartServer, handleStopServer } from './ipc.js';
 import { setInitialPassword, store } from './settings.js';
 import { startScheduler } from './timeScheduler.js';
 
-const iconPath = getResource(process.platform === 'win32' ? 'icon.ico' : 'icon.png', 'src/renderer/assets');
+const iconPath = getResource(process.platform === 'win32' ? 'icon.ico' : 'icon.png', 'assets');
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
