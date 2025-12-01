@@ -18,7 +18,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 
         if (response.ok) {
             // Redirect to the main application; the browser will now have the session cookie
-            window.location.href = '/app'; // or /app/index.html
+            window.location.href = '/'; // or /index.html
         } else {
             // Login failed.
             const errorData = await response.json();

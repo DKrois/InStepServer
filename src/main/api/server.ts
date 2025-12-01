@@ -78,17 +78,17 @@ function createExpressApp() {
         }
     }));
 
-    app.use('/', (req, res, next) => {
-        if (req.path === '/' && req.method === 'GET' && req.session?.isAuthenticated) return res.redirect('/app');
-
-        next();
+    // automatic redirect if already authenticated
+    app.use('/login', (req, res, next) => {
+        if (req.method === 'GET' && req.session?.isAuthenticated) return res.redirect('/');
+        else next();
     });
 
-    app.use('/', express.static(getResource('public'))); // for login page
+    app.use('/login', express.static(getResource('public'))); // for login page
     app.post('/login', api.handleLogin);
 
     app.use('/api/static', express.static(projectDB.path)); // serve db path for image access
-    app.use('/app', isAuth, express.static(getResource('protected'))); // for IMD
+    app.use('/', isAuth, express.static(getResource('protected'))); // for IMD
 
     // GET routes without auth
     app.get('/api/:id/list', api.handleListRequest);
@@ -103,14 +103,19 @@ function createExpressApp() {
 
     // handle non-existing routes
     app.use((req: express.Request, res: express.Response) => {
-        res.status(404).send({
-            error: 'Not Found',
-            path: req.originalUrl,
-        });
+        if (isBrowser(req)) {
+            res.status(404).sendFile(join(process.cwd(), 'public/404.html'));
+            console.log('gaijsd')
+        } else {
+            res.status(404).send({
+                error: 'Not Found',
+                path: req.originalUrl,
+            });
+        }
     });
 
     // unhandled error
-    app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    app.use((err: any, _req: express.Request, res: express.Response) => {
         errorWithMessage('Unhandled http error', err);
         if (!res.headersSent) {
             res.status(err.status || 500).send({
@@ -127,18 +132,23 @@ function isAuth(req: express.Request, res: express.Response, next: express.NextF
         if (req.session.isAuthenticated) {
             return next();
         }
-        res.status(401);
 
-        const userAgent = req.headers['user-agent']?.toLowerCase() || '';
-        if (userAgent && !userAgent.includes('PostmanRuntime') && !userAgent.includes('Node')) { // for API testing
-            // likely a browser
-            return res.redirect('/');
+        // not authenticated
+        res.status(401);
+        if (isBrowser(req)) {
+            if (req.path === '/') return res.redirect('/login');
+            else return next();
         } else {
             return res.send(formatError('Unauthorized. Please log in.'));
         }
     } catch (e) {
         next(e);
     }
+}
+
+function isBrowser(req: express.Request) {
+    const userAgent = req.headers['user-agent']?.toLowerCase() || '';
+    return userAgent && !userAgent.includes('PostmanRuntime') && !userAgent.includes('Node');
 }
 
 /* EXAMPLE SAVE ON CLIENT -- missing auth (?)
