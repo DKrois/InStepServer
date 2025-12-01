@@ -3,15 +3,15 @@ import session from 'express-session';
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import multer from 'multer';
 import makeStore from 'nedb-promises-session-store';
-import { Server } from 'node:http';
+import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import * as api from './api.js';
-import { userDataPath } from './app/app.js';
-import { store } from './app/settings.js';
+import { userDataPath } from '../app/app.js';
+import { store } from '../app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
-import { errorWithMessage, info, warn } from './logging.js';
-import { formatError, getOwnIPs, getResource } from './util.js';
+import { errorWithMessage, info, warn } from '../logging.js';
+import { formatError, getOwnIPs, getResource } from '../util.js';
 
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
 
@@ -22,10 +22,10 @@ declare module 'express-session' {
     }
 }
 
-let server: Server | null = null;
+let httpServer: http.Server | null = null;
 let httpTerminator: HttpTerminator | null = null;
 export function initServer(port: number) {
-    if (server) {
+    if (httpServer) {
         warn('Server already running.');
         return false;
     }
@@ -36,24 +36,24 @@ export function initServer(port: number) {
     }
 
     const app = createExpressApp();
-    server = app.listen(port, '0.0.0.0', () => {
-        info(`Server listening on http://${getOwnIPs().pick}:${port}`);
-    });
+    httpServer = http.createServer(app).listen(port, '0.0.0.0', () =>
+        info(`Server listening on http://${getOwnIPs().pick}:${port}`)
+    );
 
-    httpTerminator = createHttpTerminator({ server });
+    httpTerminator = createHttpTerminator({ server: httpServer });
 
     return true;
 }
 
 export async function stopServer() {
-    if (!server) {
+    if (!httpServer) {
         info('Server not running.');
         return;
     }
 
     await httpTerminator?.terminate();
     info('Server closed.');
-    server = null;
+    httpServer = null;
     httpTerminator = null;
 }
 

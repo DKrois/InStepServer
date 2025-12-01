@@ -1,7 +1,7 @@
 import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { app, BrowserWindow, Menu, screen, session, shell, Tray } from 'electron';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
-import { defaultDBPath, projectDB } from '../database.js';
+import { defaultDBPath, projectDB } from '../api/database.js';
 import { errorWithMessage, info } from '../logging.js';
 import { getResource } from '../util.js';
 import { isQuitting, showToast } from './app.js';
@@ -74,7 +74,7 @@ async function finishedLoad() {
 
     if (store.get('firstTimeRunning')) {
         info('First time running, sending first-time-running IPC and generating password...');
-        setInitialPassword();
+        await setInitialPassword();
 
         mainWindow?.webContents.send('first-time-running', defaultDBPath);
         // reset firstTimeRunning flag on initial modal close in case of program crash

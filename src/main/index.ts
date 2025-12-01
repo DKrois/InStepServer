@@ -9,8 +9,14 @@ import { initApp } from './app/app.js';
 import { errorWithMessage, info } from './logging.js';
 
 /*
- * installer: banner / bg
- * http://docs.firegiant.com/wix3/wixui/wixui_customizations/
+ * db cache
+ * only allow one imd connection at a time ?
+ *
+ * pw sent in plaintext on login
+ *  only open edit endpoints when needed
+ *  warning if non-private net?
+ *  basic data validation
+ *
  */
 
 /* OTHER

@@ -43,7 +43,7 @@ if (-not $Force) {
 Write-Host "Proceeding with release..."
 
 # make sure repo & packages are up-to-date
-npm i
+pnpm i
 
 git add .
 git commit -m "Release $Version"

@@ -4,7 +4,7 @@ import { app, dialog, ipcMain, nativeTheme } from 'electron';
 import Store from 'electron-store';
 import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
-import { defaultDBPath } from '../database.js';
+import { defaultDBPath } from '../api/database.js';
 import { info } from '../logging.js';
 import { canWriteToPath } from '../util.js';
 
@@ -56,7 +56,7 @@ async function handleUpdatePath(currentlySelected?: string): Promise<{ success: 
     const defaultPath = currentlySelected || defaultDBPath;
     const { canceled, filePaths } = await dialog.showOpenDialog({
         title: 'Select Project Storage Folder',
-        defaultPath: defaultPath,
+        defaultPath,
         properties: ['openDirectory']
     });
 
@@ -93,7 +93,7 @@ export function registerSecurityIPC() {
     ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
 }
 
-export function setInitialPassword() {
+export async function setInitialPassword() {
     const newPassword = generateRandomPassword();
     initialPassword = newPassword; // Store it to show the user once
 

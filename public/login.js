@@ -1,6 +1,7 @@
 document.getElementById('login-form').addEventListener('submit', async (event) => {
     event.preventDefault();
 
+    /** @type {HTMLInputElement} */
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
     const password = passwordInput.value;

@@ -1,6 +1,6 @@
 import { app, ipcMain, nativeTheme } from 'electron';
-import { defaultDBPath, initDB, projectDB } from '../database';
-import { initServer, stopServer } from '../server';
+import { defaultDBPath, initDB, projectDB } from '../api/database';
+import { initServer, stopServer } from '../api/server';
 import { normalizeSize } from '../util';
 import { registerShortcutsIPC, registerUpdateIPC } from './installer';
 import { registerSecurityIPC, registerSettingsIPC, store } from './settings';
