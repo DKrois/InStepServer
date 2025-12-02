@@ -13,6 +13,24 @@ import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, info, warn } from '../logging.js';
 import { formatError, getOwnIPs, getResource } from '../util.js';
 
+const assetsRoute = '/assets';
+const docsRoute = '/docs';
+const docsAssetsRoute = `${docsRoute}/assets`;
+const publicAPI = '/api';
+const staticAPI = `${publicAPI}/static`;
+const loginRoute = '/login';
+const imdRoute = '/app';
+const imdAPI = `${imdRoute}/api`;
+
+const sitesPath = getResource('sites');
+const publicPath = join(sitesPath, 'public');
+export const assetsPath = join(sitesPath, 'assets');
+const loginPath = join(sitesPath, 'login');
+const imdPath = join(sitesPath, 'protected');
+
+const docsAssetsPath = join(sitesPath, 'docs-assets');
+const docsViewsPath = join(sitesPath, 'docs-views');
+
 const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
 
 // add isAuthenticated flag to session
@@ -79,33 +97,48 @@ function createExpressApp() {
     }));
 
     // automatic redirect if already authenticated
-    app.use('/login', (req, res, next) => {
-        if (req.method === 'GET' && req.session?.isAuthenticated) return res.redirect('/');
-        else next();
+    app.use('/', (req, res, next) => {
+        if (req.method === 'GET') {
+            if (req.session?.isAuthenticated && (req.path === '/' || req.path === loginRoute)) return res.redirect(imdRoute);
+
+            if (req.path === '/') return res.redirect(loginRoute);
+            else return next();
+        } else {
+            return next();
+        }
     });
 
-    app.use('/login', express.static(getResource('public'))); // for login page
-    app.post('/login', api.handleLogin);
+    app.set('view engine', 'ejs');
+    app.set('views', docsViewsPath);
 
-    app.use('/assets', express.static('assets'));
-    app.use('/api/static', express.static(projectDB.path)); // serve db path for image access
-    app.use('/', isAuth, express.static(getResource('protected'))); // for IMD
+    app.use(assetsRoute, express.static(assetsPath));
+    app.use(staticAPI, express.static(projectDB.path)); // serve db path for image access
+
+    app.use(docsAssetsRoute, express.static(docsAssetsPath));
+
+    app.use('/docs', createDocsRouter('full'));
+    app.use('/user-docs', createDocsRouter('user')); // only show the 'User App' section
+
+    app.use(loginRoute, express.static(loginPath));
+    app.post(loginRoute, api.handleLogin);
 
     // GET routes without auth
-    app.get('/api/:id/list', api.handleListRequest);
-    app.get('/api/:id', api.handleGETRequest);
-    app.get('/api/:id/:version', api.handleGETRequest);
+    app.get(`${publicAPI}/:id/list`, api.handleListRequest);
+    app.get(`${publicAPI}/:id`, api.handleGETRequest);
+    app.get(`${publicAPI}/:id/:version`, api.handleGETRequest);
 
-    app.put('/api/:id/', isAuth, api.handlePUTRequest);
-    app.put('/api/:id/:version', isAuth, api.handlePUTRequest);
-    app.post('/api/:id/:version/floorplans', isAuth, upload.array('floorplans'), api.handleFloorplanUpload);
-    app.delete('/api/:id', isAuth, api.handleDELETERequest);
-    app.delete('/api/:id/:version', isAuth, api.handleDELETERequest);
+    // IMD routes with auth
+    app.use(imdRoute, isAuth, express.static(imdPath));
+    app.put(`${imdAPI}/:id`, isAuth, api.handlePUTRequest);
+    app.put(`${imdAPI}/:id/:version`, isAuth, api.handlePUTRequest);
+    app.post(`${imdAPI}/:id/:version/floorplans`, isAuth, upload.array('floorplans'), api.handleFloorplanUpload);
+    app.delete(`${imdAPI}/:id`, isAuth, api.handleDELETERequest);
+    app.delete(`${imdAPI}/:id/:version`, isAuth, api.handleDELETERequest);
 
     // handle non-existing routes
     app.use((req: express.Request, res: express.Response) => {
         if (isBrowser(req)) {
-            res.status(404).sendFile(join(process.cwd(), 'public/404.html'));
+            res.status(404).sendFile(`${publicPath}/404.html`);
         } else {
             res.status(404).send({
                 error: 'Not Found',
@@ -127,6 +160,41 @@ function createExpressApp() {
     return app;
 }
 
+function createDocsRouter(sidebarType: 'full' | 'user') {
+    const router = express.Router();
+
+    // Middleware to set sidebar type and current path for all routes in this router
+    router.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+        res.locals.sidebarType = sidebarType;
+        // Construct a base path for highlighting active links, e.g., /docs or /user-docs
+        res.locals.basePath = req.baseUrl;
+        next();
+    });
+
+    // main index page
+    router.get('/', (req, res) => {
+        res.render('pages/docs-index', {
+            title: 'Introduction',
+            currentPath: `${req.baseUrl}/`
+        });
+    });
+
+    // Route for nested pages like /imd/overview
+    router.get('/:section/:page', (req, res) => {
+        const { section, page } = req.params;
+        const viewPath = `pages/${section}/${page}`;
+        const pageTitle = `${section.toUpperCase()} - ${page.charAt(0).toUpperCase() + page.slice(1)}`;
+
+        // We'd normally check if the file exists, but for this concept we'll render directly
+        res.render(viewPath, {
+            title: pageTitle,
+            currentPath: `${req.baseUrl}/${section}/${page}`
+        });
+    });
+
+    return router;
+}
+
 function isAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         if (req.session.isAuthenticated) {
@@ -136,7 +204,7 @@ function isAuth(req: express.Request, res: express.Response, next: express.NextF
         // not authenticated
         res.status(401);
         if (isBrowser(req)) {
-            if (req.path === '/') return res.redirect('/login');
+            if (req.path === '/' || req.path === imdRoute) return res.redirect(loginRoute);
             else return next();
         } else {
             return res.send(formatError('Unauthorized. Please log in.'));
@@ -196,7 +264,7 @@ async function saveProjectToServer(
                 formData.append('floorplans', file, floorName);
             }
 
-            const filesResponse = await fetch(`/api/${id}/${version}/floorplans`, {
+            const filesResponse = await fetch(`/app/api/${id}/${version}/floorplans`, {
                 method: 'POST',
                 body: formData, // When using FormData, the browser sets the correct Content-Type header automatically
             });

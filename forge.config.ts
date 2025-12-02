@@ -16,11 +16,11 @@ import { rendererConfig } from './webpack.renderer.config';
 
 const appBaseDir = './src/renderer';
 
-const assetsPath = `assets`;
+const assetsPath = `sites/assets`;
 const windowsIcon = `${assetsPath}/icon.ico`;
 const linuxIcon = `${assetsPath}/icon.png`;
 
-const serverAssets = ['public', 'protected', 'assets'];
+const serverAssets = ['sites'];
 const installerAssets = resolve(`./src/main/app/wxs`);
 
 const setupExeName = `${exeBaseName}-Setup-$\{version}`;
@@ -115,7 +115,7 @@ const config: ForgeConfig = {
 };
 
 function getTemplate(name: string, trimTrailingNewLine: boolean = false) {
-    const path = join(__dirname, `./src/main/app/wxs/${name}.wxs`);
+    const path = join(installerAssets, `${name}.wxs`);
     const content = readFileSync(path, 'utf-8');
     return trimTrailingNewLine ? content.replace(/[\r\n]+$/g, '') : content;
 }

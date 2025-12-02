@@ -1,7 +1,7 @@
-$basePath = Split-Path $PSScriptRoot -Parent
-$tempPath = Join-Path $basePath ".temp_imd"
+$rootPath = Split-Path $PSScriptRoot -Parent
+$tempPath = Join-Path $rootPath ".temp_imd"
 $imdProjectPath = Join-Path (Join-Path $tempPath "InStepIMD") "vite-project"
-$outPath = Join-Path $basePath "protected"
+$outPath = Join-Path (Join-Path $rootPath "sites") "protected"
 
 Write-Host "-- Creating temporary directory..."
 Remove-Item -Path $tempPath -ErrorAction SilentlyContinue -Recurse -Force

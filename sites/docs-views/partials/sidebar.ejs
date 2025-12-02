@@ -1,0 +1,25 @@
+<nav class="sidebar">
+    <ul>
+        <li>
+            <a href="<%= basePath %>/" class="<%= currentPath === basePath + '/' ? 'active' : '' %>">Introduction</a>
+        </li>
+    </ul>
+
+    <% if (sidebarType === 'full') { %>
+        <h3>Indoor Map Digitalizer</h3>
+        <ul>
+            <li><a href="<%= basePath %>/imd/overview" class="<%= currentPath === basePath + '/imd/overview' ? 'active' : '' %>">Overview</a></li>
+            <li><a href="<%= basePath %>/imd/quickstart" class="<%= currentPath === basePath + '/imd/quickstart' ? 'active' : '' %>">Quickstart</a></li>
+        </ul>
+
+        <h3>Server</h3>
+        <ul>
+            <li><a href="<%= basePath %>/server/overview" class="<%= currentPath === basePath + '/server/overview' ? 'active' : '' %>">Overview</a></li>
+        </ul>
+    <% } %>
+
+    <h3>User App</h3>
+    <ul>
+        <li><a href="<%= basePath %>/app/overview" class="<%= currentPath === basePath + '/user-app/overview' ? 'active' : '' %>">Overview</a></li>
+    </ul>
+</nav>

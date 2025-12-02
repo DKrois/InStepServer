@@ -1,16 +1,17 @@
 import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { app, BrowserWindow, Menu, screen, session, shell, Tray } from 'electron';
+import { join } from 'node:path';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
 import { defaultDBPath, projectDB } from '../api/database.js';
+import { assetsPath } from '../api/server';
 import { errorWithMessage, info } from '../logging.js';
-import { getResource } from '../util.js';
 import { isQuitting, showToast } from './app.js';
 import { createShortcut } from './installer';
 import { handleStartServer, handleStopServer } from './ipc.js';
 import { setInitialPassword, store } from './settings.js';
 import { startScheduler } from './timeScheduler.js';
 
-const iconPath = getResource(process.platform === 'win32' ? 'icon.ico' : 'icon.png', 'assets');
+const iconPath = join(assetsPath, process.platform === 'win32' ? 'icon.ico' : 'icon.png');
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;

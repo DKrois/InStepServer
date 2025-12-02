@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "@electron-forge/shared-types": "^7.10.2",
+    "@types/ejs": "^3.1.5",
     "ansi-to-html": "^0.7.2",
     "bcryptjs": "^3.0.3",
     "chalk": "^5.6.2",
+    "ejs": "^3.1.10",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^11.0.2",
