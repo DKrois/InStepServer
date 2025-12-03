@@ -13,10 +13,14 @@ const saveBtn = document.getElementById('save-security-btn')!;
 const toggleCurrentPasswordBtn = document.getElementById('toggle-current-password')!;
 const toggleNewPasswordBtn = document.getElementById('toggle-new-password')!;
 
+const enableIMDAPICheckbox = document.getElementById('imd-api-toggle')! as HTMLInputElement;
+
 const sessionYearsInput = document.getElementById('session-years-input') as HTMLInputElement;
 const sessionDaysInput = document.getElementById('session-days-input') as HTMLInputElement;
 const sessionHoursInput = document.getElementById('session-hours-input') as HTMLInputElement;
 const sessionMinutesInput = document.getElementById('session-minutes-input') as HTMLInputElement;
+
+let previousEnableIMDAPI = false; // local flag to avoid transmitting on unchanged
 
 // --- Event Listeners ---
 unlockBtn.addEventListener('click', handleUnlock);
@@ -80,7 +84,20 @@ async function handleSave() {
         return;
     }
 
-    // -- handle duration --
+    // -- handle session --
+    const enableIMDAPI = enableIMDAPICheckbox.checked;
+    if (enableIMDAPI !== previousEnableIMDAPI) {
+        previousEnableIMDAPI = enableIMDAPI;
+        const enableIMDAPIResult = await window.api.toggleIMDAPI(enableIMDAPI, currentPassword);
+        if (enableIMDAPIResult.success) {
+            showTranslatedToast( enableIMDAPI ? 'toastIMDAPIEnabled' : 'toastIMDAPIDisabled');
+            setRestartServerInfoVisible(true);
+        } else {
+            showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+            return;
+        }
+    }
+
     const durationResult = await handleSaveDuration();
 
     // user entered invalid duration; toast already shown. don't lock, don't continue (avoid confusion if pw gets changed anyway)

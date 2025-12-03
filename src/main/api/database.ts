@@ -194,6 +194,7 @@ export function isDBInitialized(): boolean {
     return _db !== null;
 }
 
+// proxy to avoid always using projectDB() and undefined errors
 export const projectDB: ProjectDatabase = new Proxy({} as ProjectDatabase, {
     get(_, prop) {
         if (!_db) {

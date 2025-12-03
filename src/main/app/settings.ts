@@ -9,6 +9,7 @@ import { info } from '../logging.js';
 import { canWriteToPath } from '../util.js';
 
 let initialPassword: string | null = null;
+export let enableIMDAPI = false;
 
 export const store = new Store({
     defaults: {
@@ -89,6 +90,7 @@ export function registerSecurityIPC() {
     ipcMain.handle('verify-password',  (_event, password) => verifyPassword(password));
     ipcMain.handle('update-password', async (_event, oldPassword, newPassword) => handleUpdatePassword(oldPassword, newPassword));
 
+    ipcMain.handle('toggle-imd-api', (_event, enable: boolean, currentPassword: string) => handleToggleIMDAPI(enable, currentPassword));
     ipcMain.handle('get-session-duration', () => store.get('sessionMaxAge'));
     ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
 }
@@ -129,6 +131,13 @@ async function handleUpdatePassword(oldPassword: string, newPassword: string) {
     const newHash = await bcrypt.hash(newPassword, salt);
     store.set('passwordHash', newHash);
 
+    return { success: true };
+}
+
+async function handleToggleIMDAPI(enable: boolean, currentPassword: string): Promise<{ success: boolean }> {
+    if (!verifyPassword(currentPassword)) return { success: false };
+
+    enableIMDAPI = enable;
     return { success: true };
 }
 

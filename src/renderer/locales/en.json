@@ -24,11 +24,29 @@
 
   "security": "Security",
   "currentPassword": "Current Password:",
-  "newPassword": "New Password:",
   "unlock": "Unlock",
   "lock": "Lock",
   "save": "Save",
   "togglePassword": "Show/Hide Password",
+
+
+  "sessionTitle": "Session",
+  "enableIMDAPI": "Enable Indoor Map Digitalizer API",
+  "toastIMDAPIEnabled": "Enabled IMD API",
+  "toastIMDAPIDisabled": "Disabled IMD API",
+  "sessionDuration": "Session duration",
+  "sessionDurationDesc": "Set how long a user remains logged in before needing to sign in again. Changes will apply to all new logins; currently active sessions will keep their original expiry time.",
+  "years": "Years",
+  "days": "Days",
+  "hours": "Hours",
+  "minutes": "Minutes",
+
+  "toastDurationUpdated": "Session duration updated",
+  "toastInvalidDuration": "Invalid duration entered",
+
+
+  "changePassword": "Change password",
+  "newPassword": "New Password:",
 
   "toastPasswordIncorrect": "Incorrect password",
   "toastPasswordEmpty": "Password cannot be empty",
@@ -38,17 +56,6 @@
   "initialPasswordDesc": "This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.",
   "copyPassword": "Copy to Clipboard",
   "toastPasswordCopied": "Password copied to clipboard",
-
-
-  "sessionDurationTitle": "Session Duration",
-  "sessionDurationDesc": "Set how long a user remains logged in before needing to sign in again. Changes will apply to all new logins; currently active sessions will keep their original expiry time.",
-  "years": "Years",
-  "days": "Days",
-  "hours": "Hours",
-  "minutes": "Minutes",
-
-  "toastDurationUpdated": "Session duration updated",
-  "toastInvalidDuration": "Invalid duration entered",
 
 
   "statistics": "Statistics",

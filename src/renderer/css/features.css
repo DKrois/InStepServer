@@ -87,17 +87,22 @@ input[type="time"]:focus {
 }
 
 /* Session config section */
-#session-duration-section h3 {
+#session-section h3 {
     margin-top: 0;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
-#session-duration-section p {
+#session-section h4 {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#session-section p {
     font-size: 0.9em;
     opacity: 0.8;
     line-height: 1.5;
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .duration-controls {

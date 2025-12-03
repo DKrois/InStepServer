@@ -33,7 +33,7 @@ body.logs-visible .main-content {
 
 hr {
     border: none;
-    border-top: 1px solid rgba(128, 128, 128, 0.2); /* Subtle line */
+    border-top: 1px solid rgba(128, 128, 128, 0.7); /* Subtle line */
     margin: 10px 0; /* Space above and below */
 }
 

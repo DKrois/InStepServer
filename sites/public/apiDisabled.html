@@ -83,21 +83,16 @@
             fill: #ff6fcf;
             color: #ff6fcf;
         }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
 
 <img src="/assets/icon.png" alt="Logo" class="logo">
 
-<h1>404</h1>
-<p>Oops! The page you are looking for does not exist.</p>
+<h3>API disabled</h3>
+<p>The Indoor Map Digitalizer API has been disabled by the server administrator.</p>
 
 <div class="buttons">
-    <a id="app-button" class="hidden" href="/app">App</a>
     <a href="/docs">Documentation</a>
 </div>
 
@@ -107,27 +102,6 @@
     </svg>
     GitHub
 </a>
-
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const appButton = document.getElementById('app-button');
-
-        try {
-            const response = await fetch('/app/api/enabled');
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.enabled) {
-                    // If the API is enabled, make the button visible
-                    appButton.classList.remove('hidden');
-                }
-            }
-        } catch (error) {
-            // If the request fails (e.g., server is down), the button remains hidden.
-            console.error('Could not check IMD API status:', error);
-        }
-    });
-</script>
 
 </body>
 </html>

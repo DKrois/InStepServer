@@ -24,11 +24,29 @@
 
   "security": "Sicherheit",
   "currentPassword": "Aktuelles Passwort:",
-  "newPassword": "Neues Passwort:",
   "unlock": "Entsperren",
   "lock": "Sperren",
   "save": "Speichern",
   "togglePassword": "Passwort anzeigen/verbergen",
+
+
+  "sessionTitle": "Sitzung",
+  "enableIMDAPI": "Indoor Map Digitalizer-API aktivieren",
+  "sessionDuration": "Sitzungsdauer",
+  "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",
+  "years": "Jahre",
+  "days": "Tage",
+  "hours": "Stunden",
+  "minutes": "Minuten",
+
+  "toastIMDAPIEnabled": "IMD-API aktiviert",
+  "toastIMDAPIDisabled": "IMD-API deaktiviert",
+  "toastDurationUpdated": "Sitzungsdauer aktualisiert",
+  "toastInvalidDuration": "Ungültige Dauer eingegeben",
+
+
+  "changePassword": "Passwort ändern",
+  "newPassword": "Neues Passwort:",
 
   "toastPasswordIncorrect": "Falsches Passwort",
   "toastPasswordEmpty": "Passwort darf nicht leer sein",
@@ -38,17 +56,6 @@
   "initialPasswordDesc": "Dies ist das erste Mal, dass Sie die Anwendung ausführen. Bitte kopieren und speichern Sie dieses zufällig generierte Passwort an einem sicheren Ort.",
   "copyPassword": "In die Zwischenablage kopieren",
   "toastPasswordCopied": "Passwort in die Zwischenablage kopiert",
-
-
-  "sessionDurationTitle": "Sitzungsdauer",
-  "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",
-  "years": "Jahre",
-  "days": "Tage",
-  "hours": "Stunden",
-  "minutes": "Minuten",
-
-  "toastDurationUpdated": "Sitzungsdauer aktualisiert",
-  "toastInvalidDuration": "Ungültige Dauer eingegeben",
 
 
   "statistics": "Statistiken",

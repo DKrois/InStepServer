@@ -8,13 +8,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import * as api from './api.js';
 import { userDataPath } from '../app/app.js';
-import { store } from '../app/settings.js';
+import { enableIMDAPI, store } from '../app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, info, warn } from '../logging.js';
 import { formatError, getOwnIPs, getResource } from '../util.js';
 
 const assetsRoute = '/assets';
 const docsRoute = '/docs';
+const userDocsRoute = '/user-docs';
 const docsAssetsRoute = `${docsRoute}/assets`;
 const publicAPI = '/api';
 const staticAPI = `${publicAPI}/static`;
@@ -99,9 +100,13 @@ function createExpressApp() {
     // automatic redirect if already authenticated
     app.use('/', (req, res, next) => {
         if (req.method === 'GET') {
-            if (req.session?.isAuthenticated && (req.path === '/' || req.path === loginRoute)) return res.redirect(imdRoute);
+            // authenticated: redirect to app
+            if (req.session?.isAuthenticated && (req.path === '/' || req.path === loginRoute))
+                return res.redirect(enableIMDAPI ? imdRoute : userDocsRoute);
 
-            if (req.path === '/') return res.redirect(loginRoute);
+            // not authenticated and accessing root: redirect to login
+            // (don't check for loginRoute here as it'll result in a redirect loop
+            if (req.path === '/') return res.redirect(enableIMDAPI ? loginRoute : userDocsRoute);
             else return next();
         } else {
             return next();
@@ -116,13 +121,14 @@ function createExpressApp() {
 
     app.use(docsAssetsRoute, express.static(docsAssetsPath));
 
-    app.use('/docs', createDocsRouter('full'));
-    app.use('/user-docs', createDocsRouter('user')); // only show the 'User App' section
+    app.use(docsRoute, createDocsRouter('full'));
+    app.use(userDocsRoute, createDocsRouter('user')); // only show the 'User App' section
 
-    app.use(loginRoute, express.static(loginPath));
-    app.post(loginRoute, api.handleLogin);
+    app.use(loginRoute, isIMDAPIEnabled, express.static(loginPath));
+    app.post(loginRoute, isIMDAPIEnabled, api.handleLogin);
 
     // GET routes without auth
+    app.get(`${imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.send({ enabled: enableIMDAPI }));
     app.get(`${publicAPI}/:id/list`, api.handleListRequest);
     app.get(`${publicAPI}/:id`, api.handleGETRequest);
     app.get(`${publicAPI}/:id/:version`, api.handleGETRequest);
@@ -195,7 +201,22 @@ function createDocsRouter(sidebarType: 'full' | 'user') {
     return router;
 }
 
+function isIMDAPIEnabled(req: express.Request, res: express.Response, next: express.NextFunction) {
+    if (enableIMDAPI) {
+        return next();
+    }
+
+    if (isBrowser(req)) {
+        return res.status(404).sendFile(`${publicPath}/apiDisabled.html`);
+    } else {
+        return res.status(503).json({ error: 'IMD API is disabled by the server administrator.' });
+    }
+}
+
 function isAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+    // show apiDisabled page if IMD disabled
+    if (!enableIMDAPI) return isIMDAPIEnabled(req, res, next);
+
     try {
         if (req.session.isAuthenticated) {
             return next();
