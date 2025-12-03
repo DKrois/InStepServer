@@ -3,6 +3,7 @@ import session from 'express-session';
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import multer from 'multer';
 import makeStore from 'nedb-promises-session-store';
+import { mkdtempSync } from 'node:fs';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -32,7 +33,8 @@ const imdPath = join(sitesPath, 'protected');
 const docsAssetsPath = join(sitesPath, 'docs-assets');
 const docsViewsPath = join(sitesPath, 'docs-views');
 
-const upload = multer({ dest: join(tmpdir(), 'InStepServer', 'uploads') });
+const uploadDir = mkdtempSync(join(tmpdir(), 'InStepServer-uploads'));
+const upload = multer({ dest: uploadDir });
 
 // add isAuthenticated flag to session
 declare module 'express-session' {

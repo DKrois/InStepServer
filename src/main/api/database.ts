@@ -1,5 +1,7 @@
+import { LRUCache } from 'lru-cache';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
+import { Durations } from '../../common/time';
 import { userDataPath } from '../app/app.js';
 import { mainWindow } from '../app/window.js';
 import { errorWithMessage, info, warn } from '../logging.js';
@@ -15,19 +17,41 @@ export interface DirectoryStats {
     size: number;
 }
 
+//export interface ProjectData {}
+export type ProjectData = any;
+
 class ProjectDatabase {
+    private cache: LRUCache<string, ProjectData>;
+
     constructor(private dbPath: string) {
         fs.mkdir(dbPath, { recursive: true }); // nothing happens if dir already exists
+
+        this.cache = new LRUCache<string, ProjectData>({
+            // num of items to store, oldest are removed first
+            max: 10,
+
+            // max age
+            ttl: 15 * Durations.msInMinute,
+        });
     }
 
     get path(): string {
         return this.dbPath;
     }
 
+    private _getCacheKey(id: number, version: number): string {
+        return `project-${id}-v${version}`;
+    }
+
     private _createPath(id: number, version?: number, ...additional: string[]): string {
         const base = join(this.dbPath, id.toString());
         const fullPath = version !== null && version !== undefined ? join(base, `v${version}`) : base;
         return additional.length ? join(fullPath, ...additional) : fullPath;
+    }
+
+    private _extractVersionNumber(path: string) {
+        const match = path.match(/^v(\d+)$/);
+        return match ? parseInt(match[1], 10) : null;
     }
 
     /**
@@ -42,6 +66,9 @@ class ProjectDatabase {
 
         const path = join(versionPath, 'data.json');
         await writeJSON(path, projectData);
+
+        // cache invalid → remove old
+        this.cache.delete(this._getCacheKey(id, version));
     }
 
     /**
@@ -54,7 +81,7 @@ class ProjectDatabase {
         const versionPath = this._createPath(id, version);
         const newPath = join(versionPath, file.originalname); // Use originalname as filename
 
-        // Multer saves to a temporary path, so move it to the final destination
+        // multer saves to a temporary path, so move it to the final destination
         await fs.rename(file.path, newPath);
     }
 
@@ -65,8 +92,15 @@ class ProjectDatabase {
      */
     async delete(id: number, version?: number) {
         const path = this._createPath(id, version);
-
         await fs.rm(path, { recursive: true, force: true });
+
+        if (version !== undefined) {
+            this.cache.delete(this._getCacheKey(id, version));
+        } else {
+            // entire project deleted (likely multiple cache entries affected)
+            // just clearing everything is fine here
+            this.cache.clear();
+        }
     }
 
     /**
@@ -74,13 +108,20 @@ class ProjectDatabase {
      * @param id project id
      * @param version version to read. If absent, uses most recent one
      */
-    async get(id: number, version?: number) {
-        const v = version ? `v${version}` : (await this.getLatestVersion(id))?.path;
+    async get(id: number, version?: number): Promise<ProjectData> {
+        const v = version ?? (await this.getLatestVersion(id))?.version;
         if (!v) throw new Error(`${id}/@latest not found.`);
 
-        const filePath = this._createPath(id, version, 'data.json');
+        const cacheKey = this._getCacheKey(id, v);
+        if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
+
+        const filePath = this._createPath(id, v, 'data.json');
         const json = await fs.readFile(filePath, 'utf8');
-        return JSON.parse(json);
+        const data: ProjectData = JSON.parse(json);
+
+        // update cache
+        this.cache.set(cacheKey, data);
+        return data;
     }
 
     /**
@@ -121,11 +162,6 @@ class ProjectDatabase {
 
         if (versioned.length === 0) return null;
         return versioned.reduce((a, b) => (b.version > a.version ? b : a));
-    }
-
-    private _extractVersionNumber(path: string) {
-        const match = path.match(/^v(\d+)$/);
-        return match ? parseInt(match[1], 10) : null;
     }
 
     /**
