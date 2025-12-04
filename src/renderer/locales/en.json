@@ -31,9 +31,12 @@
 
 
   "sessionTitle": "Session",
+  "sessionIMDDesc": "This checkbox enables or disables remote access to the Indoor Map Digitalizer (IMD) endpoints. Because only one person can edit at a time, the first user to connect 'locks' the editor. The 'Release IMD Lock' button forcibly ends the active session. <br><strong>Warning:</strong> Releasing the lock while someone is actively working will interrupt them and likely cause a loss of unsaved changes. Only use this to free a stuck session.",
   "enableIMDAPI": "Enable Indoor Map Digitalizer API",
   "toastIMDAPIEnabled": "Enabled IMD API",
   "toastIMDAPIDisabled": "Disabled IMD API",
+  "releaseIMDLock": "Release IMD Lock",
+
   "sessionDuration": "Session duration",
   "sessionDurationDesc": "Set how long a user remains logged in before needing to sign in again. Changes will apply to all new logins; currently active sessions will keep their original expiry time.",
   "years": "Years",

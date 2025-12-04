@@ -8,8 +8,9 @@ import { initDB } from '../api/database.js';
 import { handleSquirrelCommands, initUpdater } from './installer.js';
 import { registerIPCHandlers } from './ipc.js';
 import { initLogging } from '../logging.js';
+import { createTray } from './menu';
 import { initStore, store } from './settings.js';
-import { createTray, createWindow, mainWindow } from './window.js';
+import { createWindow, mainWindow } from './window.js';
 
 export let isQuitting = false;
 

@@ -1,12 +1,11 @@
-import crypto from 'crypto';
 import express from 'express';
-import { store, verifyPassword } from '../app/settings.js';
-import { projectDB } from './database.js';
+import { verifyPassword } from '../app/settings.js';
 import { errorWithMessage, info, warn } from '../logging.js';
 import { formatError } from '../util.js';
+import { projectDB } from './database.js';
+import { activeUserLock, releaseLock } from './middleware';
 
 // --- Auth ---
-
 export async function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         const { password } = req.body;
@@ -34,20 +33,15 @@ export async function handleLogin(req: express.Request, res: express.Response, n
     }
 }
 
-export function getSessionSecret(): string {
-    const key = 'sessionSecret';
-    let secret = store.get(key);
-
-    // If no secret is found, generate a new one
-    if (!secret) {
-        info('No session secret found. Generating a new one.');
-        secret = crypto.randomBytes(64).toString('hex');
-
-        // Save the new secret to the store for future restarts
-        store.set(key, secret);
+export function handleReleaseLock(req: express.Request, res: express.Response) {
+    if (req.session && req.session.id === activeUserLock.sessionId) {
+        // user owns the lock, so they're allowed to release it
+        releaseLock('explicit');
+        return res.sendStatus(204);
+    } else {
+        // if someone else tries to release → deny
+        return res.status(403).json({ error: 'You do not hold the current lock.' });
     }
-
-    return secret;
 }
 
 // --- API Handlers ---

@@ -2,6 +2,11 @@
   "name": "InStep Server",
   "exeBaseName": "InStepServer",
 
+  "cacheSize": 10,
+  "cacheMaxAgeSeconds": 900,
+
+  "imdLockDurationSeconds": 300,
+
   "toastTimeout": 2000,
   "schedulerIntervalTime": 20000,
 

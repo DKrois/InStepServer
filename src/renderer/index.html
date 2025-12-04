@@ -113,13 +113,15 @@
                             <div id="session-section">
                                 <h3 data-i18n="sessionTitle">Session</h3>
 
-                                <div class="form-group checkbox-group">
+                                <p data-i18n="sessionIMDDesc"></p> <!-- set by i18next -->
+                                <div class="form-group">
                                     <input type="checkbox" id="imd-api-toggle">
                                     <label for="imd-api-toggle" data-i18n="enableIMDAPI">Enable IMD API</label>
+                                    <button id="release-imd-lock" data-i18n="releaseIMDLock" class="ml-auto">Release IMD Lock</button>
                                 </div>
 
                                 <h4 data-i18n="sessionDuration">Duration</h4>
-                                <p data-i18n="sessionDurationDesc">Configure how long users stay logged in. This will apply to new logins.</p>
+                                <p data-i18n="sessionDurationDesc"></p>
 
                                 <div class="duration-controls">
                                     <div class="duration-input-group">

@@ -5,6 +5,7 @@ import Store from 'electron-store';
 import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
 import { defaultDBPath } from '../api/database.js';
+import { releaseLock } from '../api/middleware';
 import { info } from '../logging.js';
 import { canWriteToPath } from '../util.js';
 
@@ -91,6 +92,7 @@ export function registerSecurityIPC() {
     ipcMain.handle('update-password', async (_event, oldPassword, newPassword) => handleUpdatePassword(oldPassword, newPassword));
 
     ipcMain.handle('toggle-imd-api', (_event, enable: boolean, currentPassword: string) => handleToggleIMDAPI(enable, currentPassword));
+    ipcMain.handle('release-imd-lock', (_event, currentPassword: string) => handleReleaseIMDLock(currentPassword));
     ipcMain.handle('get-session-duration', () => store.get('sessionMaxAge'));
     ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
 }
@@ -131,6 +133,13 @@ async function handleUpdatePassword(oldPassword: string, newPassword: string) {
     const newHash = await bcrypt.hash(newPassword, salt);
     store.set('passwordHash', newHash);
 
+    return { success: true };
+}
+
+async function handleReleaseIMDLock(currentPassword: string): Promise<{ success: boolean }> {
+    if (!verifyPassword(currentPassword)) return { success: false };
+
+    releaseLock('explicit');
     return { success: true };
 }
 

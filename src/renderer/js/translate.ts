@@ -44,7 +44,7 @@ export function getTranslation(str: string, options?: TOptions) {
 export function updateUIText() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n')!;
-        element.textContent = i18next.t(key);
+        element.innerHTML = i18next.t(key);
     });
     document.querySelectorAll('[data-i18n-title]').forEach(element => {
         const key = element.getAttribute('data-i18n-title')!;

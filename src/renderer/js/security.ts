@@ -13,6 +13,7 @@ const saveBtn = document.getElementById('save-security-btn')!;
 const toggleCurrentPasswordBtn = document.getElementById('toggle-current-password')!;
 const toggleNewPasswordBtn = document.getElementById('toggle-new-password')!;
 
+const releaseIMDLockBtn = document.getElementById('release-imd-lock')!;
 const enableIMDAPICheckbox = document.getElementById('imd-api-toggle')! as HTMLInputElement;
 
 const sessionYearsInput = document.getElementById('session-years-input') as HTMLInputElement;
@@ -26,6 +27,7 @@ let previousEnableIMDAPI = false; // local flag to avoid transmitting on unchang
 unlockBtn.addEventListener('click', handleUnlock);
 lockBtn.addEventListener('click', () => setLockedState(true));
 saveBtn.addEventListener('click', handleSave);
+releaseIMDLockBtn.addEventListener('click', releaseIMDLock);
 
 currentPasswordInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -91,9 +93,9 @@ async function handleSave() {
         const enableIMDAPIResult = await window.api.toggleIMDAPI(enableIMDAPI, currentPassword);
         if (enableIMDAPIResult.success) {
             showTranslatedToast( enableIMDAPI ? 'toastIMDAPIEnabled' : 'toastIMDAPIDisabled');
-            setRestartServerInfoVisible(true);
         } else {
             showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+            setLockedState(true);
             return;
         }
     }
@@ -144,6 +146,19 @@ async function handleSavePassword(): Promise<{ success: boolean, code?: 'empty-p
 }
 
 // --- Session config ---
+async function releaseIMDLock() {
+    const currentPassword = currentPasswordInput.value;
+
+    const result = await window.api.releaseIMDLock(currentPassword);
+    if (result.success) {
+        showTranslatedToast( 'toastIMDLockReleased');
+    } else {
+        showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+        setLockedState(true);
+        return;
+    }
+}
+
 let currentTotalMs = 0;
 async function loadCurrentSessionDuration() {
     currentTotalMs = await window.api.getSessionDuration();

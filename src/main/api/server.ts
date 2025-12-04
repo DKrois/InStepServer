@@ -3,6 +3,7 @@ import session from 'express-session';
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import multer from 'multer';
 import makeStore from 'nedb-promises-session-store';
+import * as crypto from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
@@ -12,26 +13,31 @@ import { userDataPath } from '../app/app.js';
 import { enableIMDAPI, store } from '../app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, info, warn } from '../logging.js';
-import { formatError, getOwnIPs, getResource } from '../util.js';
+import { getOwnIPs, getResource } from '../util.js';
+import { isAuth, isIMDAPIEnabled, manageImdLock, sendFileIfBrowser } from './middleware';
 
-const assetsRoute = '/assets';
-const docsRoute = '/docs';
-const userDocsRoute = '/user-docs';
-const docsAssetsRoute = `${docsRoute}/assets`;
-const publicAPI = '/api';
-const staticAPI = `${publicAPI}/static`;
-const loginRoute = '/login';
-const imdRoute = '/app';
-const imdAPI = `${imdRoute}/api`;
+export const Routes = {
+    assets: '/assets',
+    docs: '/docs',
+    userDocs: '/user-docs',
+    docsAssets: `/docs/assets`,
+    publicAPI: '/api',
+    staticAPI: '/api/static',
+    login: '/login',
+    imd: '/app',
+    imdAPI: '/app/api',
+};
 
 const sitesPath = getResource('sites');
-const publicPath = join(sitesPath, 'public');
-export const assetsPath = join(sitesPath, 'assets');
-const loginPath = join(sitesPath, 'login');
-const imdPath = join(sitesPath, 'protected');
+export const SitesPaths = {
+    public: join(sitesPath, 'public'),
+    assets: join(sitesPath, 'assets'),
+    login: join(sitesPath, 'login'),
+    imd: join(sitesPath, 'protected'),
 
-const docsAssetsPath = join(sitesPath, 'docs-assets');
-const docsViewsPath = join(sitesPath, 'docs-views');
+    docsAssets: join(sitesPath, 'docs-assets'),
+    docsViews: join(sitesPath, 'docs-views'),
+};
 
 const uploadDir = mkdtempSync(join(tmpdir(), 'InStepServer-uploads'));
 const upload = multer({ dest: uploadDir });
@@ -88,7 +94,7 @@ function createExpressApp() {
     });
 
     app.use(session({
-        secret: api.getSessionSecret(), // Used to sign the session ID cookie
+        secret: getSessionSecret(), // Used to sign the session ID cookie
         store: fileStore,
         resave: false,                                    // Don't save session if unmodified
         saveUninitialized: false,                         // Don't create session until something stored
@@ -103,12 +109,12 @@ function createExpressApp() {
     app.use('/', (req, res, next) => {
         if (req.method === 'GET') {
             // authenticated: redirect to app
-            if (req.session?.isAuthenticated && (req.path === '/' || req.path === loginRoute))
-                return res.redirect(enableIMDAPI ? imdRoute : userDocsRoute);
+            if (req.session?.isAuthenticated && (req.path === '/' || req.path === Routes.login))
+                return res.redirect(Routes.imd);
 
             // not authenticated and accessing root: redirect to login
-            // (don't check for loginRoute here as it'll result in a redirect loop
-            if (req.path === '/') return res.redirect(enableIMDAPI ? loginRoute : userDocsRoute);
+            // (don't check for Routes.login here as it'll result in a redirect loop
+            if (req.path === '/') return res.redirect(Routes.login);
             else return next();
         } else {
             return next();
@@ -116,50 +122,53 @@ function createExpressApp() {
     });
 
     app.set('view engine', 'ejs');
-    app.set('views', docsViewsPath);
+    app.set('views', SitesPaths.docsViews);
 
-    app.use(assetsRoute, express.static(assetsPath));
-    app.use(staticAPI, express.static(projectDB.path)); // serve db path for image access
+    app.use(Routes.assets, express.static(SitesPaths.assets));
+    app.use(Routes.staticAPI, express.static(projectDB.path)); // serve db path for image access
 
-    app.use(docsAssetsRoute, express.static(docsAssetsPath));
+    app.use(Routes.docsAssets, express.static(SitesPaths.docsAssets));
 
-    app.use(docsRoute, createDocsRouter('full'));
-    app.use(userDocsRoute, createDocsRouter('user')); // only show the 'User App' section
+    app.use(Routes.docs, createDocsRouter('full'));
+    app.use(Routes.userDocs, createDocsRouter('user')); // only show the 'User App' section
 
-    app.use(loginRoute, isIMDAPIEnabled, express.static(loginPath));
-    app.post(loginRoute, isIMDAPIEnabled, api.handleLogin);
+    app.use(Routes.login, isIMDAPIEnabled, express.static(SitesPaths.login));
+    app.post(Routes.login, isIMDAPIEnabled, api.handleLogin);
 
     // GET routes without auth
-    app.get(`${imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.send({ enabled: enableIMDAPI }));
-    app.get(`${publicAPI}/:id/list`, api.handleListRequest);
-    app.get(`${publicAPI}/:id`, api.handleGETRequest);
-    app.get(`${publicAPI}/:id/:version`, api.handleGETRequest);
+    app.get(`${Routes.imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.json({ enabled: enableIMDAPI }));
+    app.get(`${Routes.publicAPI}/:id/list`, api.handleListRequest);
+    app.get(`${Routes.publicAPI}/:id`, api.handleGETRequest);
+    app.get(`${Routes.publicAPI}/:id/:version`, api.handleGETRequest);
 
     // IMD routes with auth
-    app.use(imdRoute, isAuth, express.static(imdPath));
-    app.put(`${imdAPI}/:id`, isAuth, api.handlePUTRequest);
-    app.put(`${imdAPI}/:id/:version`, isAuth, api.handlePUTRequest);
-    app.post(`${imdAPI}/:id/:version/floorplans`, isAuth, upload.array('floorplans'), api.handleFloorplanUpload);
-    app.delete(`${imdAPI}/:id`, isAuth, api.handleDELETERequest);
-    app.delete(`${imdAPI}/:id/:version`, isAuth, api.handleDELETERequest);
+    app.post(`${Routes.imdAPI}/release-lock`, isIMDAPIEnabled, isAuth, api.handleReleaseLock);
+
+    const authMiddleware = [isIMDAPIEnabled, isAuth, manageImdLock];
+    app.use(Routes.imd, ...authMiddleware, express.static(SitesPaths.imd));
+    app.put(`${Routes.imdAPI}/:id`, ...authMiddleware, api.handlePUTRequest);
+    app.put(`${Routes.imdAPI}/:id/:version`, ...authMiddleware, api.handlePUTRequest);
+    app.post(`${Routes.imdAPI}/:id/:version/floorplans`, ...authMiddleware, upload.array('floorplans'), api.handleFloorplanUpload);
+    app.delete(`${Routes.imdAPI}/:id`, ...authMiddleware, api.handleDELETERequest);
+    app.delete(`${Routes.imdAPI}/:id/:version`, ...authMiddleware, api.handleDELETERequest);
 
     // handle non-existing routes
     app.use((req: express.Request, res: express.Response) => {
-        if (isBrowser(req)) {
-            res.status(404).sendFile(`${publicPath}/404.html`);
-        } else {
-            res.status(404).send({
+        sendFileIfBrowser(req, res, {
+            status: 404,
+            filepath: `${SitesPaths.public}/404.html`,
+            error: {
                 error: 'Not Found',
                 path: req.originalUrl,
-            });
-        }
+            }
+        });
     });
 
     // unhandled error
     app.use((err: any, _req: express.Request, res: express.Response) => {
         errorWithMessage('Unhandled http error', err);
         if (!res.headersSent) {
-            res.status(err.status || 500).send({
+            res.status(err.status || 500).json({
                 error: err.message || 'Internal Server Error',
             });
         }
@@ -203,43 +212,20 @@ function createDocsRouter(sidebarType: 'full' | 'user') {
     return router;
 }
 
-function isIMDAPIEnabled(req: express.Request, res: express.Response, next: express.NextFunction) {
-    if (enableIMDAPI) {
-        return next();
+function getSessionSecret(): string {
+    const key = 'sessionSecret';
+    let secret = store.get(key);
+
+    // If no secret is found, generate a new one
+    if (!secret) {
+        info('No session secret found. Generating a new one.');
+        secret = crypto.randomBytes(64).toString('hex');
+
+        // Save the new secret to the store for future restarts
+        store.set(key, secret);
     }
 
-    if (isBrowser(req)) {
-        return res.status(404).sendFile(`${publicPath}/apiDisabled.html`);
-    } else {
-        return res.status(503).json({ error: 'IMD API is disabled by the server administrator.' });
-    }
-}
-
-function isAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
-    // show apiDisabled page if IMD disabled
-    if (!enableIMDAPI) return isIMDAPIEnabled(req, res, next);
-
-    try {
-        if (req.session.isAuthenticated) {
-            return next();
-        }
-
-        // not authenticated
-        res.status(401);
-        if (isBrowser(req)) {
-            if (req.path === '/' || req.path === imdRoute) return res.redirect(loginRoute);
-            else return next();
-        } else {
-            return res.send(formatError('Unauthorized. Please log in.'));
-        }
-    } catch (e) {
-        next(e);
-    }
-}
-
-function isBrowser(req: express.Request) {
-    const userAgent = req.headers['user-agent']?.toLowerCase() || '';
-    return userAgent && !userAgent.includes('PostmanRuntime') && !userAgent.includes('Node');
+    return secret;
 }
 
 /* EXAMPLE SAVE ON CLIENT -- missing auth (?)

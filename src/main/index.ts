@@ -9,14 +9,9 @@ import { initApp } from './app/app.js';
 import { errorWithMessage, info } from './logging.js';
 
 /*
- * db cache
- * only allow one imd connection at a time ?
+ * basic data validation
  *
- * pw sent in plaintext on login
- *  only open edit endpoints when needed
- *  warning if non-private net?
- *  basic data validation
- *
+ * links to specific section in docs in apiDisabled, imdInUse
  */
 
 /* OTHER

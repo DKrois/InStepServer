@@ -33,6 +33,7 @@ const api = {
     updatePassword: (oldPassword: string, newPassword: string): Promise<{ success: boolean }> => ipcRenderer.invoke('update-password', oldPassword, newPassword),
 
     toggleIMDAPI: (enabled: boolean, password: string): Promise<{ success: boolean }> => ipcRenderer.invoke('toggle-imd-api', enabled, password),
+    releaseIMDLock: (password: string): Promise<{ success: boolean }> => ipcRenderer.invoke('release-imd-lock', password),
     getSessionDuration: (): Promise<number> => ipcRenderer.invoke('get-session-duration'),
     updateSessionDuration: (ms: number, password: string): Promise<{ success: boolean }> => ipcRenderer.invoke('update-session-duration', ms, password),
 

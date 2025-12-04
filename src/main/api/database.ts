@@ -1,9 +1,9 @@
 import { LRUCache } from 'lru-cache';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { Durations } from '../../common/time';
 import { userDataPath } from '../app/app.js';
 import { mainWindow } from '../app/window.js';
+import { cacheSize, cacheMaxAgeSeconds } from '../../../config.json';
 import { errorWithMessage, info, warn } from '../logging.js';
 import { writeJSON } from '../util.js';
 
@@ -28,10 +28,10 @@ class ProjectDatabase {
 
         this.cache = new LRUCache<string, ProjectData>({
             // num of items to store, oldest are removed first
-            max: 10,
+            max: cacheSize,
 
             // max age
-            ttl: 15 * Durations.msInMinute,
+            ttl: 1000 * cacheMaxAgeSeconds,
         });
     }
 
