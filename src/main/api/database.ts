@@ -1,9 +1,9 @@
 import { LRUCache } from 'lru-cache';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
+import { cacheMaxAgeSeconds, cacheSize } from '../../../config.json';
 import { userDataPath } from '../app/app.js';
 import { mainWindow } from '../app/window.js';
-import { cacheSize, cacheMaxAgeSeconds } from '../../../config.json';
 import { errorWithMessage, info, warn } from '../logging.js';
 import { writeJSON } from '../util.js';
 
@@ -17,16 +17,69 @@ export interface DirectoryStats {
     size: number;
 }
 
-//export interface ProjectData {}
-export type ProjectData = any;
+export interface SimplifiedProject {
+    properties: {
+        projectName: string;
+    };
+    floorplanImages: Record<string, string | null>;
+}
+export interface SimplifiedState {
+    project: SimplifiedProject;
+}
+
+export const stateSchema = {
+    project: {
+        type: 'string',
+        properties: {
+            projectName: 'string',
+            elementTypeStyles: 'object',
+        },
+        floorplanImages: 'object',
+    },
+
+    worldSize: ['width, height'],
+
+    pan: ['x', 'y'],
+    scale: 'number',
+
+    threeDPan: ['x', 'y'],
+    threeDScale: 'number',
+    threeDIsDragging: 'boolean',
+    threeDStartPos: ['x', 'y'],
+    
+    activeLanguage: 'string',
+    activeTheme: 'string',
+    currentMode: 'string',
+
+    mousePos: ['x', 'y'],
+    mousePosScreen: ['x', 'y'],
+
+    gridSize: 'number',
+    isGridVisible: 'boolean',
+    isSnapEnabled: 'boolean',
+    
+    isShiftPressed: 'boolean',
+    isCtrlPressed: 'boolean',
+    isAltPressed: 'boolean',
+
+    isMovingElement: 'boolean',
+    dragStartPos: ['x', 'y'],
+
+    isEditingPath: 'boolean',
+
+    panStart: ['x', 'y'],
+    isPanning: 'boolean',
+
+    visibleLayers: 'object',
+};
 
 class ProjectDatabase {
-    private cache: LRUCache<string, ProjectData>;
+    private cache: LRUCache<string, SimplifiedProject>;
 
     constructor(private dbPath: string) {
         fs.mkdir(dbPath, { recursive: true }); // nothing happens if dir already exists
 
-        this.cache = new LRUCache<string, ProjectData>({
+        this.cache = new LRUCache<string, SimplifiedProject>({
             // num of items to store, oldest are removed first
             max: cacheSize,
 
@@ -40,13 +93,20 @@ class ProjectDatabase {
     }
 
     private _getCacheKey(id: number, version: number): string {
-        return `project-${id}-v${version}`;
+        return `project-${id}-${this.createVersionString(version)}`;
     }
 
-    private _createPath(id: number, version?: number, ...additional: string[]): string {
-        const base = join(this.dbPath, id.toString());
-        const fullPath = version !== null && version !== undefined ? join(base, `v${version}`) : base;
-        return additional.length ? join(fullPath, ...additional) : fullPath;
+    private _createPath(id?: number, version?: number, ...additional: string[]): string {
+        const joinIfDefined = (...str: (string | null | undefined)[]) =>
+            join(...str.filter(s => s !== null && s !== undefined));
+
+        const base = joinIfDefined(this.dbPath, id?.toString());
+        const fullPath = joinIfDefined(base, this.createVersionString(version));
+        return joinIfDefined(fullPath, ...additional);
+    }
+
+    public createVersionString(version?: number): string | undefined {
+        return version ? `v${version}` : undefined;
     }
 
     private _extractVersionNumber(path: string) {
@@ -54,11 +114,52 @@ class ProjectDatabase {
         return match ? parseInt(match[1], 10) : null;
     }
 
+    private validateState(state: any): boolean {
+        // Check top-level keys in schema only
+        for (const key of Object.keys(stateSchema)) {
+            if (!(key in state)) return false;
+
+            const rule = (stateSchema as Record<string, any>)[key];
+            const value = state[key];
+
+            // If the rule is a list → check required subkeys
+            if (Array.isArray(rule)) {
+                for (const sub of rule) {
+                    if (!(sub in value)) return false;
+                }
+            }
+
+            // If the rule is "object" → just ensure it's an object
+            if (rule === 'object' && (typeof value !== 'object' || value === null)) {
+                return false;
+            }
+
+            // If it's the `project` object → check nested structure
+            if (key === 'project') {
+                const { properties: requiredProps } = rule;
+
+                for (const sub of requiredProps) {
+                    if (!(sub in value.properties)) return false;
+                }
+
+                if (
+                    typeof value.floorplanImages !== 'object' ||
+                    value.floorplanImages === null
+                ) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Creates a new version and saves the JSON data.
      * floorplanImages will be removed.
      */
     async add(id: number, version: number, data: any) {
+        if (!this.validateState(data)) throw new Error(`State structure not valid`);
         const versionPath = this._createPath(id, version);
         await fs.mkdir(versionPath, { recursive: true });
 
@@ -101,34 +202,95 @@ class ProjectDatabase {
             // just clearing everything is fine here
             this.cache.clear();
         }
+
+        // check if last version deleted → delete project folder
+        const versions = await this.listVersionsForProject(id);
+        if (versions.length === 0) await fs.rm(this._createPath(id), { recursive: true, force: true });
     }
+
+    async get(id: number, returnFull: false, version?: number): Promise<{ data: SimplifiedProject, version: number }>;
+    async get(id: number, returnFull: true, version?: number): Promise<{ data: SimplifiedState, version: number }>;
 
     /**
      * Reads a project file.
+     * If 'returnFull' is set to false, only the project data will be returned. Otherwise, the entire state will be used.
      * @param id project id
+     * @param returnFull whether to return the full state object
      * @param version version to read. If absent, uses most recent one
      */
-    async get(id: number, version?: number): Promise<ProjectData> {
+    async get(id: number, returnFull: boolean, version?: number): Promise<{ data: SimplifiedState | SimplifiedProject, version: number }> {
         const v = version ?? (await this.getLatestVersion(id))?.version;
         if (!v) throw new Error(`${id}/@latest not found.`);
 
-        const cacheKey = this._getCacheKey(id, v);
-        if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
+        const read = async (): Promise<SimplifiedState> => {
+            const filePath = this._createPath(id, v, 'data.json');
+            const json = await fs.readFile(filePath, 'utf8');
+            return JSON.parse(json);
+        };
 
-        const filePath = this._createPath(id, v, 'data.json');
-        const json = await fs.readFile(filePath, 'utf8');
-        const data: ProjectData = JSON.parse(json);
+        // don't use cache if returning full data
+        if (returnFull) {
+            const state = await read();
+            return { data: state, version: v };
+        }
+
+        const cacheKey = this._getCacheKey(id, v);
+        if (this.cache.has(cacheKey)) return { data: this.cache.get(cacheKey)!, version: v };
+
+        const state = await read();
+        const data = state.project;
+        this.cache.set(cacheKey, data);
 
         // update cache
-        this.cache.set(cacheKey, data);
-        return data;
+        return { data, version: v };
+    }
+
+    /**
+     * Checks if a project already exists.<br>
+     * It is not recommended to call this function before accessing a project to check whether it exists,
+     * but rather handling the error separately.
+     * @param id Project ID
+     */
+    async exists(id: number): Promise<boolean> {
+        const path = this._createPath(id);
+        return fs.access(path).then(
+            () => true,
+            () => false,
+        );
+    }
+
+    async listProjects(): Promise<{ name: string, id: number, latestVersion: number }[]> {
+        const path = this._createPath();
+        try {
+            const projectIDs = await fs.readdir(path);
+            const projects = projectIDs.map(async idStr => {
+                const id = parseInt(idStr, 10);
+                const { data, version } = await this.get(id, false);
+
+                return { name: data.properties.projectName, id, latestVersion: version };
+            });
+
+            return Promise.allSettled(projects)
+                .then(results =>
+                    results.map(result => {
+                        if (result.status === 'fulfilled') {
+                            return result.value;
+                        } else {
+                            errorWithMessage('Error reading project', result.reason);
+                            return undefined;
+                        }
+                    }).filter(result => result !== undefined)
+                );
+        } catch {
+            return [];
+        }
     }
 
     /**
      * Returns an array of project versions.
      * @param id project id
      */
-    async list(id: number): Promise<number[]> {
+    async listVersionsForProject(id: number): Promise<number[]> {
         const path = this._createPath(id);
         try {
             const entries = await fs.readdir(path);
@@ -208,7 +370,6 @@ class ProjectDatabase {
     }
 }
 
-
 /**
  * Initializes the database with a specific path. This should only be
  * called once at startup from the main process.
@@ -239,3 +400,74 @@ export const projectDB: ProjectDatabase = new Proxy({} as ProjectDatabase, {
         return _db[prop as keyof ProjectDatabase];
     }
 });
+
+/*
+function createNewProject(): Project {
+  return {
+    type: 'FeatureCollection',
+    features: [],
+    properties: {
+      projectName: 'Unbenanntes Projekt',
+      elementTypeStyles: {},
+    },
+    floorplanImages: { [DEFAULT_FLOOR_ID]: null },
+  };
+}
+
+export const state = {
+  project: createNewProject(),
+
+  worldSize: { width: 8000, height: 6000 },
+
+  pan: ['x', 'y'],
+  scale: 1,
+
+  threeDPan: { x: 50, y: 50 }, // Initialer Versatz der 3D-Gruppe
+  threeDScale: 0.8, // Initialer Zoomfaktor der 3D-Gruppe
+  threeDIsDragging: 'boolean',
+  threeDStartPos: ['x', 'y'],
+
+  activeFloorId: DEFAULT_FLOOR_ID as string | null, // KORRIGIERT: Standardwert auf 'EG' gesetzt
+  activeLanguage: 'de',
+  activeTheme: 'light' as 'light' | 'dark',
+  currentMode: 'select' as 'select' | 'pan' | 'move-element' | 'area' | 'square' | 'polygon' | 'circle' | 'line' | 'arc' | 'point' | 'scissors' | 'merge',
+  tempShape: null as { start?: {x: number, y: number}; end?: {x: number, y: number}; control?: {x: number, y: number}; nodes?: {x: number, y: number}[] } | null,
+
+  mousePos: ['x', 'y'],
+  mousePosScreen: ['x', 'y'],
+
+  gridSize: 40,
+  isGridVisible: true,
+  isSnapEnabled: true,
+
+  selectedFeatureIds: [] as string[],
+  cachedFloorPlanImages: {} as Record<string, HTMLImageElement>,
+  clipboard: null as IMDFeature[] | null,
+  isShiftPressed: 'boolean',
+  isCtrlPressed: 'boolean',
+  isAltPressed: 'boolean',
+
+  styleOverrides: null as Record<string, StyleDefinition> | null,
+
+  isMovingElement: 'boolean',
+  dragStartPos: ['x', 'y'],
+  originalGeometriesOnMove: new Map<string, Geometry>(),
+
+  isEditingPath: 'boolean',
+  editedFeatureId: null as string | null,
+  editedNodeIndex: -1,
+
+  hoveredFeatureId: null as string | null,
+  hoveredEdgeIndex: -1,
+
+  panStart: ['x', 'y'],
+  isPanning: 'boolean',
+
+  visibleLayers: {
+    area: true,
+    path: true,
+    point: true,
+    connector: true,
+  } as Record<string, boolean>,
+};
+ */

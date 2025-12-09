@@ -5,23 +5,19 @@ process.env.FORCE_COLOR = '1';
 import { app } from 'electron';
 import { name } from '../../config.json';
 import 'source-map-support/register';
+import { stopServer } from './api/server';
 import { initApp } from './app/app.js';
 import { errorWithMessage, info } from './logging.js';
 
 /*
- * basic data validation
+ * basic data validation (include version, id in payload too?)
  *
- * links to specific section in docs in apiDisabled, imdInUse
+ * mdns ?
  */
 
-/* OTHER
+/*
+ * links to specific section in docs in apiDisabled, imdInUse
  * cookie { secure: true } if https
- *
- * Installer:
- * https://stackoverflow.com/questions/19271862/wix-how-to-run-exe-files-after-installation-from-installed-directory
- * https://skjoldrun.github.io/docs/other/wix-v3-installer.html
- * https://github.com/electron-userland/electron-wix-msi/tree/master/src
- * https://github.com/electron-userland/electron-wix-msi/blob/master/src/creator.ts#L426
  */
 
 
@@ -30,13 +26,20 @@ async function main() {
     initApp();
     //setInterval(() => console.log(normalizeSize(process.memoryUsage().heapUsed)), 1000)
 
+    app.on('before-quit', () => cleanup());
     process.on('SIGINT', () => exit());
     process.on('SIGTERM', () => exit());
     process.on('uncaughtException', exception => errorWithMessage('Unhandled Exception:', exception));
     process.on('unhandledRejection', reason => errorWithMessage('Unhandled Rejection:', reason));
 }
 
+function cleanup() {
+    info('Cleaning up...');
+    stopServer();
+}
+
 function exit(exitCode = 0) {
+    cleanup();
     info('Exiting...');
     process.exit(exitCode);
 }

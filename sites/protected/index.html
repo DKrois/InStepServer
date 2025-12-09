@@ -8,8 +8,8 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.mjs" type="module"></script>
   <link rel="icon" type="image/png" href="assets/logo_transparent.png">
-  <script type="module" crossorigin src="assets/index-CuMVgk4I.js"></script>
-  <link rel="stylesheet" crossorigin href="assets/index-d9X4KHQ4.css">
+  <script type="module" crossorigin src="assets/index-Do_75fPR.js"></script>
+  <link rel="stylesheet" crossorigin href="assets/index-Bp91ScuK.css">
 </head>
 <body data-theme="light">
   <div id="backstage-container"></div>
@@ -24,23 +24,19 @@
       <button id="overview-menu-trigger" class="menu-trigger">Übersicht</button>
     </nav>
     
-    <div id="theme-selector" class="theme-selector">
-        <button id="theme-trigger" class="menu-trigger" title="Dunkles Thema umschalten">
-          <img id="theme-icon" src="/sites/assets/darkMode.png" alt="Theme Icon" style="width:18px;height:18px;vertical-align:middle;">
-        </button>
-    </div>
-    
-    <div id="language-selector" class="language-selector">
+    <div id="language-selector" class="language-selector" style="margin-left:auto; display:flex; align-items:center; gap:8px;">
         <button id="lang-trigger" class="menu-trigger">
-          <img id="lang-icon" src="/sites/assets/language-light.png" alt="Language Icon" style="width:18px;height:18px;margin-right:5px;vertical-align:middle;">
-          <span id="active-lang-display">Deutsch</span> 
-          <!-- Dropdown-Pfeil-SVG wieder hinzufügen, da er fehlt und für die UI wichtig ist -->
+          <img id="lang-icon" src="assets/language-light.png" alt="Language Icon" style="width:18px;height:18px;margin-right:5px;vertical-align:middle;">
+          <span id="active-lang-display">Deutsch</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;margin-left:5px;"><path d="M7 10l5 5 5-5z"/></svg>
         </button>
         <div id="lang-menu" class="lang-menu">
             <button data-lang="en">English</button>
             <button data-lang="de">Deutsch</button>
         </div>
+        <button id="theme-trigger" class="menu-trigger" title="Dunkles Thema umschalten">
+          <img id="theme-icon" src="assets/darkMode.png" alt="Theme Icon" style="width:18px;height:18px;vertical-align:middle;">
+        </button>
     </div>
   </header>
 

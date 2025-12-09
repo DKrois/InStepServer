@@ -1,3 +1,17 @@
+import { getOwnIPs, getResource } from '../util.js';
+import { join } from 'node:path';
+// initialize before menu.ts (imported via app → window) uses it
+const sitesPath = getResource('sites');
+export const SitesPaths = {
+    public: join(sitesPath, 'public'),
+    assets: join(sitesPath, 'assets'),
+    login: join(sitesPath, 'login'),
+    imd: join(sitesPath, 'protected'),
+
+    docsAssets: join(sitesPath, 'docs-assets'),
+    docsViews: join(sitesPath, 'docs-views'),
+};
+
 import express from 'express';
 import session from 'express-session';
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
@@ -7,14 +21,12 @@ import * as crypto from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import * as api from './api.js';
 import { userDataPath } from '../app/app.js';
 import { enableIMDAPI, store } from '../app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
 import { errorWithMessage, info, warn } from '../logging.js';
-import { getOwnIPs, getResource } from '../util.js';
-import { isAuth, isIMDAPIEnabled, manageImdLock, sendFileIfBrowser } from './middleware';
+import { isAuth, isIMDAPIEnabled, manageImdLock, sendFileIfBrowser } from './middleware.js';
 
 export const Routes = {
     assets: '/assets',
@@ -26,17 +38,6 @@ export const Routes = {
     login: '/login',
     imd: '/app',
     imdAPI: '/app/api',
-};
-
-const sitesPath = getResource('sites');
-export const SitesPaths = {
-    public: join(sitesPath, 'public'),
-    assets: join(sitesPath, 'assets'),
-    login: join(sitesPath, 'login'),
-    imd: join(sitesPath, 'protected'),
-
-    docsAssets: join(sitesPath, 'docs-assets'),
-    docsViews: join(sitesPath, 'docs-views'),
 };
 
 const uploadDir = mkdtempSync(join(tmpdir(), 'InStepServer-uploads'));
@@ -67,6 +68,8 @@ export function initServer(port: number) {
         info(`Server listening on http://${getOwnIPs().pick}:${port}`)
     );
 
+    //startMDNSAdvertisement(port);
+
     httpTerminator = createHttpTerminator({ server: httpServer });
 
     return true;
@@ -79,6 +82,8 @@ export async function stopServer() {
     }
 
     await httpTerminator?.terminate();
+    //stopMDNSAdvertisement();
+
     info('Server closed.');
     httpServer = null;
     httpTerminator = null;
@@ -136,8 +141,10 @@ function createExpressApp() {
     app.post(Routes.login, isIMDAPIEnabled, api.handleLogin);
 
     // GET routes without auth
+    app.get(`${Routes.imdAPI}/random-id`, api.getRandomProjectID);
     app.get(`${Routes.imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.json({ enabled: enableIMDAPI }));
-    app.get(`${Routes.publicAPI}/:id/list`, api.handleListRequest);
+    app.get(`${Routes.publicAPI}/list`, api.handleListProjectsRequest);
+    app.get(`${Routes.publicAPI}/:id/list`, api.handleListProjectVersionsRequest);
     app.get(`${Routes.publicAPI}/:id`, api.handleGETRequest);
     app.get(`${Routes.publicAPI}/:id/:version`, api.handleGETRequest);
 
