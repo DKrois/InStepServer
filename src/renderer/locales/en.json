@@ -36,6 +36,7 @@
   "toastIMDAPIEnabled": "Enabled IMD API",
   "toastIMDAPIDisabled": "Disabled IMD API",
   "releaseIMDLock": "Release IMD Lock",
+  "toastIMDLockReleased": "Released IMD lock",
 
   "sessionDuration": "Session duration",
   "sessionDurationDesc": "Set how long a user remains logged in before needing to sign in again. Changes will apply to all new logins; currently active sessions will keep their original expiry time.",

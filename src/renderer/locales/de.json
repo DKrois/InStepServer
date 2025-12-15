@@ -36,6 +36,7 @@
   "toastIMDAPIEnabled": "IMD-API aktiviert",
   "toastIMDAPIDisabled": "IMD-API deaktiviert",
   "releaseIMDLock": "IMD-Sperre aufheben",
+  "toastIMDLockReleased": "IMD-Sperre aufgehoben",
 
   "sessionDuration": "Sitzungsdauer",
   "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",

@@ -1,9 +1,9 @@
 import express from 'express';
 import { imdLockDurationSeconds } from '../../../config.json';
-import { enableIMDAPI } from '../app/settings';
-import { info } from '../logging';
-import { formatError } from '../util';
-import { Routes, SitesPaths } from './server';
+import { enableIMDAPI } from '../app/settings.js';
+import { errorToJSON } from '../errorformatting';
+import { info } from '../log.js';
+import { Routes, SitesPaths } from './server.js';
 
 // only allow one imd connection at a time
 export let activeUserLock: { sessionId: string | null; timeoutId: NodeJS.Timeout | null } = {
@@ -29,7 +29,7 @@ export function manageImdLock(req: express.Request, res: express.Response, next:
 
     // no lock → acquire
     if (!activeUserLock.sessionId) {
-        info(`Lock acquired by session ID: ${currentSessionId}`);
+        info(`Lock acquired by session ID: ${currentSessionId}`, 'session');
         activeUserLock.sessionId = currentSessionId;
     }
 
@@ -45,7 +45,7 @@ export function isIMDAPIEnabled(req: express.Request, res: express.Response, nex
     sendFileIfBrowser(req, res, {
         status: 503,
         filepath: `${SitesPaths.public}/apiDisabled.html`,
-        error: 'IMD API is disabled by the server administrator.'
+        error: 'IMD API has been disabled by the server administrator.'
     });
 }
 
@@ -59,7 +59,7 @@ export function isAuth(req: express.Request, res: express.Response, next: expres
             if (req.path === '/' || req.path === Routes.imd) return res.redirect(Routes.login);
             else return next();
         } else {
-            return res.json(formatError('Unauthorized. Please log in.'));
+            return res.json(errorToJSON('Unauthorized. Please log in.'));
         }
     } catch (e) {
         next(e);
@@ -67,7 +67,7 @@ export function isAuth(req: express.Request, res: express.Response, next: expres
 }
 
 // --- Helpers ---
-export function sendFileIfBrowser(req: express.Request, res: express.Response, options: { status: number, filepath: string, error: string | object } ) {
+export function sendFileIfBrowser(req: express.Request, res: express.Response, options: { status: number, filepath: string, error: string | object }) {
     const { status, filepath, error } = options;
     const e = typeof error === 'string' ? { error } : error;
     if (isBrowser(req)) {
@@ -79,12 +79,12 @@ export function sendFileIfBrowser(req: express.Request, res: express.Response, o
 
 export function isBrowser(req: express.Request) {
     const userAgent = req.headers['user-agent']?.toLowerCase() || '';
-    return userAgent && !userAgent.includes('PostmanRuntime') && !userAgent.includes('Node');
+    return userAgent && !userAgent.includes('postmanruntime') && !userAgent.includes('node');
 }
 
 export function releaseLock(reason: 'timeout' | 'explicit' = 'timeout') {
     if (activeUserLock.sessionId) {
-        info(`Lock released (${reason}) for session ID: ${activeUserLock.sessionId}`);
+        info(`Lock released (${reason}) for session ID: ${activeUserLock.sessionId}`, 'session');
         activeUserLock.sessionId = null;
         if (activeUserLock.timeoutId) {
             clearTimeout(activeUserLock.timeoutId);

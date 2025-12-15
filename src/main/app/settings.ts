@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
 import { defaultDBPath } from '../api/database.js';
 import { releaseLock } from '../api/middleware';
-import { info } from '../logging.js';
+import { info } from '../log.js';
 import { canWriteToPath } from '../util.js';
 
 let initialPassword: string | null = null;
@@ -105,7 +105,7 @@ export async function setInitialPassword() {
     const hash = bcrypt.hashSync(newPassword, salt);
     store.set('passwordHash', hash);
 
-    info('Initial password set');
+    info('Initial password set', 'settings');
 }
 
 function generateRandomPassword() {

@@ -58,8 +58,8 @@ const api = {
         ipcRenderer.on('project-db-initialized', () => callback());
     },
 
-    onLog: (callback: (log: string) => void) => {
-        ipcRenderer.on('log', (_event, value) => callback(value as string));
+    onLog: (callback: (log: string[]) => void) => {
+        ipcRenderer.on('log', (_event, value) => callback(value as string[]));
     },
     onShowToast: (callback: (key: string, options?: TOptions, type?: 'info' | 'error') => void) => {
         ipcRenderer.on('show-toast', (_event, key: string, options?: TOptions, type: 'info' | 'error' = 'info') => callback(key, options, type));

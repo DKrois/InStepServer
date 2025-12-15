@@ -1,33 +1,38 @@
 import express from 'express';
 import { randomInt } from 'node:crypto';
 import { verifyPassword } from '../app/settings.js';
-import { errorWithMessage, info, warn } from '../logging.js';
-import { formatError } from '../util.js';
+import { errorToJSON } from '../errorformatting.js';
+import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { projectDB } from './database.js';
-import { activeUserLock, releaseLock } from './middleware';
+import { activeUserLock, releaseLock } from './middleware.js';
+
+const logSource = 'api';
+const info = (str: string) => _info(str, logSource);
+const warn = (str: string) => _warn(str, logSource);
+const error = (str: string, err: unknown) => _error(str, err, logSource);
 
 // --- Auth ---
 export async function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         const { password } = req.body;
-        if (!password) return res.status(400).send(formatError('Password is required.'));
+        if (!password) return res.status(400).send(errorToJSON('Password is required.'));
 
         const isValid = await verifyPassword(password);
         if (isValid) {
             req.session.isAuthenticated = true; // Set the session flag
 
-            req.session.save((err) => {
+            req.session.save(err => {
                 if (err) {
-                    errorWithMessage('Session save error after login', err);
+                    error('Session save error after login', err);
                     return next(err);
                 }
 
-                info('User authenticated successfully and session saved.');
+                _info('User authenticated successfully and session saved.', 'session');
                 return res.status(200).json({ message: 'Login successful.' });
             });
         } else {
             warn('Failed login attempt.');
-            return res.status(401).json(formatError('Invalid password.'));
+            return res.status(401).json(errorToJSON('Invalid password.'));
         }
     } catch (e) {
         next(e);
@@ -57,8 +62,8 @@ export function getRandomProjectID(_req: express.Request, res: express.Response)
     try {
         return res.status(200).json({ id });
     } catch (e: any) {
-        if (e.code === 'ENOENT') return res.status(400).send(formatError('File / directory not found.', { path: e.path }));
-        return res.status(500).send(formatError(e))
+        if (e.code === 'ENOENT') return res.status(400).send(errorToJSON({ message: 'File / directory not found.', path: e.path }));
+        return res.status(500).send(errorToJSON(e))
     }
 }
 
@@ -68,7 +73,7 @@ export async function handlePUTRequest(req: express.Request, res: express.Respon
 
     // keys.length === 0 checks if body is empty
     const data = req.body;
-    if (!data || Object.keys(data).length === 0) return res.status(400).send(formatError('No data provided.'));
+    if (!data || Object.keys(data).length === 0) return res.status(400).send(errorToJSON('No data provided.'));
 
     const v = version ?? ((await projectDB.getLatestVersion(id))?.version ?? 0) + 1;
 
@@ -92,7 +97,7 @@ export async function handleFloorplanUpload(req: express.Request, res: express.R
     const version = parseInt(req.params.version);
 
     const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) return res.status(400).send(formatError('No files provided.'));
+    if (!files || files.length === 0) return res.status(400).send(errorToJSON('No files provided.'));
 
     const handler = async () => {
         for (const file of files) await projectDB.addImage(id, version, file);
@@ -117,7 +122,7 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
 
     const handler = async () => {
         const v = version ?? (await projectDB.getLatestVersion(id))?.version;
-        if (v === undefined) return res.status(500).send(formatError('No versions found for this project.'));
+        if (v === undefined) return res.status(500).send(errorToJSON('No versions found for this project.'));
 
         const imageFiles = await projectDB.listImages(id, v);
 
@@ -211,10 +216,10 @@ async function handle(handler: () => Promise<any>, onSuccess: () => any, res: ex
 
     const check = (name: string, num: number | undefined, require: boolean | undefined) => {
         if (num !== undefined && isNaN(num)) {
-            res.status(400).send(formatError(`Invalid ${name} provided.`));
+            res.status(400).send(errorToJSON(`Invalid ${name} provided.`));
             return false;
         } else if (require && (num === undefined || num === null)) {
-            res.status(400).send(formatError(`No ${name} provided.`));
+            res.status(400).send(errorToJSON(`No ${name} provided.`));
             return false;
         }
         return true;
@@ -226,7 +231,7 @@ async function handle(handler: () => Promise<any>, onSuccess: () => any, res: ex
     try {
         return await handler().then(onSuccess);
     } catch (e: any) {
-        if (e.code === 'ENOENT') return res.status(400).send(formatError('File / directory not found.', { path: e.path }));
-        return res.status(e.message.includes('structure not valid') ? 400 : 500).send(formatError(e))
+        if (e.code === 'ENOENT') return res.status(400).send(errorToJSON({ message: 'File / directory not found.', path: e.path }));
+        return res.status(e.message.includes('structure not valid') ? 400 : 500).send(errorToJSON(e))
     }
 }

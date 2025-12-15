@@ -7,17 +7,15 @@ import { name } from '../../config.json';
 import 'source-map-support/register';
 import { stopServer } from './api/server';
 import { initApp } from './app/app.js';
-import { errorWithMessage, info } from './logging.js';
+import { error, info } from './log.js';
 
 /*
- * basic data validation (include version, id in payload too?)
- *
- * mdns ?
+ * imd lock translations
+ * hyperlink docs (session descriptions)
  */
 
 /*
  * links to specific section in docs in apiDisabled, imdInUse
- * cookie { secure: true } if https
  */
 
 
@@ -29,8 +27,8 @@ async function main() {
     app.on('before-quit', () => cleanup());
     process.on('SIGINT', () => exit());
     process.on('SIGTERM', () => exit());
-    process.on('uncaughtException', exception => errorWithMessage('Unhandled Exception:', exception));
-    process.on('unhandledRejection', reason => errorWithMessage('Unhandled Rejection:', reason));
+    process.on('uncaughtException', exception => error('Unhandled Exception:', exception));
+    process.on('unhandledRejection', reason => error('Unhandled Rejection:', reason));
 }
 
 function cleanup() {

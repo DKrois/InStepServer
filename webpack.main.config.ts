@@ -27,5 +27,6 @@ export const mainConfig: Configuration = {
     target: 'electron-main',
     output: {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
-    }
+    },
+    cache: true,
 };

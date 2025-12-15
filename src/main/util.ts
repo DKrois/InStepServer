@@ -4,14 +4,6 @@ import { networkInterfaces } from 'node:os';
 import { join } from 'node:path';
 import { formatNumber } from '../common/util.js';
 
-export function formatError(e: Error | string, additional?: any) {
-    const message = typeof e === 'string' ? e : e.message;
-    return {
-        message,
-        ...additional,
-    };
-}
-
 export function normalizeSize(bytes: number, decimals: number = 2): string {
     if (bytes === 0) return '0 Bytes';
 

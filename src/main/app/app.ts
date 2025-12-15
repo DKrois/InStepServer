@@ -7,8 +7,8 @@ export const userDataPath = app.getPath('userData');
 import { initDB } from '../api/database.js';
 import { handleSquirrelCommands, initUpdater } from './installer.js';
 import { registerIPCHandlers } from './ipc.js';
-import { initLogging } from '../logging.js';
-import { createTray } from './menu';
+import { initLogging } from '../log.js';
+import { createTray } from './menu.js';
 import { initStore, store } from './settings.js';
 import { createWindow, mainWindow } from './window.js';
 
@@ -69,8 +69,9 @@ export function initApp() {
     });
 }
 
-export function sendLog(message: string) {
-    mainWindow?.webContents.send('log', message);
+export function sendLog(message: string | string[]) {
+    const m = Array.isArray(message) ? message : [message];
+    mainWindow?.webContents.send('log', m);
 }
 
 export function showToast(key: string, options?: TOptions, type: 'info' | 'error' = 'info') {

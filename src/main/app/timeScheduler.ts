@@ -1,12 +1,23 @@
 import { dialog, ipcMain, Menu } from 'electron';
-import { generateScheduleEvents, TimeSettings } from '../../common/time.js';
+import { readFile, writeFile } from 'node:fs/promises';
 import { schedulerIntervalTime } from '../../../config.json';
-import { error, errorWithMessage, info, infoWithBackground, warn } from '../logging.js';
-import { handleStartServer, handleStopServer, manualTimeOverride, serverStartTime, setManualTimeOverride } from './ipc.js';
+import { generateScheduleEvents, TimeSettings } from '../../common/time.js';
+import { info as _info, warn as _warn } from '../log.js';
+import {
+    handleStartServer,
+    handleStopServer,
+    manualTimeOverride,
+    serverStartTime,
+    setManualTimeOverride
+} from './ipc.js';
 import { store } from './settings.js';
 import { mainWindow } from './window.js';
-import { writeFile, readFile } from 'node:fs/promises';
+
 let schedulerInterval: NodeJS.Timeout | null = null;
+
+const logSource = 'scheduler';
+const info = (str: string) => _info(str, logSource);
+const warn = (str: string) => _warn(str, logSource);
 
 export function registerTimeSettingsIPC() {
     ipcMain.on('save-time-settings', async (_event, settings) => {
@@ -26,7 +37,7 @@ export function registerTimeSettingsIPC() {
 
     ipcMain.on('show-clear-time-context-menu', (_event, inputId: string) => {
         if (!mainWindow) {
-            error('Main window not available');
+            warn('Main window not available');
             return;
         }
 
@@ -46,7 +57,7 @@ export function registerTimeSettingsIPC() {
 
 async function handleExport(): Promise<{ success: boolean, code?: 'cancelled' }> {
     if (!mainWindow) {
-        error('Main window not available');
+        warn('Main window not available');
         return { success: false };
     }
 
@@ -62,7 +73,7 @@ async function handleExport(): Promise<{ success: boolean, code?: 'cancelled' }>
             await writeFile(filePath, JSON.stringify(settings, null, 2));
             return { success: true };
         } catch (error: any) {
-            errorWithMessage('Error exporting time settings', error);
+            error('Error exporting time settings', error);
             return { success: false };
         }
     }
@@ -71,7 +82,7 @@ async function handleExport(): Promise<{ success: boolean, code?: 'cancelled' }>
 
 async function handleImport(): Promise<{ success: boolean, data?: TimeSettings, code?: 'cancelled' }> {
     if (!mainWindow) {
-        error('Main window not available');
+        warn('Main window not available');
         return { success: false };
     }
 
@@ -87,7 +98,7 @@ async function handleImport(): Promise<{ success: boolean, data?: TimeSettings, 
             const settings = JSON.parse(data);
             return { success: true, data: settings };
         } catch (error: any) {
-            errorWithMessage('Error importing time settings', error);
+            error('Error importing time settings', error);
             return { success: false };
         }
     }
@@ -135,10 +146,10 @@ async function checkSchedule() {
 
     // only start/stop if state differs from desired state
     if (shouldBeRunning && !isActuallyRunning) {
-        infoWithBackground(`State should be ON. Starting server.`, '[Scheduler]');
+        info(`State should be ON. Starting server.`);
         handleStartServer();
     } else if (!shouldBeRunning && isActuallyRunning) {
-        infoWithBackground(`State should be OFF. Stopping server.`, '[Scheduler]');
+        info(`State should be OFF. Stopping server.`);
         await handleStopServer();
     }
 }

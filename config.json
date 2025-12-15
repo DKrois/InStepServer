@@ -1,5 +1,6 @@
 {
   "name": "InStep Server",
+  "hostname": "instep",
   "exeBaseName": "InStepServer",
 
   "cacheSize": 10,

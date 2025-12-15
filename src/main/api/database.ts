@@ -4,8 +4,13 @@ import { join } from 'node:path';
 import { cacheMaxAgeSeconds, cacheSize } from '../../../config.json';
 import { userDataPath } from '../app/app.js';
 import { mainWindow } from '../app/window.js';
-import { errorWithMessage, info, warn } from '../logging.js';
+import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { writeJSON } from '../util.js';
+
+const logSource = 'db';
+const info = (str: string) => _info(str, logSource);
+const warn = (str: string) => _warn(str, logSource);
+const error = (str: string, err: unknown) => _error(str, err, logSource);
 
 export const defaultDBPath = join(userDataPath, 'data');
 
@@ -37,7 +42,7 @@ export const stateSchema = {
         floorplanImages: 'object',
     },
 
-    worldSize: ['width, height'],
+    worldSize: ['width', 'height'],
 
     pan: ['x', 'y'],
     scale: 'number',
@@ -114,6 +119,11 @@ class ProjectDatabase {
         return match ? parseInt(match[1], 10) : null;
     }
 
+    /**
+     * Checks if the provided structure is a valid state object.
+     * @param state
+     * @private
+     */
     private validateState(state: any): boolean {
         // Check top-level keys in schema only
         for (const key of Object.keys(stateSchema)) {
@@ -137,14 +147,16 @@ class ProjectDatabase {
             // If it's the `project` object → check nested structure
             if (key === 'project') {
                 const { properties: requiredProps } = rule;
+                const { properties, floorplanImages } = value;
 
-                for (const sub of requiredProps) {
-                    if (!(sub in value.properties)) return false;
+                for (const [k, type] of Object.entries(requiredProps)) {
+                    if (!(k in properties)) return false;
+                    if (typeof properties[k] !== type) return false;
                 }
 
                 if (
-                    typeof value.floorplanImages !== 'object' ||
-                    value.floorplanImages === null
+                    typeof floorplanImages !== 'object' ||
+                    floorplanImages === null
                 ) {
                     return false;
                 }
@@ -276,7 +288,7 @@ class ProjectDatabase {
                         if (result.status === 'fulfilled') {
                             return result.value;
                         } else {
-                            errorWithMessage('Error reading project', result.reason);
+                            error('Error reading project', result.reason);
                             return undefined;
                         }
                     }).filter(result => result !== undefined)
@@ -355,13 +367,13 @@ class ProjectDatabase {
                         stats.size += fileStats.size; // .size is in bytes
                     } catch (err) {
                         // This can happen if the file is deleted between readdir and stat calls
-                        errorWithMessage(`Could not get stats for file: ${fullPath}`, err);
+                        error(`Could not get stats for file: ${fullPath}`, err);
                     }
                 }
             }
         } catch (error: any) {
             // only print if error isn't 'no such file or directory'
-            if (error.code !== 'ENOENT') errorWithMessage(`Could not read directory: ${directoryPath}`, error);
+            if (error.code !== 'ENOENT') error(`Could not read directory: ${directoryPath}`, error);
             // Return zeroed stats if the directory can't be read
             return { directoryCount: 0, fileCount: 0, size: 0 };
         }
@@ -400,74 +412,3 @@ export const projectDB: ProjectDatabase = new Proxy({} as ProjectDatabase, {
         return _db[prop as keyof ProjectDatabase];
     }
 });
-
-/*
-function createNewProject(): Project {
-  return {
-    type: 'FeatureCollection',
-    features: [],
-    properties: {
-      projectName: 'Unbenanntes Projekt',
-      elementTypeStyles: {},
-    },
-    floorplanImages: { [DEFAULT_FLOOR_ID]: null },
-  };
-}
-
-export const state = {
-  project: createNewProject(),
-
-  worldSize: { width: 8000, height: 6000 },
-
-  pan: ['x', 'y'],
-  scale: 1,
-
-  threeDPan: { x: 50, y: 50 }, // Initialer Versatz der 3D-Gruppe
-  threeDScale: 0.8, // Initialer Zoomfaktor der 3D-Gruppe
-  threeDIsDragging: 'boolean',
-  threeDStartPos: ['x', 'y'],
-
-  activeFloorId: DEFAULT_FLOOR_ID as string | null, // KORRIGIERT: Standardwert auf 'EG' gesetzt
-  activeLanguage: 'de',
-  activeTheme: 'light' as 'light' | 'dark',
-  currentMode: 'select' as 'select' | 'pan' | 'move-element' | 'area' | 'square' | 'polygon' | 'circle' | 'line' | 'arc' | 'point' | 'scissors' | 'merge',
-  tempShape: null as { start?: {x: number, y: number}; end?: {x: number, y: number}; control?: {x: number, y: number}; nodes?: {x: number, y: number}[] } | null,
-
-  mousePos: ['x', 'y'],
-  mousePosScreen: ['x', 'y'],
-
-  gridSize: 40,
-  isGridVisible: true,
-  isSnapEnabled: true,
-
-  selectedFeatureIds: [] as string[],
-  cachedFloorPlanImages: {} as Record<string, HTMLImageElement>,
-  clipboard: null as IMDFeature[] | null,
-  isShiftPressed: 'boolean',
-  isCtrlPressed: 'boolean',
-  isAltPressed: 'boolean',
-
-  styleOverrides: null as Record<string, StyleDefinition> | null,
-
-  isMovingElement: 'boolean',
-  dragStartPos: ['x', 'y'],
-  originalGeometriesOnMove: new Map<string, Geometry>(),
-
-  isEditingPath: 'boolean',
-  editedFeatureId: null as string | null,
-  editedNodeIndex: -1,
-
-  hoveredFeatureId: null as string | null,
-  hoveredEdgeIndex: -1,
-
-  panStart: ['x', 'y'],
-  isPanning: 'boolean',
-
-  visibleLayers: {
-    area: true,
-    path: true,
-    point: true,
-    connector: true,
-  } as Record<string, boolean>,
-};
- */

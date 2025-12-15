@@ -2,7 +2,6 @@ import AnsiToHTML from 'ansi-to-html';
 import type { TOptions } from 'i18next';
 import { toastTimeout } from '../../../config.json';
 import { getTranslation } from './translate';
-import { getCurrentTime } from '../../common/time';
 
 const convert = new AnsiToHTML();
 
@@ -38,30 +37,27 @@ logsOutput.addEventListener('scroll', () => {
     isAutoScrollActive = logsOutput.scrollHeight - logsOutput.scrollTop - logsOutput.clientHeight < scrollThreshold;
 });
 
-function addLogMessage(message: string) {
-    const formatted = formatLog(message);
-    logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n`);
+function addLogMessage(message: string[]) {
+    const [first, ...rest] = message;
+
+    const formatted = formatLog(first);
+    const r = rest.length > 0 ? rest.map(s => formatLog(s)).join('\n') : '';
+
+    logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n${r}`);
 
     if (isAutoScrollActive) scrollToBottom();
 }
 
 // - Log formatting -
-function formatLog(message: string, fromServer = false) {
-    const base = `${getCurrentTime()}${fromServer ? ' [Server]' : ''}`;
-    const baseFormatted = formatBackground(base);
-
+function formatLog(message: string) {
     const m = escapeHtml(message);
-    const str = convert.toHtml(`${baseFormatted} ${m}`);
+    const str = convert.toHtml(m);
     return linkify(str);
 }
 
 function linkify(text: string): string {
     const urlRegex = /(https?:\/\/\S+)/g;
     return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
-}
-
-function formatBackground(str: string): string {
-    return `<span style="color: #909090; opacity: 0.6;">${str}</span>`;
 }
 
 function escapeHtml(unsafe: string): string {

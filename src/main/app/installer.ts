@@ -5,10 +5,15 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { basename,  dirname, resolve } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
-import { error, errorWithMessage, info, warn } from '../logging.js';
+import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { Durations } from '../../common/time.js';
 import { store } from './settings';
 import { mainWindow } from './window.js';
+
+const logSource = 'installer';
+const info = (str: string) => _info(str, logSource);
+const warn = (str: string) => _warn(str, logSource);
+const error = (str: string, err: unknown) => _error(str, err, logSource);
 
 type ShortcutLocation = 'Desktop' | 'StartMenu';
 
@@ -60,8 +65,8 @@ export function initUpdater() {
             updateInterval: '1 hour',
             logger: electron_log,
         });
-    } catch (error) {
-        errorWithMessage('Failed to initialize auto-updater', error);
+    } catch (e) {
+        error('Failed to initialize auto-updater', e);
     }
 }
 
@@ -72,7 +77,7 @@ async function checkForUpdate() {
     try {
         const response = await fetch('https://api.github.com/repos/DKrois/InStepServer/releases/latest');
         if (!response.ok) {
-            error(`Failed to fetch releases: ${response.statusText}`);
+            warn(`Failed to fetch releases: ${response.statusText}`);
             return;
         }
 
@@ -92,8 +97,8 @@ async function checkForUpdate() {
                 url: updateUrl
             });
         }
-    } catch (error) {
-        errorWithMessage('Failed to check for updates', error);
+    } catch (e) {
+        error('Failed to check for updates', e);
     }
 }
 
@@ -159,13 +164,13 @@ export function createShortcut(location: ShortcutLocation) {
             ], { encoding: 'utf-8' });
 
             if (result.error) {
-                errorWithMessage(`Failed to create ${location} shortcut via Update.exe`, result.error);
+                error(`Failed to create ${location} shortcut via Update.exe`, result.error);
             } else {
                 info(`${location} shortcut created successfully via Update.exe`);
                 return true;
             }
         } catch (e) {
-            errorWithMessage(`Failed to create ${location} shortcut via Update.exe`, e);
+            error(`Failed to create ${location} shortcut via Update.exe`, e);
             // re-attempt with PowerShell
         }
     }
@@ -192,14 +197,14 @@ export function createShortcut(location: ShortcutLocation) {
             '-Command', fullCommand,
         ], { encoding: 'utf-8' });
         if (result.error) {
-            errorWithMessage(`Failed to create ${location} shortcut via PowerShell`, result.error);
+            error(`Failed to create ${location} shortcut via PowerShell`, result.error);
             return false;
         } else {
             info(`${location} shortcut created successfully via PowerShell.`);
             return true;
         }
     } catch (e) {
-        errorWithMessage(`Failed to create ${location} shortcut via PowerShell`, e);
+        error(`Failed to create ${location} shortcut via PowerShell`, e);
         return false;
     }
 }

@@ -3,7 +3,7 @@ import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { join } from 'node:path';
 import { projectDB } from '../api/database';
 import { SitesPaths } from '../api/server';
-import { errorWithMessage } from '../logging';
+import { error } from '../log';
 import { showToast } from './app';
 import { createShortcut } from './installer';
 import { handleStartServer, handleStopServer } from './ipc';
@@ -25,7 +25,7 @@ export function createMenu() {
                             const path = projectDB.path;
                             await shell.openPath(path);
                         } catch (e) {
-                            errorWithMessage('Failed to open project storage path', e);
+                            error('Failed to open project storage path', e);
                             return;
                         }
                     }

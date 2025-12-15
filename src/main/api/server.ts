@@ -12,6 +12,7 @@ export const SitesPaths = {
     docsViews: join(sitesPath, 'docs-views'),
 };
 
+import ejs from 'ejs';
 import express from 'express';
 import session from 'express-session';
 import { createHttpTerminator, HttpTerminator } from 'http-terminator';
@@ -25,8 +26,14 @@ import * as api from './api.js';
 import { userDataPath } from '../app/app.js';
 import { enableIMDAPI, store } from '../app/settings.js';
 import { isDBInitialized, projectDB } from './database.js';
-import { errorWithMessage, info, warn } from '../logging.js';
+import { info as _info, warn as _warn, error as _error } from '../log.js';
+import { startMDNSAdvertisement, stopMDNSAdvertisement } from './mdns';
 import { isAuth, isIMDAPIEnabled, manageImdLock, sendFileIfBrowser } from './middleware.js';
+
+const logSource = 'server';
+const info = (str: string) => _info(str, logSource);
+const warn = (str: string) => _warn(str, logSource);
+const error = (str: string, err: unknown) => _error(str, err, logSource);
 
 export const Routes = {
     assets: '/assets',
@@ -68,7 +75,7 @@ export function initServer(port: number) {
         info(`Server listening on http://${getOwnIPs().pick}:${port}`)
     );
 
-    //startMDNSAdvertisement(port);
+    startMDNSAdvertisement(port);
 
     httpTerminator = createHttpTerminator({ server: httpServer });
 
@@ -77,12 +84,12 @@ export function initServer(port: number) {
 
 export async function stopServer() {
     if (!httpServer) {
-        info('Server not running.');
+        warn('Server not running.');
         return;
     }
 
     await httpTerminator?.terminate();
-    //stopMDNSAdvertisement();
+    stopMDNSAdvertisement();
 
     info('Server closed.');
     httpServer = null;
@@ -101,12 +108,13 @@ function createExpressApp() {
     app.use(session({
         secret: getSessionSecret(), // Used to sign the session ID cookie
         store: fileStore,
-        resave: false,                                    // Don't save session if unmodified
-        saveUninitialized: false,                         // Don't create session until something stored
+        resave: false, // Don't save session if unmodified
+        saveUninitialized: false, // Don't create session until something stored
         cookie: {
-            secure: false, // true if using HTTPS
+            secure: 'auto',
             httpOnly: true,
             maxAge: store.get('sessionMaxAge') || undefined, // sessions don't expire if sessionMaxAge is 0
+            path: Routes.imd,
         }
     }));
 
@@ -126,6 +134,7 @@ function createExpressApp() {
         }
     });
 
+    app.engine('ejs', ejs.renderFile);
     app.set('view engine', 'ejs');
     app.set('views', SitesPaths.docsViews);
 
@@ -173,7 +182,7 @@ function createExpressApp() {
 
     // unhandled error
     app.use((err: any, _req: express.Request, res: express.Response) => {
-        errorWithMessage('Unhandled http error', err);
+        error('Unhandled http error', err);
         if (!res.headersSent) {
             res.status(err.status || 500).json({
                 error: err.message || 'Internal Server Error',
@@ -225,7 +234,7 @@ function getSessionSecret(): string {
 
     // If no secret is found, generate a new one
     if (!secret) {
-        info('No session secret found. Generating a new one.');
+        _info('No session secret found. Generating a new one.', 'session');
         secret = crypto.randomBytes(64).toString('hex');
 
         // Save the new secret to the store for future restarts
