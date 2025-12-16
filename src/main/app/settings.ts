@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import { app, dialog, ipcMain, nativeTheme } from 'electron';
-// @ts-ignore
 import Store from 'electron-store';
 import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';

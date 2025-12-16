@@ -1,6 +1,5 @@
 import { showTranslatedToast } from './logs';
 import { getTranslation } from './translate';
-// @ts-ignore
 import { marked } from 'marked';
 
 // Initial modal, update modal, confirmation

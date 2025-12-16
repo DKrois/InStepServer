@@ -13,7 +13,8 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "docs:bundle": "bun build sites/docs/src/*.ts --outdir sites/docs/assets/js --target=browser --format=esm --splitting --minify"
   },
   "dependencies": {
     "@electron-forge/shared-types": "^7.10.2",

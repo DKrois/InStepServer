@@ -2,14 +2,15 @@ import { getOwnIPs, getResource } from '../util.js';
 import { join } from 'node:path';
 // initialize before menu.ts (imported via app → window) uses it
 const sitesPath = getResource('sites');
+const docsPath = join(sitesPath, 'docs');
 export const SitesPaths = {
     public: join(sitesPath, 'public'),
     assets: join(sitesPath, 'assets'),
     login: join(sitesPath, 'login'),
     imd: join(sitesPath, 'protected'),
 
-    docsAssets: join(sitesPath, 'docs', 'assets'),
-    docsViews: join(sitesPath, 'docs', 'views'),
+    docsAssets: join(docsPath, 'assets'),
+    docsViews: join(docsPath, 'views'),
 };
 
 // @ts-expect-error import works fine

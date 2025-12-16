@@ -29,7 +29,7 @@ export const rules: Required<ModuleOptions>['rules'] = [
         loader: 'ts-loader',
         options: {
             transpileOnly: true,
-            configFile: 'tsconfig.webpack.json'
+            configFile: 'src/renderer/tsconfig.webpack.json'
         },
         include: src,
     },

@@ -2,14 +2,14 @@ import { resolve } from 'node:path';
 
 const assetsFolder = resolve('src/renderer/assets');
 
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+import ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+import CopyWebpackPlugin = require('copy-webpack-plugin');
 
 export const plugins = [
     new ForkTsCheckerWebpackPlugin({
         logger: 'webpack-infrastructure',
         typescript: {
-            configFile: 'tsconfig.webpack.json'
+            configFile: 'src/renderer/tsconfig.webpack.json'
         },
     }),
     new CopyWebpackPlugin({
