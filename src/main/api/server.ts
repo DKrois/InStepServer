@@ -12,6 +12,7 @@ export const SitesPaths = {
     docsViews: join(sitesPath, 'docs-views'),
 };
 
+// @ts-expect-error import works fine
 import ejs from 'ejs';
 import express from 'express';
 import session from 'express-session';
@@ -42,7 +43,7 @@ export const Routes = {
     docsAssets: `/docs/assets`,
     publicAPI: '/api',
     staticAPI: '/api/static',
-    login: '/login',
+    login: '/app/login',
     imd: '/app',
     imdAPI: '/app/api',
 };
@@ -122,8 +123,8 @@ function createExpressApp() {
     app.use('/', (req, res, next) => {
         if (req.method === 'GET') {
             // authenticated: redirect to app
-            if (req.session?.isAuthenticated && (req.path === '/' || req.path === Routes.login))
-                return res.redirect(Routes.imd);
+            const pathMatches = req.path === '/' || req.path === Routes.login || req.path === Routes.login + '/';
+            if (req.session?.isAuthenticated && pathMatches) return res.redirect(Routes.imd);
 
             // not authenticated and accessing root: redirect to login
             // (don't check for Routes.login here as it'll result in a redirect loop

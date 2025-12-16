@@ -2,8 +2,11 @@ import express from 'express';
 import { imdLockDurationSeconds } from '../../../config.json';
 import { enableIMDAPI } from '../app/settings.js';
 import { errorToJSON } from '../errorformatting';
-import { info } from '../log.js';
+import { info as _info } from '../log.js';
 import { Routes, SitesPaths } from './server.js';
+
+const logSource = 'session';
+const info = (str: string) => _info(str, logSource);
 
 // only allow one imd connection at a time
 export let activeUserLock: { sessionId: string | null; timeoutId: NodeJS.Timeout | null } = {
@@ -29,7 +32,7 @@ export function manageImdLock(req: express.Request, res: express.Response, next:
 
     // no lock → acquire
     if (!activeUserLock.sessionId) {
-        info(`Lock acquired by session ID: ${currentSessionId}`, 'session');
+        info(`Lock acquired by session ID: ${currentSessionId}`);
         activeUserLock.sessionId = currentSessionId;
     }
 
@@ -84,7 +87,7 @@ export function isBrowser(req: express.Request) {
 
 export function releaseLock(reason: 'timeout' | 'explicit' = 'timeout') {
     if (activeUserLock.sessionId) {
-        info(`Lock released (${reason}) for session ID: ${activeUserLock.sessionId}`, 'session');
+        info(`Lock released (${reason}) for session ID: ${activeUserLock.sessionId}`);
         activeUserLock.sessionId = null;
         if (activeUserLock.timeoutId) {
             clearTimeout(activeUserLock.timeoutId);

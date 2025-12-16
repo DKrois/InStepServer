@@ -10,12 +10,10 @@ import { initApp } from './app/app.js';
 import { error, info } from './log.js';
 
 /*
- * imd lock translations
- * hyperlink docs (session descriptions)
- */
-
-/*
  * links to specific section in docs in apiDisabled, imdInUse
+ *      session
+ *
+ * "enter" in session
  */
 
 

@@ -5,6 +5,7 @@ import { errorToJSON } from '../errorformatting.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { projectDB } from './database.js';
 import { activeUserLock, releaseLock } from './middleware.js';
+import { Routes } from './server.js';
 
 const logSource = 'api';
 const info = (str: string) => _info(str, logSource);
@@ -134,7 +135,7 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
         for (const filename of imageFiles) {
             // The filename is the floor name (e.g., 'floor1.png')
             // Construct the static URL
-            project.floorplanImages[filename] = `/api/static/${id}/v${v}/${filename}`;
+            project.floorplanImages[filename] = `${Routes.staticAPI}/${id}/v${v}/${filename}`;
         }
 
         res.status(200).send(data);

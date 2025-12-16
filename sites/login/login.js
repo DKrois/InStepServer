@@ -8,7 +8,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
     errorMessage.textContent = '';
 
     try {
-        const response = await fetch('/login', {
+        const response = await fetch(window.location.href, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 
         if (response.ok) {
             // Redirect to the main application; the browser will now have the session cookie
-            window.location.href = '/'; // or /index.html
+            window.location.href = '/app'; // or /index.html
         } else {
             // Login failed.
             const errorData = await response.json();
