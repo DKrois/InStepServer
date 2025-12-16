@@ -4,6 +4,7 @@ import { setRestartServerInfoVisible } from './serverStatus';
 
 const securityCard = document.getElementById('security-card')!;
 
+const lockedSection = document.getElementById('locked-section')!;
 const currentPasswordInput = document.getElementById('current-password-input') as HTMLInputElement;
 const newPasswordInput = document.getElementById('new-password-input') as HTMLInputElement;
 const unlockBtn = document.getElementById('unlock-btn')!;
@@ -36,8 +37,15 @@ currentPasswordInput.addEventListener('keydown', (event) => {
     }
 });
 
-newPasswordInput.addEventListener('keydown', (event) => {
+// save on enter
+lockedSection.addEventListener('keydown', event => {
     if (event.key === 'Enter') {
+        // Don't trigger save if the user is typing in a textarea
+        /*const targetElement = event.target as HTMLElement;
+        if (targetElement && targetElement.tagName === 'TEXTAREA') {
+            return; // Do nothing, allow the default newline behavior
+        }*/
+
         event.preventDefault();
         handleSave();
     }

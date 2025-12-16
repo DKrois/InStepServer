@@ -12,8 +12,6 @@ import { error, info } from './log.js';
 /*
  * links to specific section in docs in apiDisabled, imdInUse
  *      session
- *
- * "enter" in session
  */
 
 
