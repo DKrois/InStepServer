@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Menu, screen, session } from 'electron';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
-import { defaultDBPath } from '../api/database.js';
+
+import { defaultDBPath } from '../constants';
 import { info } from '../log.js';
 import { isQuitting } from './app.js';
 import { handleStartServer } from './ipc.js';

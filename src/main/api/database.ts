@@ -2,7 +2,6 @@ import { LRUCache } from 'lru-cache';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { cacheMaxAgeSeconds, cacheSize } from '../../../config.json';
-import { userDataPath } from '../app/app.js';
 import { mainWindow } from '../app/window.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { writeJSON } from '../util.js';
@@ -11,8 +10,6 @@ const logSource = 'db';
 const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
 const error = (str: string, err: unknown) => _error(str, err, logSource);
-
-export const defaultDBPath = join(userDataPath, 'data');
 
 let _db: ProjectDatabase | null = null;
 
@@ -32,7 +29,7 @@ export interface SimplifiedState {
     project: SimplifiedProject;
 }
 
-export const stateSchema = {
+const stateSchema = {
     project: {
         type: 'string',
         properties: {

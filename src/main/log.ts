@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import log from 'electron-log';
-import { getCurrentTime } from '../common/time';
-import { sendLog } from './app/app';
-import { errorToString, indent } from './errorformatting';
+import { getCurrentTime } from '../common/time.js';
+import { sendLog } from './app/app.js';
+import { errorToString, indent } from './errorformatting.js';
 
 export function initLogging() {
     log.initialize();

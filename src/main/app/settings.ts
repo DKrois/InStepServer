@@ -3,8 +3,8 @@ import { app, dialog, ipcMain, nativeTheme } from 'electron';
 import Store from 'electron-store';
 import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
-import { defaultDBPath } from '../api/database.js';
-import { releaseLock } from '../api/middleware';
+import { releaseLock } from '../api/middleware.js';
+import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
 import { canWriteToPath } from '../util.js';
 

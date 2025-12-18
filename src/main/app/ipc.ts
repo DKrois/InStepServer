@@ -1,11 +1,12 @@
 import { app, ipcMain, nativeTheme } from 'electron';
-import { defaultDBPath, initDB, projectDB } from '../api/database';
-import { initServer, stopServer } from '../api/server';
-import { normalizeSize } from '../util';
-import { registerShortcutsIPC, registerUpdateIPC } from './installer';
-import { registerSecurityIPC, registerSettingsIPC, store } from './settings';
-import { registerTimeSettingsIPC } from './timeScheduler';
-import { mainWindow } from './window';
+import { initDB, projectDB } from '../api/database.js';
+import { initServer, stopServer } from '../api/server.js';
+import { defaultDBPath } from '../constants.js';
+import { normalizeSize } from '../util.js';
+import { registerShortcutsIPC, registerUpdateIPC } from './installer.js';
+import { registerSecurityIPC, registerSettingsIPC, store } from './settings.js';
+import { registerTimeSettingsIPC } from './timeScheduler.js';
+import { mainWindow } from './window.js';
 
 export let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;

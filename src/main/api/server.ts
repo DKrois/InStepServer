@@ -1,18 +1,3 @@
-import { getOwnIPs, getResource } from '../util.js';
-import { join } from 'node:path';
-// initialize before menu.ts (imported via app → window) uses it
-const sitesPath = getResource('sites');
-const docsPath = join(sitesPath, 'docs');
-export const SitesPaths = {
-    public: join(sitesPath, 'public'),
-    assets: join(sitesPath, 'assets'),
-    login: join(sitesPath, 'login'),
-    imd: join(sitesPath, 'protected'),
-
-    docsAssets: join(docsPath, 'assets'),
-    docsViews: join(docsPath, 'views'),
-};
-
 // @ts-expect-error import works fine
 import ejs from 'ejs';
 import express from 'express';
@@ -24,31 +9,21 @@ import * as crypto from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
-import * as api from './api.js';
-import { userDataPath } from '../app/app.js';
+import { join } from 'node:path';
 import { enableIMDAPI, store } from '../app/settings.js';
+import { Routes, SitesPaths, userDataPath } from '../constants.js';
+import { error as _error, info as _info, warn as _warn } from '../log.js';
+import { getOwnIPs } from '../util.js';
+import * as api from './api.js';
 import { isDBInitialized, projectDB } from './database.js';
-import { info as _info, warn as _warn, error as _error } from '../log.js';
-import { startMDNSAdvertisement, stopMDNSAdvertisement } from './mdns';
-import { isAuth, isIMDAPIEnabled, manageImdLock, sendFileIfBrowser } from './middleware.js';
 import { createDocsRouter } from './docs.js';
+import { startMDNSAdvertisement, stopMDNSAdvertisement } from './mdns.js';
+import { isAuth, isIMDAPIEnabled, manageImdLock, sendFileIfBrowser } from './middleware.js';
 
 const logSource = 'server';
 const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
 const error = (str: string, err: unknown) => _error(str, err, logSource);
-
-export const Routes = {
-    assets: '/assets',
-    docs: '/docs',
-    userDocs: '/user-docs',
-    docsAssets: `/docs/assets`,
-    publicAPI: '/api',
-    staticAPI: '/api/static',
-    login: '/app/login',
-    imd: '/app',
-    imdAPI: '/app/api',
-};
 
 const uploadDir = mkdtempSync(join(tmpdir(), 'InStepServer-uploads'));
 const upload = multer({ dest: uploadDir });

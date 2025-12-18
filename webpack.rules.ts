@@ -3,6 +3,8 @@ import type { ModuleOptions } from 'webpack';
 
 const src = resolve('src');
 
+export const tsConfig = 'src/renderer/tsconfig.json';
+
 export const rules: Required<ModuleOptions>['rules'] = [
     // Add support for native node modules
     {
@@ -29,7 +31,7 @@ export const rules: Required<ModuleOptions>['rules'] = [
         loader: 'ts-loader',
         options: {
             transpileOnly: true,
-            configFile: 'src/renderer/tsconfig.webpack.json'
+            configFile: tsConfig,
         },
         include: src,
     },

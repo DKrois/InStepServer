@@ -1,9 +1,9 @@
 import express from 'express';
 import { imdLockDurationSeconds } from '../../../config.json';
 import { enableIMDAPI } from '../app/settings.js';
-import { errorToJSON } from '../errorformatting';
+import { Routes, SitesPaths } from '../constants.js';
+import { errorToJSON } from '../errorformatting.js';
 import { info as _info } from '../log.js';
-import { Routes, SitesPaths } from './server.js';
 
 const logSource = 'session';
 const info = (str: string) => _info(str, logSource);

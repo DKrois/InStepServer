@@ -7,6 +7,8 @@
 /.webpack
 /out
 
+/sites/docs/assets/js
+
 /data
-/key.pem
-/cert.pem
+/**/key.pem
+/**/cert.pem

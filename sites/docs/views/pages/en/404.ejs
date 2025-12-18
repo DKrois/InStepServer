@@ -1,0 +1,12 @@
+<% const body = `
+    <div style="margin-top: 50px;">
+        <h1 style="font-size: 4rem; color: var(--accent-color);">404</h1>
+        <h2>Page not found</h2>
+        <p>The page at <code>${currentPath}</code> does not exist.</p>
+        <a href="${baseRoute}" style="color: var(--link-color);">Return to Introduction</a>
+    </div>
+`; %>
+
+<!-- Set a local flag for the shell to hide TOC -->
+<% locals.is404 = true; %>
+<%- include('../layouts/shell', { body: body }); %>

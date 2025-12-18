@@ -1,13 +1,10 @@
 import { app, BrowserWindow, nativeTheme } from 'electron';
 import log from 'electron-log';
 import type { TOptions } from 'i18next';
-
-// variable needs to be set before importing projectDB as it uses it during initialization
-export const userDataPath = app.getPath('userData');
 import { initDB } from '../api/database.js';
+import { initLogging } from '../log.js';
 import { handleSquirrelCommands, initUpdater } from './installer.js';
 import { registerIPCHandlers } from './ipc.js';
-import { initLogging } from '../log.js';
 import { createTray } from './menu.js';
 import { initStore, store } from './settings.js';
 import { createWindow, mainWindow } from './window.js';

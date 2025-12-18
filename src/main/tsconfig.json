@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "nodenext",
 
@@ -15,7 +15,6 @@
 
     "lib": ["ESNext"],
 
-    "outDir": "dist",
     "baseUrl": "../..",
     "paths": {
       "*": ["node_modules/*"],
@@ -27,5 +26,5 @@
   },
   "include": ["**/*"],
   "exclude": [
-    "../../node_modules", "dist"]
+    "../../node_modules"]
 }

@@ -5,11 +5,13 @@ process.env.FORCE_COLOR = '1';
 import { app } from 'electron';
 import { name } from '../../config.json';
 import 'source-map-support/register';
-import { stopServer } from './api/server';
+import { stopServer } from './api/server.js';
 import { initApp } from './app/app.js';
 import { error, info } from './log.js';
 
 /*
+ * disable i18n debug
+ *
  * links to specific section in docs in apiDisabled, imdInUse
  *      session
  */

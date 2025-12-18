@@ -1,14 +1,14 @@
 import { app, Menu, shell, Tray } from 'electron';
 import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { join } from 'node:path';
-import { projectDB } from '../api/database';
-import { SitesPaths } from '../api/server';
-import { error } from '../log';
-import { showToast } from './app';
-import { createShortcut } from './installer';
-import { handleStartServer, handleStopServer } from './ipc';
-import { store } from './settings';
-import { mainWindow } from './window';
+import { projectDB } from '../api/database.js';
+import { SitesPaths } from '../constants.js';
+import { error } from '../log.js';
+import { showToast } from './app.js';
+import { createShortcut } from './installer.js';
+import { handleStartServer, handleStopServer } from './ipc.js';
+import { store } from './settings.js';
+import { mainWindow } from './window.js';
 
 const iconPath = join(SitesPaths.assets, process.platform === 'win32' ? 'icon.ico' : 'icon.png');
 let tray: Tray | null = null;

@@ -7,7 +7,7 @@ import { basename,  dirname, resolve } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { Durations } from '../../common/time.js';
-import { store } from './settings';
+import { store } from './settings.js';
 import { mainWindow } from './window.js';
 
 const logSource = 'installer';
@@ -81,7 +81,7 @@ async function checkForUpdate() {
             return;
         }
 
-        const release = await response.json();
+        const release = await response.json() as any;
         const latestVersion = release.tag_name.replace('v', '');
         const currentVersion = app.getVersion();
 

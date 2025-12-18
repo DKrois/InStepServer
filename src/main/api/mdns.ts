@@ -1,6 +1,6 @@
 import Bonjour from 'bonjour-service';
 import { hostname } from '../../../config.json';
-import { info as _info, warn as _warn } from '../log';
+import { info as _info, warn as _warn } from '../log.js';
 
 const logSource = 'mdns';
 const info = (str: string) => _info(str, logSource);

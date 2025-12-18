@@ -1,11 +1,11 @@
 import express from 'express';
 import { randomInt } from 'node:crypto';
 import { verifyPassword } from '../app/settings.js';
+import { Routes } from '../constants.js';
 import { errorToJSON } from '../errorformatting.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { projectDB } from './database.js';
 import { activeUserLock, releaseLock } from './middleware.js';
-import { Routes } from './server.js';
 
 const logSource = 'api';
 const info = (str: string) => _info(str, logSource);

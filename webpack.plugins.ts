@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { tsConfig } from './webpack.rules';
 
 const assetsFolder = resolve('src/renderer/assets');
 
@@ -9,7 +10,7 @@ export const plugins = [
     new ForkTsCheckerWebpackPlugin({
         logger: 'webpack-infrastructure',
         typescript: {
-            configFile: 'src/renderer/tsconfig.webpack.json'
+            configFile: tsConfig,
         },
     }),
     new CopyWebpackPlugin({
