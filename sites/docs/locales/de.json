@@ -1,24 +1,11 @@
 {
-  "header": {
-    "title": "Einführung",
-    "theme": "Design wechseln"
-  },
-  "nav": {
-    "intro": "Einführung",
+  "sidebar": {
+    "introduction": "Einleitung",
     "imd": "Indoor Map Digitalizer",
+    "server": "Server",
+    "app": "Benutzer-App",
     "overview": "Übersicht",
     "quickstart": "Schnellstart",
-    "server": "Server",
-    "server_security": "Sicherheit",
-    "server_session": "Sitzungseinstellungen",
-    "server_password": "Passwort",
-    "app": "Benutzer App"
-  },
-  "toc": {
-    "title": "Auf dieser Seite"
-  },
-  "404": {
-    "title": "Seite nicht gefunden",
-    "text": "Die gesuchte Seite existiert nicht."
+    "security": "Sicherheit"
   }
 }

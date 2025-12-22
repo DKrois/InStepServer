@@ -7,19 +7,23 @@ export const defaultDBPath = join(userDataPath, 'data');
 
 const sitesPath = getResource('sites');
 const docsPath = join(sitesPath, 'docs');
-export const SitesPaths = {
+export const SitesPaths = Object.freeze({
     public: join(sitesPath, 'public'),
     assets: join(sitesPath, 'assets'),
     login: join(sitesPath, 'login'),
     imd: join(sitesPath, 'protected'),
 
-    docsViews: join(docsPath, 'views'),
-    docsContent: join(docsPath, 'content'),
-    docsAssets: join(docsPath, 'assets'),
-};
+    docs: {
+        config: join(docsPath, 'config'),
+        views: join(docsPath, 'views'),
+        content: join(docsPath, 'content'),
+        assets: join(docsPath, 'assets'),
+        locales: join(docsPath, 'locales'),
+    },
+});
 
 const docsAssetsRoute = `/docs/assets`;
-export const Routes = {
+export const Routes = Object.freeze({
     assets: '/assets',
     publicAPI: '/api',
     staticAPI: '/api/static',
@@ -31,4 +35,4 @@ export const Routes = {
     userDocs: '/user-docs',
     docsAssets: docsAssetsRoute,
     docsImages: `${docsAssetsRoute}/images`,
-};
+});

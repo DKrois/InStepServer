@@ -12,6 +12,10 @@ import { error, info } from './log.js';
 /*
  * disable i18n debug
  *
+ * mobile
+ * save sidebar folder state in localStorage
+ * 404 translation
+ *
  * links to specific section in docs in apiDisabled, imdInUse
  *      session
  */

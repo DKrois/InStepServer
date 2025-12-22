@@ -3,6 +3,8 @@ import { getTranslation } from './translate';
 import { marked } from 'marked';
 
 // Initial modal, update modal, confirmation
+
+// enable gfm (github flavoured markdown)
 marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 
 const initialModalBackdrop = document.getElementById('initial-modal')!;

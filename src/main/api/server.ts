@@ -114,15 +114,15 @@ function createExpressApp() {
 
     app.engine('ejs', ejs.renderFile);
     app.set('view engine', 'ejs');
-    app.set('views', SitesPaths.docsViews);
+    app.set('views', SitesPaths.docs.views);
 
     app.use(Routes.assets, express.static(SitesPaths.assets));
     app.use(Routes.staticAPI, express.static(projectDB.path)); // serve db path for image access
 
-    app.use(Routes.docsAssets, express.static(SitesPaths.docsAssets));
+    app.use(Routes.docsAssets, express.static(SitesPaths.docs.assets));
 
-    app.use(Routes.docs, createDocsRouter('full'));
-    app.use(Routes.userDocs, createDocsRouter('user')); // only show the 'User App' section
+    app.use(Routes.docs, createDocsRouter({ sidebarType: 'full', basePath: Routes.docs }));
+    app.use(Routes.userDocs, createDocsRouter({ sidebarType: 'user', basePath: Routes.userDocs })); // only show the 'User App' section
 
     app.use(Routes.login, isIMDAPIEnabled, express.static(SitesPaths.login));
     app.post(Routes.login, isIMDAPIEnabled, api.handleLogin);

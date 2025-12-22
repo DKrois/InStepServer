@@ -1,177 +1,148 @@
 import express from 'express';
-import { Routes } from '../constants.js';
-import { error } from '../log.js';
+import fm from 'front-matter';
+import { existsSync, readFileSync } from 'fs';
+import { marked } from 'marked';
+import { join } from 'path';
+import { Routes, SitesPaths } from '../constants.js';
+import { error as _error } from '../log.js';
+import { formatCase } from '../../common/util.js';
 
-type SidebarType = 'full' | 'user';
+const logSource = 'docs';
+const error = (message: string, err: unknown) => _error(message, err, logSource);
 
-export interface NavItem {
-    label: string;
-    i18nKey: string;
-    id?: string; // Used for folder expansion logic
-    href?: string; // Relative to the docs root (e.g., '/server/overview')
-    children?: NavItem[];
-    allowedContexts: SidebarType[]; // Controls visibility
+const preloadPath = join(SitesPaths.docs.assets, 'js', 'preload.js');
+const sidebarConfigPath = join(SitesPaths.docs.config, 'sidebar.json');
+
+type Attributes = { title: string };
+
+interface DocConfig {
+    sidebarType: 'full' | 'user';
+    basePath: string; // /docs or /user-docs
 }
 
-export function createDocsRouter(sidebarType: SidebarType) {
+interface SidebarItem {
+    title: string;
+    key?: string; // for i18n
+    href?: string;
+    children?: SidebarItem[];
+    allowUserDocs?: boolean; // Filter for User Docs
+}
+
+export function createDocsRouter(config: DocConfig) {
     const router = express.Router();
+    const { sidebarType, basePath } = config;
 
-    // global middleware for router
-    router.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-        // inject global variables for EJS
+    const preload = readFileSync(preloadPath, 'utf8');
+
+    // middleware: locals (ejs variables) setup
+    router.use((_req, res, next) => {
+        res.locals.baseRoute = basePath;
+        res.locals.assetsRoute = `${Routes.docs}/assets`; // assets served from /docs/assets
         res.locals.sidebarType = sidebarType;
-        res.locals.baseRoute = req.baseUrl; // '/docs' or '/user-docs'
-        res.locals.docsImages = Routes.docsImages;
-        res.locals.docsAssets = Routes.docsAssets;
-
-        // inject nav data (sidebar)
-        res.locals.navTree = getFilteredNav(sidebarType);
-
+        res.locals.preload = preload;
         next();
     });
 
-    // handles /, /server/overview, /server/security/password, etc.
-    router.get(/.*/, (req: express.Request, res: express.Response) => {
-        // strip trailing slash for consistency
-        let path = req.path.replace(/\/$/, '') || '/';
+    // root redirect: /docs -> /docs/en/introduction
+    router.get('/', (_req, res) =>
+        res.redirect(`${basePath}/en/introduction`)
+    );
 
-        // determine title from nav data (optional, purely for <title>)
-        const pathSegments = path.split('/').filter(Boolean);
-        const title = pathSegments.length > 0
-            ? pathSegments.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' – ')
-            : 'Introduction';
+    // language redirect: /docs/en -> /docs/en/introduction
+    router.get('/:lang', (req, res) =>
+        res.redirect(`${req.baseUrl}/${req.params.lang}/introduction`)
+    );
 
-        // determine EJS View path
-        // if path is '/', render 'pages/docs-index'
-        // otherwise, render 'pages/path/to/file'
-        let viewPath = path === '/'
-            ? 'pages/docs-index'
-            : `pages${path}`;
+    // main page handler
+    router.get('/:lang/*path', async (req, res) => {
+        const lang = req.params.lang;
+        // @ts-expect-error works fine
+        const pathParam = req.params.path.join('/').replaceAll('.md', '') || 'introduction'; // e.g. "server/overview"
 
-        // inject current path relative to docs root for highlighting
-        res.locals.currentPath = path;
-        res.locals.title = title;
-        res.locals.is404 = false;
+        // validate language
+        if (!['en', 'de'].includes(lang)) {
+            return render404(res, lang, req.path, basePath, getSidebar(sidebarType, 'en'));
+        }
 
-        // try to render
-        res.render(viewPath, (err: Error, html: string) => {
-            if (err) {
-                // check if it's a "view not found" error
-                if (err.message.includes('Failed to lookup view')) {
-                    // 404
-                    res.locals.is404 = true;
-                    res.locals.title = 'Page not found';
-                    return res.status(404).render('pages/404');
-                }
-                // actual server error (syntax error in EJS, etc)
-                error('Docs render error', err, 'docs');
-                return res.status(500).send('Internal server error');
-            }
-            // render successful
-            res.send(html);
-        });
+        const mdPath = join(SitesPaths.docs.content, lang, `${pathParam}.md`);
+
+        // Check if file exists
+        if (!existsSync(mdPath)) {
+            return render404(res, lang, req.path, basePath, getSidebar(sidebarType, 'en'));
+        }
+
+        try {
+            const fileContent = readFileSync(mdPath, 'utf-8');
+            const { attributes, body } = fm<Attributes>(fileContent);
+            const htmlContent = marked.parse(body, { async: false });
+
+            // construct Title: Section - Page
+            const pathParts = pathParam.split('/');
+            const pageName = pathParts.pop() || '';
+            const sectionName = pathParts.pop() || '';
+
+            // prefer Frontmatter title, else fallback to filename
+            const displayTitle = attributes.title || `${sectionName ? formatCase(sectionName) + ' – ' : ''}${formatCase(pageName)}`;
+
+            res.render('layout', {
+                title: displayTitle,
+                content: htmlContent,
+                sidebar: getSidebar(sidebarType, lang),
+                currentPath: pathParam,
+                lang,
+                isFullDocs: sidebarType === 'full',
+                showToc: true,
+            });
+
+        } catch (err) {
+            error('Docs Render Error', err);
+            res.status(500).send('Internal Server Error');
+        }
     });
 
     return router;
 }
 
-export const DOCS_NAVIGATION: NavItem[] = [
-    {
-        label: 'Introduction',
-        i18nKey: 'nav.intro',
-        href: '/', // The root index page
-        allowedContexts: ['full', 'user']
-    },
-    {
-        label: 'Indoor Map Digitalizer',
-        i18nKey: 'nav.imd',
-        id: 'imd',
-        allowedContexts: ['full'],
-        children: [
-            {
-                label: 'Overview',
-                i18nKey: 'nav.overview',
-                href: '/imd/overview',
-                allowedContexts: ['full']
-            },
-            {
-                label: 'Quickstart',
-                i18nKey: 'nav.quickstart',
-                href: '/imd/quickstart',
-                allowedContexts: ['full']
-            }
-            // Add more pages here
-        ]
-    },
-    {
-        label: 'Server',
-        i18nKey: 'nav.server',
-        id: 'server',
-        allowedContexts: ['full'],
-        children: [
-            {
-                label: 'Overview',
-                i18nKey: 'nav.overview',
-                href: '/server/overview',
-                allowedContexts: ['full']
-            },
-            {
-                label: 'Quickstart',
-                i18nKey: 'nav.quickstart',
-                href: '/server/quickstart',
-                allowedContexts: ['full']
-            },
-            {
-                label: 'Security',
-                i18nKey: 'nav.server_security',
-                id: 'server-security',
-                allowedContexts: ['full'],
-                children: [
-                    {
-                        label: 'Session Settings',
-                        i18nKey: 'nav.server_session',
-                        href: '/server/security/session',
-                        allowedContexts: ['full']
-                    },
-                    {
-                        label: 'Password',
-                        i18nKey: 'nav.server_password',
-                        href: '/server/security/password',
-                        allowedContexts: ['full']
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        label: 'User App',
-        i18nKey: 'nav.app',
-        id: 'app',
-        allowedContexts: ['full', 'user'],
-        children: [
-            {
-                label: 'Overview',
-                i18nKey: 'nav.overview',
-                href: '/app/overview',
-                allowedContexts: ['full', 'user']
-            },
-            {
-                label: 'Quickstart',
-                i18nKey: 'nav.quickstart',
-                href: '/app/quickstart',
-                allowedContexts: ['full', 'user']
-            }
-        ]
-    }
-];
+function render404(res: express.Response, lang: string, currentPath: string, basePath: string, sidebar: any[]) {
+    const notFoundHtml = `
+            <h1>404 Not Found</h1>
+            <p>The requested documentation page could not be found.</p>
+            <br>
+            <a href="${basePath}/${lang}/introduction" style="color: var(--accent-primary); text-decoration: underline;">
+                Return to Introduction
+            </a>
+        `;
 
-// Helper to filter the tree based on the context (user vs full)
-export function getFilteredNav(context: SidebarType): NavItem[] {
-    const filterItems = (items: NavItem[]): NavItem[] =>
-        items.filter(item => item.allowedContexts.includes(context))
-            .map(item => ({
-                ...item,
-                children: item.children ? filterItems(item.children) : undefined
-            }));
-    return filterItems(DOCS_NAVIGATION);
+    res.status(404).render('layout', {
+        title: 'Page Not Found',
+        sidebar,
+        currentPath,
+        lang,
+        showToc: false,       // disable right sidebar
+        content: notFoundHtml
+    });
+}
+
+function getSidebar(sidebarType: string, lang: string): any[] {
+    const localeData = JSON.parse(readFileSync(join(SitesPaths.docs.locales, `${lang}.json`), 'utf-8'));
+    const sidebarConfig = JSON.parse(readFileSync(sidebarConfigPath, 'utf-8'));
+
+    // Recursive function to filter and translate
+    const processItems = (items: SidebarItem[]): any[] => {
+        return items.reduce((acc: any[], item) => {
+            if (sidebarType === 'user' && item.allowUserDocs === false) return acc;
+
+            const translatedTitle = item.key ? (localeData.sidebar[item.key] || item.title) : item.title;
+            const processedItem: any = { ...item, title: translatedTitle };
+
+            if (item.children) {
+                processedItem.children = processItems(item.children);
+            }
+
+            acc.push(processedItem);
+            return acc;
+        }, []);
+    };
+
+    return processItems(sidebarConfig);
 }

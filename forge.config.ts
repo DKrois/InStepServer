@@ -41,7 +41,7 @@ const config: ForgeConfig = {
         new MakerSquirrel({
             setupExe: `${setupExeName}.exe`,
             setupIcon: windowsIcon,
-            iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/assets/icon.ico',
+            iconUrl: 'https://raw.githubusercontent.com/DKrois/InStepServer/refs/heads/master/sites/assets/icon.ico',
             exe: `${exeBaseName}.exe`
         }),
         new MakerWix({

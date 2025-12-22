@@ -1,24 +1,11 @@
 {
-  "header": {
-    "title": "Introduction",
-    "theme": "Toggle Theme"
-  },
-  "nav": {
-    "intro": "Introduction",
+  "sidebar": {
+    "introduction": "Introduction",
     "imd": "Indoor Map Digitalizer",
+    "server": "Server",
+    "app": "User App",
     "overview": "Overview",
     "quickstart": "Quickstart",
-    "server": "Server",
-    "server_security": "Security",
-    "server_session": "Session Settings",
-    "server_password": "Password",
-    "app": "User App"
-  },
-  "toc": {
-    "title": "On this page"
-  },
-  "404": {
-    "title": "Page not found",
-    "text": "The page you are looking for does not exist."
+    "security": "Security"
   }
 }

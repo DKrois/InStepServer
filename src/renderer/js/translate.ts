@@ -9,7 +9,7 @@ import { showTranslatedToast } from './logs';
 const themeSwitcher = document.getElementById('theme-switcher')!;
 const languageSwitcher = document.getElementById('language-switcher') as HTMLSelectElement;
 
-// *** Translation ***
+// --- Translation ---
 i18next.init({
     lng: 'en',
     debug: true,
