@@ -28,6 +28,16 @@ interface SidebarItem {
     allowUserDocs?: boolean; // Filter for User Docs
 }
 
+function getLocaleData(lang: string) {
+    try {
+        return JSON.parse(readFileSync(join(SitesPaths.docs.locales, `${lang}.json`), 'utf-8'));
+    } catch (e) {
+        // default to en
+        if (lang !== 'en') return getLocaleData('en');
+        else throw e;
+    }
+}
+
 export function createDocsRouter(config: DocConfig) {
     const router = express.Router();
     const { sidebarType, basePath } = config;
@@ -61,14 +71,24 @@ export function createDocsRouter(config: DocConfig) {
 
         // validate language
         if (!['en', 'de'].includes(lang)) {
-            return render404(res, lang, req.path, basePath, getSidebar(sidebarType, 'en'));
+            return render404(res, {
+                lang: 'en',
+                currentPath: pathParam,
+                basePath,
+                sidebarType,
+            });
         }
 
         const mdPath = join(SitesPaths.docs.content, lang, `${pathParam}.md`);
 
         // Check if file exists
         if (!existsSync(mdPath)) {
-            return render404(res, lang, req.path, basePath, getSidebar(sidebarType, lang));
+            return render404(res, {
+                lang,
+                currentPath: pathParam,
+                basePath,
+                sidebarType,
+            });
         }
 
         try {
@@ -103,19 +123,34 @@ export function createDocsRouter(config: DocConfig) {
     return router;
 }
 
-function render404(res: express.Response, lang: string, currentPath: string, basePath: string, sidebar: any[]) {
+function render404(res: express.Response, options: { lang: string, currentPath: string, basePath: string, sidebarType: string }) {
+    const { lang, currentPath, basePath, sidebarType } = options;
+    // try to load translations from file
+    const data = getLocaleData(lang);
+    const t = data.ui['404'];
+
+    // use translated 404
     const notFoundHtml = `
-            <h1>404 Not Found</h1>
-            <p>The requested documentation page could not be found.</p>
-            <br>
-            <a href="${basePath}/${lang}/introduction" style="color: var(--accent-primary); text-decoration: underline;">
-                Return to Introduction
-            </a>
+            <div style="text-align: center; padding-top: 2rem;">
+                <h1 style="border:none; margin-bottom: 1rem;">${t.heading}</h1>
+                <p>${t.message}</p>
+                <br>
+                <a href="${basePath}/${lang}/introduction" class="nav-link" style="
+                    display: inline-block; 
+                    background: var(--accent-hover); 
+                    color: var(--accent-primary); 
+                    padding: 0.5rem 1rem; 
+                    border-radius: 4px;
+                    text-decoration: none;
+                    font-weight: 500;">
+                    ${t.button}
+                </a>
+            </div>
         `;
 
     res.status(404).render('layout', {
-        title: 'Page Not Found',
-        sidebar,
+        title: t.title,
+        sidebar: getSidebar(sidebarType, lang),
         currentPath,
         lang,
         showToc: false,       // disable right sidebar
@@ -124,7 +159,7 @@ function render404(res: express.Response, lang: string, currentPath: string, bas
 }
 
 function getSidebar(sidebarType: string, lang: string): any[] {
-    const localeData = JSON.parse(readFileSync(join(SitesPaths.docs.locales, `${lang}.json`), 'utf-8'));
+    const localeData = getLocaleData(lang);
     const sidebarConfig = JSON.parse(readFileSync(sidebarConfigPath, 'utf-8'));
 
     // Recursive function to filter and translate

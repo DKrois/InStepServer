@@ -7,7 +7,7 @@ export function setupLanguageSwitcher() {
         const baseRoute = selector.dataset.base || 'docs';
         const currentPath = selector.dataset.path || 'introduction'; // e.g. "server/overview"
 
-        // Redirect to new language, keeping the same page
+        // redirect to new language, keeping the same page
         window.location.href = `${baseRoute}/${targetLang}/${currentPath}`;
     });
 }
