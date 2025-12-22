@@ -31,7 +31,6 @@
 
 
   "sessionTitle": "Sitzung",
-  "sessionIMDDesc": "Diese Checkbox aktiviert oder deaktiviert den Fernzugriff auf die Endpunkte des Indoor Map Digitalizers (IMD). Da nur eine Person gleichzeitig bearbeiten kann, 'sperrt' der erste Benutzer den Editor. Die Schaltfläche 'IMD-Sperre aufheben' beendet die aktive Sitzung zwangsweise. <br><strong>Warnung:</strong> Das Aufheben der Sperre, während jemand aktiv arbeitet, unterbricht dessen Sitzung und führt wahrscheinlich zum Verlust von nicht gespeicherten Änderungen. Nur verwenden, um eine blockierte Sitzung freizugeben.",
   "enableIMDAPI": "Indoor Map Digitalizer-API aktivieren",
   "toastIMDAPIEnabled": "IMD-API aktiviert",
   "toastIMDAPIDisabled": "IMD-API deaktiviert",
@@ -39,7 +38,6 @@
   "toastIMDLockReleased": "IMD-Sperre aufgehoben",
 
   "sessionDuration": "Sitzungsdauer",
-  "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",
   "years": "Jahre",
   "days": "Tage",
   "hours": "Stunden",
@@ -146,5 +144,9 @@
   "ok": "OK",
   "cancel": "Abbrechen",
   "cancelled": "Abgebrochen",
-  "toastUnknownError": "Ein unbekannter Fehler ist aufgetreten"
+  "toastUnknownError": "Ein unbekannter Fehler ist aufgetreten",
+
+  "documentationUnavailableTitle": "Dokumentation nicht verfügbar",
+  "documentationUnavailableDesc": "Um auf die InStep-Dokumentation zugreifen zu können, muss der Server aktiviert sein. Bitte starten Sie den Server und versuchen Sie es erneut.",
+  "documentationUnavailableNote": "Alternativ können Sie auf einen Teil der Dokumentation zugreifen unter https://github.com/DKrois/InStepServer/tree/master/sites/docs/content"
 }

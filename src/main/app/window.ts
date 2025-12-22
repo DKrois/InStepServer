@@ -1,7 +1,7 @@
-import { app, BrowserWindow, Menu, screen, session } from 'electron';
+import { app, BrowserWindow, Menu, screen, session, shell } from 'electron';
 import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
-
-import { defaultDBPath } from '../constants';
+import { isServerRunning } from '../api/server.js';
+import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
 import { isQuitting } from './app.js';
 import { handleStartServer } from './ipc.js';
@@ -62,6 +62,20 @@ export function createWindow() {
     });
     mainWindow.on('closed', () => mainWindow = null);
 
+    // always open links in external browser
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        if (!url.startsWith('file://') && !url.startsWith('app://')
+            && !url.startsWith('http://localhost:3000') // for dev
+        ) {
+            event.preventDefault();
+            shell.openExternal(url);
+        }
+    });
+
     mainWindow.webContents.on('did-finish-load', finishedLoad);
 }
 
@@ -80,7 +94,7 @@ async function finishedLoad() {
     // time management takes precedence over "start on open" setting
     if (timeSettings?.enabled) {
         await startScheduler();
-    } else if (store.get('startServerOnOpen')) {
+    } else if (store.get('startServerOnOpen') && !isServerRunning()) {
         handleStartServer();
     } else {
         mainWindow?.webContents.send('server-status-changed', { isRunning: false, port: null });

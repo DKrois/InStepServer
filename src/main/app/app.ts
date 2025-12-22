@@ -71,6 +71,10 @@ export function sendLog(message: string | string[]) {
     mainWindow?.webContents.send('log', m);
 }
 
-export function showToast(key: string, options?: TOptions, type: 'info' | 'error' = 'info') {
+export function sendToast(key: string, options?: TOptions, type: 'info' | 'error' = 'info') {
     mainWindow?.webContents.send('show-toast', key, options, type);
+}
+
+export function sendPopup(titleKey: string, messageKey: string, sideNoteKey?: string, options?: TOptions) {
+    mainWindow?.webContents.send('show-popup-modal', titleKey, messageKey, sideNoteKey, options);
 }

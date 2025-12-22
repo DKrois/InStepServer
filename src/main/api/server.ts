@@ -74,6 +74,10 @@ export async function stopServer() {
     httpTerminator = null;
 }
 
+export function isServerRunning() {
+    return !!httpServer;
+}
+
 function createExpressApp() {
     const app = express();
     app.use(express.json());

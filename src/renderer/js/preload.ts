@@ -64,6 +64,9 @@ const api = {
     onShowToast: (callback: (key: string, options?: TOptions, type?: 'info' | 'error') => void) => {
         ipcRenderer.on('show-toast', (_event, key: string, options?: TOptions, type: 'info' | 'error' = 'info') => callback(key, options, type));
     },
+    onShowPopupModal: (callback: (titleKey: string, messageKey: string, sideNoteKey?: string, option?: TOptions) => void) => {
+        ipcRenderer.on('show-popup-modal', (_event, titleKey, messageKey, sideNoteKey, options) => callback(titleKey, messageKey, sideNoteKey, options))
+    }
 };
 
 // --- Expose to Renderer ---

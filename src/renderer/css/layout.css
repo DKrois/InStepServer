@@ -67,6 +67,10 @@ hr {
     margin-left: auto;
 }
 
+.small {
+    font-size: smaller;
+    color: #aaaaaa;
+}
 
 /* --- Sidebar (Statistics) --- */
 .sidebar {

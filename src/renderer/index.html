@@ -114,7 +114,7 @@
                             <div id="session-section">
                                 <h3 data-i18n="sessionTitle">Session</h3>
 
-                                <p data-i18n="sessionIMDDesc"></p> <!-- set by i18next -->
+                                <!-- add hyperlink to docs -->
                                 <div class="form-group">
                                     <input type="checkbox" id="imd-api-toggle">
                                     <label for="imd-api-toggle" data-i18n="enableIMDAPI">Enable IMD API</label>
@@ -122,7 +122,7 @@
                                 </div>
 
                                 <h4 data-i18n="sessionDuration">Duration</h4>
-                                <p data-i18n="sessionDurationDesc"></p>
+                                <!-- add hyperlink to docs -->
 
                                 <div class="duration-controls">
                                     <div class="duration-input-group">
@@ -220,7 +220,7 @@
 
         <!-- Initial Modal -->
         <div id="initial-modal" class="modal hidden">
-            <div id="modal-dialog" class="modal-dialog card">
+            <div class="modal-dialog card">
                 <h3 data-i18n="initialPasswordTitle">Initial Password</h3>
                 <p data-i18n="initialPasswordDesc">This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.</p>
                 <div class="password-display-wrapper">
@@ -257,7 +257,7 @@
         </div>
 
         <div id="update-modal" class="modal hidden">
-            <div id="update-modal-dialog" class="modal-dialog card">
+            <div class="modal-dialog card">
                 <h3 data-i18n="updateAvailableTitle">Update Available</h3>
                 <p id="update-version-paragraph"></p>
 
@@ -279,6 +279,18 @@
                 <div class="button-group modal-buttons">
                     <button id="confirm-btn-ok" data-i18n="ok">OK</button>
                     <button id="confirm-btn-cancel" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- general notification popups too large for toasts -->
+        <div id="popup-modal" class="modal hidden">
+            <div class="modal-dialog card">
+                <h3 id="popup-title"></h3>
+                <p id="popup-message"></p>
+                <p id="popup-side-note" class="hidden small"></p>
+                <div class="button-group modal-buttons">
+                    <button id="popup-close-btn" data-i18n="close">Close</button>
                 </div>
             </div>
         </div>

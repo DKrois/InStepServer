@@ -55,7 +55,7 @@ function formatLog(message: string) {
     return linkify(str);
 }
 
-function linkify(text: string): string {
+export function linkify(text: string): string {
     const urlRegex = /(https?:\/\/\S+)/g;
     return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }

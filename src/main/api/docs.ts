@@ -68,7 +68,7 @@ export function createDocsRouter(config: DocConfig) {
 
         // Check if file exists
         if (!existsSync(mdPath)) {
-            return render404(res, lang, req.path, basePath, getSidebar(sidebarType, 'en'));
+            return render404(res, lang, req.path, basePath, getSidebar(sidebarType, lang));
         }
 
         try {

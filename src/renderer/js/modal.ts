@@ -1,4 +1,4 @@
-import { showTranslatedToast } from './logs';
+import { linkify, showTranslatedToast } from './logs';
 import { getTranslation } from './translate';
 import { marked } from 'marked';
 
@@ -33,6 +33,12 @@ const confirmTitle = document.getElementById('confirm-title')!;
 const confirmMessage = document.getElementById('confirm-message')!;
 const confirmBtnOk = document.getElementById('confirm-btn-ok')!;
 const confirmBtnCancel = document.getElementById('confirm-btn-cancel')!;
+
+const popupModal = document.getElementById('popup-modal')!;
+const popupTitle = document.getElementById('popup-title')!;
+const popupMessage = document.getElementById('popup-message')!;
+const popupSideNote = document.getElementById('popup-side-note')!;
+const popupCloseBtn = document.getElementById('popup-close-btn')!;
 
 window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
     const isWindows = await window.api.isWindows();
@@ -106,8 +112,8 @@ closeInitialModalBtn.addEventListener('click', () => {
 window.api.onUpdateAvailable(showUpdateModal);
 
 updateDownloadBtn.addEventListener('click', () => {
-    window.api.openDownloadURL();
     closeModal(updateModal);
+    window.api.openDownloadURL();
 });
 updateLaterBtn.addEventListener('click', () => {
     closeModal(updateModal);
@@ -118,13 +124,17 @@ updateNeverBtn.addEventListener('click', () => {
     window.api.setUpdateNotification('never');
 });
 
+popupCloseBtn.addEventListener('click', () => {
+    closeModal(popupModal);
+});
+
+window.api.onShowPopupModal(showPopupModal);
+
 export function openModal(el: HTMLElement) {
     el.classList.remove('hidden');
     el.classList.remove('closing');
 
-    requestAnimationFrame(() => {
-        el.classList.add('opening');
-    });
+    requestAnimationFrame(() => el.classList.add('opening'));
 
     // after animation ends → lock state to visible
     el.addEventListener('transitionend', () => {
@@ -158,7 +168,7 @@ function showUpdateModal(details: { version: string, oldVersion: string, release
 }
 
 // --- Confirmation dialog ---
-export function showConfirmation(messageKey: string, titleKey: string = 'confirmTitle'): Promise<boolean> {
+export async function showConfirmation(messageKey: string, titleKey: string = 'confirmTitle'): Promise<boolean> {
     // set text from translation keys
     confirmTitle.textContent = getTranslation(titleKey);
     confirmMessage.textContent = getTranslation(messageKey);
@@ -187,4 +197,27 @@ export function showConfirmation(messageKey: string, titleKey: string = 'confirm
         confirmBtnOk.addEventListener('click', handleOk);
         confirmBtnCancel.addEventListener('click', handleCancel);
     });
+}
+
+/**
+ * Show a generic modal for notifications that don't fit in toasts
+ * @param titleKey
+ * @param messageKey
+ * @param sideNoteKey
+ */
+export function showPopupModal(titleKey: string, messageKey: string, sideNoteKey?: string) {
+    // set text from translation keys
+    popupTitle.textContent = getTranslation(titleKey);
+    popupMessage.textContent = getTranslation(messageKey);
+
+    // show side note if present
+    if (sideNoteKey) {
+        popupSideNote.innerHTML = linkify(getTranslation(sideNoteKey)); // for documentationUnavailableNote
+        popupSideNote.classList.remove('hidden');
+    } else {
+        popupSideNote.classList.add('hidden');
+    }
+
+    // show modal
+    openModal(popupModal);
 }

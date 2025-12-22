@@ -96,20 +96,20 @@ button, select {
     border: 1px solid transparent;
 }
 
-#start-btn {
-    background-color: var(--primary-button-bg);
-    color: var(--primary-button-text);
-}
-
-#port-input {
+input[type="number"] {
     background-color: var(--card-bg);
     color: var(--text-color);
     border-color: var(--button-bg);
 }
 
-#port-input:focus {
+input[type="number"]:focus {
     outline: none;
     border-color: var(--accent-color);
+}
+
+#start-btn {
+    background-color: var(--primary-button-bg);
+    color: var(--primary-button-text);
 }
 
 /* Status Indicator Colors */

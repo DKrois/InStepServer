@@ -10,6 +10,7 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+// @ts-expect-error import works
 import { exeBaseName, name } from './config.json';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';

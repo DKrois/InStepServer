@@ -2,9 +2,10 @@ import { app, Menu, shell, Tray } from 'electron';
 import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { join } from 'node:path';
 import { projectDB } from '../api/database.js';
-import { SitesPaths } from '../constants.js';
+import { isServerRunning } from '../api/server.js';
+import { Routes, SitesPaths } from '../constants.js';
 import { error } from '../log.js';
-import { showToast } from './app.js';
+import { sendPopup, sendToast } from './app.js';
 import { createShortcut } from './installer.js';
 import { handleStartServer, handleStopServer } from './ipc.js';
 import { store } from './settings.js';
@@ -77,6 +78,22 @@ export function createMenu() {
                     click: menuItem => store.set('startServerOnOpen', menuItem.checked)
                 },
             ]
+        },
+        {
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'Documentation',
+                    click: async () => {
+                        if (!isServerRunning()) {
+                            sendPopup('documentationUnavailableTitle', 'documentationUnavailableDesc', 'documentationUnavailableNote');
+                            return;
+                        }
+                        // open docs in browser
+                        await shell.openExternal(`http://localhost:5000${Routes.docs}`);
+                    }
+                }
+            ]
         }
     ];
 
@@ -87,16 +104,16 @@ export function createMenu() {
                 label: 'Create Start Menu Shortcut',
                 click: () => {
                     const success = createShortcut('StartMenu');
-                    if (success) showToast('toastShortcutCreated', { type: 'Start Menu' });
-                    else showToast('toastShortcutFailed', { type: 'Start Menu' });
+                    if (success) sendToast('toastShortcutCreated', { type: 'Start Menu' });
+                    else sendToast('toastShortcutFailed', { type: 'Start Menu' });
                 }
             },
             {
                 label: 'Create Desktop Shortcut',
                 click: () => {
                     const success = createShortcut('Desktop');
-                    if (success) showToast('toastShortcutCreated', { type: 'Desktop' });
-                    else showToast('toastShortcutFailed', { type: 'Desktop' });
+                    if (success) sendToast('toastShortcutCreated', { type: 'Desktop' });
+                    else sendToast('toastShortcutFailed', { type: 'Desktop' });
                 }
             }
         ];
