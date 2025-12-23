@@ -133,3 +133,49 @@ input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
+/* Sponsor stuff */
+.sponsor-display {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sponsor-display p {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+.sponsor-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.sponsor-logo {
+    height: 22px;          /* same height horizontally */
+    width: auto;
+    object-fit: contain;
+    opacity: 0.85;
+}
+
+/* When wrapping, logos align vertically by width */
+@supports (aspect-ratio: 1 / 1) {
+    .sponsor-logo {
+        aspect-ratio: auto;
+    }
+}
+
+#app-version {
+    position: absolute;
+    right: 0;
+    opacity: 0.6;
+    font-size: 14px;
+    margin: 0;
+    white-space: nowrap;
+}

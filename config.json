@@ -11,7 +11,7 @@
   "toastTimeout": 2000,
   "schedulerIntervalTime": 20000,
 
-  "defaultWindowWidth": 1300,
+  "defaultWindowWidth": 1350,
   "defaultWindowHeight": 800,
   "minWindowWidth": 730,
   "minWindowHeight": 500

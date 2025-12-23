@@ -18,6 +18,10 @@ import { error, info } from './log.js';
  *      session
  *
  *
+ *
+ * sponsoredBy
+ *
+ *
  * "sessionIMDDesc": "Diese Checkbox aktiviert oder deaktiviert den Zugriff auf den Indoor Map Digitalizer (IMD). Da nur eine Person gleichzeitig bearbeiten kann, 'sperrt' der erste Benutzer den Editor. Die Schaltfläche 'IMD-Sperre aufheben' beendet die aktive Sitzung zwangsweise. <br><strong>Warnung:</strong> Das Aufheben der Sperre, während jemand aktiv arbeitet, unterbricht dessen Sitzung und führt wahrscheinlich zum Verlust von nicht gespeicherten Änderungen. Nur verwenden, um eine blockierte Sitzung freizugeben.",
  * "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",
  *
