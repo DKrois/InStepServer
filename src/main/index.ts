@@ -5,22 +5,15 @@ process.env.FORCE_COLOR = '1';
 import { app } from 'electron';
 import { name } from '../../config.json';
 import 'source-map-support/register';
-import { stopServer } from './api/server.js';
+import { isServerRunning, stopServer } from './api/server.js';
 import { initApp } from './app/app.js';
 import { error, info } from './log.js';
 
 /*
- * disable i18n debug
- *
  * docs mobile ?
  *
  * links to specific section in docs in apiDisabled, imdInUse
  *      session
- *
- *
- *
- * sponsoredBy
- *
  *
  * "sessionIMDDesc": "Diese Checkbox aktiviert oder deaktiviert den Zugriff auf den Indoor Map Digitalizer (IMD). Da nur eine Person gleichzeitig bearbeiten kann, 'sperrt' der erste Benutzer den Editor. Die Schaltfläche 'IMD-Sperre aufheben' beendet die aktive Sitzung zwangsweise. <br><strong>Warnung:</strong> Das Aufheben der Sperre, während jemand aktiv arbeitet, unterbricht dessen Sitzung und führt wahrscheinlich zum Verlust von nicht gespeicherten Änderungen. Nur verwenden, um eine blockierte Sitzung freizugeben.",
  * "sessionDurationDesc": "Legen Sie fest, wie lange ein Benutzer angemeldet bleibt, bevor eine erneute Anmeldung erforderlich ist. Änderungen gelten für alle neuen Anmeldungen; bereits aktive Sitzungen behalten ihre ursprüngliche Ablaufzeit bei.",
@@ -43,13 +36,13 @@ async function main() {
     process.on('unhandledRejection', reason => error('Unhandled Rejection:', reason));
 }
 
-function cleanup() {
+async function cleanup() {
     info('Cleaning up...');
-    stopServer();
+    if (isServerRunning()) await stopServer();
 }
 
-function exit(exitCode = 0) {
-    cleanup();
+async function exit(exitCode = 0) {
+    await cleanup();
     info('Exiting...');
     process.exit(exitCode);
 }

@@ -125,8 +125,8 @@ function createWeekdayRows() {
             <input type="time" class="weekday-start-time">
             <input type="time" class="weekday-end-time">
             <button class="weekday-clear-btn icon-button" data-i18n-title="clearDaySettings">
-                <img src="assets/cross-dark.png" class="button-image light-icon" alt="X">
-                <img src="assets/cross-light.png" class="button-image dark-icon" alt="X">
+                <img src="assets/cross-dark.png" class="button-image no-click light-icon" alt="X">
+                <img src="assets/cross-light.png" class="button-image no-click dark-icon" alt="X">
             </button>
         `;
         weekdayList.appendChild(li);

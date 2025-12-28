@@ -13,13 +13,13 @@ let statsInterval: NodeJS.Timeout | null = null;
 
 export let manualTimeOverride = false;
 
-export function registerIPCHandlers() {
+export async function registerIPCHandlers() {
     registerThemeIPC();
     registerSettingsIPC();
     registerTimeSettingsIPC();
     registerUpdateIPC();
     registerSecurityIPC();
-    registerServerIPC();
+    await registerServerIPC();
     registerShortcutsIPC();
     registerStatsIPC();
 
@@ -38,15 +38,15 @@ function registerThemeIPC() {
     });
 }
 
-function registerServerIPC() {
+async function registerServerIPC() {
     ipcMain.handle('start-server', (_event, port: number) => {
         manualTimeOverride = true;
         return handleStartServer(port);
     });
 
-    ipcMain.on('stop-server', async () => {
+    ipcMain.on('stop-server', () => {
         manualTimeOverride = true;
-        await handleStopServer();
+        return handleStopServer();
     });
 
     ipcMain.on('save-port', (_event, port: number) => store.set('port', port));
@@ -61,9 +61,9 @@ function registerStatsIPC() {
 }
 
 // --- Server ---
-export function handleStartServer(port?: number) {
+export async function handleStartServer(port?: number) {
     const p = port ?? store.get('port');
-    if (!initServer(p)) return false;
+    if (!(await initServer(p))) return false;
 
     serverStartTime = Date.now();
     if (statsInterval) clearInterval(statsInterval);

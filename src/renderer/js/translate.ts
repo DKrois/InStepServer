@@ -12,7 +12,7 @@ const languageSwitcher = document.getElementById('language-switcher') as HTMLSel
 // --- Translation ---
 i18next.init({
     lng: 'en',
-    debug: true,
+    debug: false,
     fallbackLng: 'en',
     resources: {
         en: { translation: en },

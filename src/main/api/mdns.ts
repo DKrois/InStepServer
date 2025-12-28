@@ -1,13 +1,14 @@
-import Bonjour from 'bonjour-service';
+import { Bonjour } from 'bonjour-service';
 import { hostname } from '../../../config.json';
 import { info as _info, warn as _warn } from '../log.js';
+import * as os from 'node:os';
 
 const logSource = 'mdns';
 const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
 
 export let bonjour: Bonjour | null = null;
-export function startMDNSAdvertisement(port: number) {
+export async function startMDNSAdvertisement(port: number) {
     if (bonjour) {
         warn('MDNS Server already running');
         return;
@@ -22,19 +23,20 @@ export function startMDNSAdvertisement(port: number) {
         host: `${hostname}.local`
     });
 
-    info(`MDNS Server started advertising at http://${service.name}.local:${port}`);
+    const getURL = (hostname: string) => `http://${hostname}.local:${port}`;
+    info(`MDNS Server started advertising at ${getURL(os.hostname())} and ${getURL(service.host)}`);
 }
 
-export function stopMDNSAdvertisement() {
+export async function stopMDNSAdvertisement() {
     if (!bonjour) {
         warn('MDNS Server not running');
         return;
     }
 
     bonjour.unpublishAll(() =>
-        bonjour?.destroy(() =>
-            info('Stopped MDNS server.')
-        )
+        bonjour?.destroy(() => {
+            info('Stopped MDNS server.');
+            bonjour = null;
+        })
     );
-    bonjour = null;
 }

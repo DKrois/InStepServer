@@ -57,14 +57,14 @@ export function getRandomProjectID(_req: express.Request, res: express.Response)
     let id;
     do {
         // generate random number; most likely unique
-        id = randomInt(10e10, 10e15);
+        id = randomInt(10e9, 10e13);
     } while (projectDB.exists(id));
 
     try {
         return res.status(200).json({ id });
     } catch (e: any) {
         if (e.code === 'ENOENT') return res.status(400).send(errorToJSON({ message: 'File / directory not found.', path: e.path }));
-        return res.status(500).send(errorToJSON(e))
+        return res.status(500).send(errorToJSON(e));
     }
 }
 
@@ -233,6 +233,6 @@ async function handle(handler: () => Promise<any>, onSuccess: () => any, res: ex
         return await handler().then(onSuccess);
     } catch (e: any) {
         if (e.code === 'ENOENT') return res.status(400).send(errorToJSON({ message: 'File / directory not found.', path: e.path }));
-        return res.status(e.message.includes('structure not valid') ? 400 : 500).send(errorToJSON(e))
+        return res.status(e.message.includes('structure not valid') ? 400 : 500).send(errorToJSON(e));
     }
 }

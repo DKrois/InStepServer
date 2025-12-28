@@ -192,6 +192,7 @@ class ProjectDatabase {
         const newPath = join(versionPath, file.originalname); // Use originalname as filename
 
         // multer saves to a temporary path, so move it to the final destination
+        await fs.mkdir(versionPath, { recursive: true });
         await fs.rename(file.path, newPath);
     }
 
@@ -338,9 +339,10 @@ class ProjectDatabase {
     /**
      * Efficiently counts subdirectories, files and their sizes within a given directory and subdirectories.
      * @param directoryPath The path to the directory to scan.
+     * @param isTopLevel whether the specified path is the top directory (containing projects)
      * @returns An object containing the total size and subdirectory and file counts.
      */
-    async getStats(directoryPath: string = this.dbPath): Promise<DirectoryStats> {
+    async getStats(directoryPath: string = this.dbPath, isTopLevel = true): Promise<DirectoryStats> {
         let stats: DirectoryStats = { directoryCount: 0, fileCount: 0, size: 0 };
 
         try {
@@ -351,13 +353,14 @@ class ProjectDatabase {
                 const fullPath = join(directoryPath, entry.name);
 
                 if (entry.isDirectory()) {
-                    stats.directoryCount++;
-                    // Recursively call and add the stats from the subdirectory
-                    const subDirStats = await this.getStats(fullPath);
-                    stats.directoryCount += subDirStats.directoryCount;
+                    if (isTopLevel) { // projects are only at top level. subdirs are versions
+                        stats.directoryCount++;
+                    }
+
+                    const subDirStats = await this.getStats(fullPath, false);
                     stats.fileCount += subDirStats.fileCount;
                     stats.size += subDirStats.size;
-                } else if (entry.isFile() && entry.name.endsWith('.json')) {
+                } else if (entry.isFile()) {
                     stats.fileCount++;
                     try {
                         const fileStats = await fs.stat(fullPath);

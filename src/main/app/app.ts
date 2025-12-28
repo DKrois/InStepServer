@@ -26,7 +26,7 @@ export function initApp() {
         return;
     }
 
-    app.on('ready', () => {
+    app.on('ready', async () => {
         initLogging();
         // set stored theme
         nativeTheme.themeSource = store.get('theme') as 'system' | 'light' | 'dark';
@@ -40,7 +40,7 @@ export function initApp() {
         const projectDataPath = store.get('projectDataPath');
         if (projectDataPath) initDB(projectDataPath);
 
-        registerIPCHandlers();
+        await registerIPCHandlers();
     });
 
     app.on('before-quit', () => {

@@ -1,72 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IMD Editor</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IMD Editor</title>
 
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.mjs" type="module"></script>
-  <link rel="icon" type="image/png" href="assets/logo_transparent.png">
-  <script type="module" crossorigin src="assets/index-DiliSaop.js"></script>
-  <link rel="stylesheet" crossorigin href="assets/index-Bp91ScuK.css">
-</head>
-<body data-theme="light">
-  <div id="backstage-container"></div>
-  <header class="app-header">
-    <div class="logo">
-      <img src="assets/logo_outline.png" alt="Firmenlogo" style="height: 40px; margin-right: 8px;">
-      IMD Editor
-    </div>
-    <nav class="main-menu">
-      <button id="file-menu-trigger" class="menu-trigger">Datei</button>
-      <button id="output-menu-trigger" class="menu-trigger">Ausgabe</button>
-      <button id="overview-menu-trigger" class="menu-trigger">Übersicht</button>
-    </nav>
-    
-    <div id="language-selector" class="language-selector" style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.mjs"
+      type="module"
+    ></script>
+    <link rel="icon" type="image/png" href="assets/logo_transparent.png" />
+    <script type="module" crossorigin src="assets/index-DG_hzbAb.js"></script>
+    <link rel="stylesheet" crossorigin href="assets/index-DiItlvhb.css">
+  </head>
+  <body data-theme="light">
+    <div id="backstage-container"></div>
+    <header class="app-header">
+      <div class="logo">
+        <img
+          src="assets/logo_outline.png"
+          alt="Firmenlogo"
+          style="height: 40px; margin-right: 8px"
+        />
+        IMD Editor
+      </div>
+      <nav class="main-menu">
+        <button id="file-menu-trigger" class="menu-trigger" title="Datei-Aktionen öffnen">
+          Datei
+        </button>
+        <button id="output-menu-trigger" class="menu-trigger" title="Export und Live-Code">
+          Ausgabe
+        </button>
+        <button id="overview-menu-trigger" class="menu-trigger" title="Projektübersicht anzeigen">
+          Übersicht
+        </button>
+      </nav>
+
+      <div
+        id="language-selector"
+        class="language-selector"
+        style="margin-left: auto; display: flex; align-items: center; gap: 8px"
+      >
         <button id="lang-trigger" class="menu-trigger">
-          <img id="lang-icon" src="assets/language-light.png" alt="Language Icon" style="width:18px;height:18px;margin-right:5px;vertical-align:middle;">
+          <img
+            id="lang-icon"
+            src="assets/language-light.png"
+            alt="Language Icon"
+            style="width: 18px; height: 18px; margin-right: 5px; vertical-align: middle"
+          />
           <span id="active-lang-display">Deutsch</span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;margin-left:5px;"><path d="M7 10l5 5 5-5z"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            style="width: 12px; height: 12px; margin-left: 5px"
+          >
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
         </button>
         <div id="lang-menu" class="lang-menu">
-            <button data-lang="en">English</button>
-            <button data-lang="de">Deutsch</button>
+          <button data-lang="en">English</button>
+          <button data-lang="de">Deutsch</button>
         </div>
         <button id="theme-trigger" class="menu-trigger" title="Dunkles Thema umschalten">
-          <img id="theme-icon" src="assets/darkMode.png" alt="Theme Icon" style="width:18px;height:18px;vertical-align:middle;">
+          <img
+            id="theme-icon"
+            src="assets/darkMode.png"
+            alt="Theme Icon"
+            style="width: 18px; height: 18px; vertical-align: middle"
+          />
         </button>
-    </div>
-  </header>
+      </div>
+    </header>
 
-  <main class="app-content">
-    <div id="toolbar-container"></div>
+    <main class="app-content">
+      <div id="toolbar-container"></div>
+      <div id="page-scrollbar-y" class="scrollbar page-scrollbar">
+        <div id="page-thumb-y" class="thumb"></div>
+      </div>
 
-    <div class="workspace">
-      <div class="canvas-wrapper">
-        <div id="corner-box" class="corner-box" title="Doppelklick zum Zurücksetzen der Ansicht"></div>
-        <canvas id="ruler-top" height="30"></canvas>
-        <canvas id="ruler-left" width="30"></canvas>
-        <div class="canvas-container">
-          <canvas id="canvas"></canvas>
-          <div id="crosshair-h" class="crosshair horizontal"></div>
-          <div id="crosshair-v" class="crosshair vertical"></div>      
-          <div id="scrollbar-x" class="scrollbar">
-            <div id="thumb-x" class="thumb"></div>
-          </div>
-          <div id="scrollbar-y" class="scrollbar">
-            <div id="thumb-y" class="thumb"></div>
+      <div class="workspace">
+        <div class="canvas-wrapper">
+          <div
+            id="corner-box"
+            class="corner-box"
+            title="Doppelklick zum Zurücksetzen der Ansicht"
+          ></div>
+          <canvas id="ruler-top" height="30"></canvas>
+          <canvas id="ruler-left" width="30"></canvas>
+          <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div id="crosshair-h" class="crosshair horizontal"></div>
+            <div id="crosshair-v" class="crosshair vertical"></div>
+            <div id="scrollbar-x" class="scrollbar">
+              <div id="thumb-x" class="thumb"></div>
+            </div>
+            <div id="scrollbar-y" class="scrollbar">
+              <div id="thumb-y" class="thumb"></div>
+            </div>
           </div>
         </div>
+        <div id="floor3DView"></div>
       </div>
-      <div id="floor3DView"></div>
-    </div>
-  </main>
+    </main>
 
-  <input type="file" id="loadProjectInput" accept=".geojson,.json" class="hidden-input">
-  <input type="file" id="floorplanInput" accept="image/*,.pdf" class="hidden-input">
+    <input type="file" id="loadProjectInput" accept=".geojson,.json" class="hidden-input" />
+    <input type="file" id="floorplanInput" accept="image/*,.pdf" class="hidden-input" />
 
-  <div id="modals-container"></div>
-</body>
+    <div id="modals-container"></div>
+  </body>
 </html>

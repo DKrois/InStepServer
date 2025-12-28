@@ -134,7 +134,7 @@ export function createTray() {
         { label: 'Open', click: () => mainWindow?.show() },
         { type: 'separator' },
 
-        { label: 'Start Server', click: () => handleStartServer() },
+        { label: 'Start Server', click: async () => await handleStartServer() },
         { label: 'Stop Server', click: handleStopServer },
         { type: 'separator' },
 

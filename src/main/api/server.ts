@@ -37,7 +37,7 @@ declare module 'express-session' {
 
 let httpServer: http.Server | null = null;
 let httpTerminator: HttpTerminator | null = null;
-export function initServer(port: number) {
+export async function initServer(port: number) {
     if (httpServer) {
         warn('Server already running.');
         return false;
@@ -49,12 +49,13 @@ export function initServer(port: number) {
     }
 
     const app = createExpressApp();
+    const localIPs = getOwnIPs();
+    const localIP = localIPs.pick ?? localIPs.allResults[0];
     httpServer = http.createServer(app).listen(port, '0.0.0.0', () =>
-        info(`Server listening on http://${getOwnIPs().pick}:${port}`)
+        info(`Server listening on http://${localIP}:${port}`)
     );
 
-    startMDNSAdvertisement(port);
-
+    await startMDNSAdvertisement(port);
     httpTerminator = createHttpTerminator({ server: httpServer });
 
     return true;
@@ -67,7 +68,7 @@ export async function stopServer() {
     }
 
     await httpTerminator?.terminate();
-    stopMDNSAdvertisement();
+    await stopMDNSAdvertisement();
 
     info('Server closed.');
     httpServer = null;
@@ -190,81 +191,3 @@ function getSessionSecret(): string {
 
     return secret;
 }
-
-/* EXAMPLE SAVE ON CLIENT -- missing auth (?)
- *
-/**
- * Saves the entire project state to the server, including floorplan images.
- * @param id The project ID.
- * @param version The project version.
- * @param projectData The main project JSON object (the 'state.project' object).
- * @param floorplanFiles A record mapping floor name to the actual File object from an input.
- *\/
-async function saveProjectToServer(
-    id: number,
-    version: number,
-    projectData: Project,
-    floorplanFiles: Record<string, File>
-) {
-    try {
-        // --- Step 1: Send the main project JSON data ---
-        console.log('Step 1: Saving project data...');
-        const projectResponse = await fetch(`/api/${id}/${version}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            // Send the project data, but floorplanImages can be omitted as the server ignores it
-            body: JSON.stringify(projectData),
-        });
-
-        if (!projectResponse.ok) {
-            const error = await projectResponse.json();
-            throw new Error(`Failed to save project data: ${error.message || 'Unknown error'}`);
-        }
-        console.log('Project data saved successfully.');
-
-        // --- Step 2: Upload the floorplan image files ---
-        if (Object.keys(floorplanFiles).length > 0) {
-            console.log('Step 2: Uploading floorplan images...');
-            const formData = new FormData();
-
-            // Append each file to the form data.
-            // The key 'floorplans' must match the server's `upload.array('floorplans')`.
-            // The third argument to append() sets the filename, which we use as the floor name.
-            for (const [floorName, file] of Object.entries(floorplanFiles)) {
-                formData.append('floorplans', file, floorName);
-            }
-
-            const filesResponse = await fetch(`/app/api/${id}/${version}/floorplans`, {
-                method: 'POST',
-                body: formData, // When using FormData, the browser sets the correct Content-Type header automatically
-            });
-
-            if (!filesResponse.ok) {
-                const error = await filesResponse.json();
-                throw new Error(`Failed to upload floorplan images: ${error.message || 'Unknown error'}`);
-            }
-            console.log('Floorplan images uploaded successfully.');
-        }
-
-        alert('Project saved successfully!');
-
-    } catch (error) {
-        console.error('An error occurred during save:', error);
-        alert(`Error saving project: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-}
-
-// --- Example of how to collect the files and call the function ---
-// This would be in your UI logic where the save button is.
-// You need to track which files have been newly selected by the user.
-
-// Assume you have:
-// let newFilesToUpload: Record<string, File> = {}; // e.g., { "ground-floor.png": File, "first-floor.pdf": File }
-// let currentProjectState: Project = state.project;
-// let projectId = 123;
-// let projectVersion = 2;
-//
-// saveProjectToServer(projectId, projectVersion, currentProjectState, newFilesToUpload);
- */

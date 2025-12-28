@@ -17,12 +17,12 @@ InStep provides a user-friendly way to navigate between rooms and floors, reduci
 
 ### InStep Server (Admin Interface)
 The Server acts as the central control center. It manages all building data, controls user access, and ensures that the maps are always up to date.  
-[Read more about the Server...](/docs/en/server/overview.md)
+[Read more about the Server...](server/overview.md)
 
 ### IMD - Indoor Map Digitalizer
 The IMD is a specialized editor used by building managers to transform architectural floor plans into interactive digital maps. Here, rooms are drawn, and pathways are defined.  
-[Read more about the IMD...](/docs/en/imd/overview.md)
+[Read more about the IMD...](imd/overview.md)
 
 ### InStep User App
 The mobile app is the companion for the end-user. It displays the map, searches for destinations, and provides step-by-step visual directions to guide you to your target.  
-[Read more about the App...](/docs/en/app/overview.md)
+[Read more about the App...](app/overview.md)

@@ -147,7 +147,7 @@ async function checkSchedule() {
     // only start/stop if state differs from desired state
     if (shouldBeRunning && !isActuallyRunning) {
         info(`State should be ON. Starting server.`);
-        handleStartServer();
+        await handleStartServer();
     } else if (!shouldBeRunning && isActuallyRunning) {
         info(`State should be OFF. Stopping server.`);
         await handleStopServer();
