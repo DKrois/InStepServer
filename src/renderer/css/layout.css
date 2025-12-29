@@ -86,7 +86,8 @@ hr {
 
 /* reveal sidebar */
 body.stats-visible .sidebar {
-    width: max(27%, 250px);
+    width: 23%;
+    max-width: 450px;
     padding: 20px;
     white-space: normal;
 }

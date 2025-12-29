@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, screen, session, shell } from 'electron';
-import { defaultWindowHeight, defaultWindowWidth, minWindowHeight, minWindowWidth } from '../../../config.json';
+import { defaultWindowHeightPercent, defaultWindowWidthPercent, minWindowHeight, minWindowWidth } from '../../../config.json';
 import { isServerRunning } from '../api/server.js';
 import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
@@ -16,12 +16,16 @@ export let mainWindow: BrowserWindow | null = null;
 
 export function createWindow() {
     const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size;
+    // calc width
+    const defaultWindowWidthPx = screenWidth * defaultWindowWidthPercent;
+    const defaultWindowHeightPx = screenHeight * defaultWindowHeightPercent;
+
     // maximize if screen is too small
-    const shouldMaximize = screenWidth < defaultWindowWidth || screenHeight < defaultWindowHeight;
+    const shouldMaximize = minWindowWidth > defaultWindowWidthPx || minWindowHeight > defaultWindowHeightPx;
 
     mainWindow = new BrowserWindow({
-        width: shouldMaximize ? screenWidth : defaultWindowWidth,
-        height: shouldMaximize ? screenHeight : defaultWindowHeight,
+        width: shouldMaximize ? screenWidth : defaultWindowWidthPx,
+        height: shouldMaximize ? screenHeight : defaultWindowHeightPx,
         minWidth: minWindowWidth,
         minHeight: minWindowHeight,
         show: false, // prevent visual flash of resize
