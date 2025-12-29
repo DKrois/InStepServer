@@ -96,7 +96,6 @@ async function finishedLoad() {
         await startScheduler();
     } else if (store.get('startServerOnOpen') && !isServerRunning()) {
         await handleStartServer();
-    } else {
-        mainWindow?.webContents.send('server-status-changed', { isRunning: false, port: null });
     }
+    // update UI if server not running already handled by getInitialSettings
 }

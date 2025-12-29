@@ -19,7 +19,7 @@ export async function registerIPCHandlers() {
     registerTimeSettingsIPC();
     registerUpdateIPC();
     registerSecurityIPC();
-    await registerServerIPC();
+    registerServerIPC();
     registerShortcutsIPC();
     registerStatsIPC();
 
@@ -38,7 +38,7 @@ function registerThemeIPC() {
     });
 }
 
-async function registerServerIPC() {
+function registerServerIPC() {
     ipcMain.handle('start-server', (_event, port: number) => {
         manualTimeOverride = true;
         return handleStartServer(port);

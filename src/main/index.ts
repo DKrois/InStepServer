@@ -12,6 +12,8 @@ import { error, info } from './log.js';
 /*
  * docs mobile ?
  *
+ * print qr (ip, a.local, instep.local)
+ *
  * links to specific section in docs in apiDisabled, imdInUse
  *      session
  *

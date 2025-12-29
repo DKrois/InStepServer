@@ -40,7 +40,7 @@ const api = {
     startServer: (port: number): Promise<boolean> => ipcRenderer.invoke('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
     savePort: (port: number) => ipcRenderer.send('save-port', port),
-    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number | null }) => void) => {
+    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number }) => void) => {
         ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },
 
@@ -65,7 +65,7 @@ const api = {
         ipcRenderer.on('show-toast', (_event, key: string, options?: TOptions, type: 'info' | 'error' = 'info') => callback(key, options, type));
     },
     onShowPopupModal: (callback: (titleKey: string, messageKey: string, sideNoteKey?: string, option?: TOptions) => void) => {
-        ipcRenderer.on('show-popup-modal', (_event, titleKey, messageKey, sideNoteKey, options) => callback(titleKey, messageKey, sideNoteKey, options))
+        ipcRenderer.on('show-popup-modal', (_event, titleKey, messageKey, sideNoteKey, options) => callback(titleKey, messageKey, sideNoteKey, options));
     }
 };
 

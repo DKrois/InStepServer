@@ -7,6 +7,7 @@ import { releaseLock } from '../api/middleware.js';
 import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
 import { canWriteToPath } from '../util.js';
+import { isServerRunning } from '../api/server.js';
 
 let initialPassword: string | null = null;
 export let enableIMDAPI = false;
@@ -44,8 +45,9 @@ export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', () => {
         const { port, language, timeSettings } = store.store;
         const isDarkMode = nativeTheme.shouldUseDarkColors;
+        const serverEnabled = isServerRunning();
 
-        return { isDarkMode, language, port, timeSettings };
+        return { isDarkMode, language, port, serverEnabled, timeSettings };
     });
 
     ipcMain.on('save-lang', (_event, language: string) => store.set('language', language));

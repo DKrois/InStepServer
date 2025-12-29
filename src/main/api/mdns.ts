@@ -23,8 +23,8 @@ export async function startMDNSAdvertisement(port: number) {
         host: `${hostname}.local`
     });
 
-    const getURL = (hostname: string) => `http://${hostname}.local:${port}`;
-    info(`MDNS Server started advertising at ${getURL(os.hostname())} and ${getURL(service.host)}`);
+    const getURL = (hostname: string) => `http://${hostname}:${port}`;
+    info(`MDNS Server started advertising at ${getURL(`${os.hostname()}.local`)} and ${getURL(service.host)}`);
 }
 
 export async function stopMDNSAdvertisement() {

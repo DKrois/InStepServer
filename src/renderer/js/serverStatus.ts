@@ -35,8 +35,9 @@ portInput.addEventListener('focusout', () => {
     if (previousPortValue !== parseInt(portInput.value, 10)) setRestartServerInfoVisible(true);
 });
 
-window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | null }) => {
-    const { isRunning, port } = status;
+window.api.onServerStatusChanged(serverStatusChanged);
+function serverStatusChanged(status: { isRunning: boolean; port?: number, isStartup?: boolean }) {
+    const { isRunning, port, isStartup } = status;
 
     serverStatusIndicator.classList.toggle('status-running', isRunning);
     serverStatusIndicator.classList.toggle('status-stopped', !isRunning);
@@ -54,17 +55,21 @@ window.api.onServerStatusChanged((status: { isRunning: boolean, port?: number | 
 
     // remove restart-server-info
     setRestartServerInfoVisible(false);
-    if (port) previousPortValue = port;
+    if (port) {
+        previousPortValue = port;
+        portInput.value = port.toString(10);
+    }
 
-    // don't show toast if port is null (in case of startup)
-    if (port !== null) {
+    // don't show toast in case of startup (when server is off)
+    if (!isStartup) {
         if (status.isRunning) showTranslatedToast('toastServerStarted', { port });
         else showTranslatedToast('toastServerStopped');
     }
-});
+}
 
-export function setInitialPort(port: any) {
-    portInput.value = port;
+export function setInitialServerSettings(settings: { serverEnabled: boolean, port: number }) {
+    const { serverEnabled, port } = settings;
+    return serverStatusChanged({ isRunning: serverEnabled, port, isStartup: true });
 }
 
 export function setRestartServerInfoVisible(visible: boolean) {
