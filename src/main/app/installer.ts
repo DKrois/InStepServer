@@ -19,6 +19,7 @@ type ShortcutLocation = 'Desktop' | 'StartMenu';
 
 // not much installer, just what happens on first run after install & updater
 let updateUrl = '';
+let lastNotifiedVersion = '';
 let updateNotificationInterval: NodeJS.Timeout; // allow for clearing
 
 export function registerUpdateIPC() {
@@ -35,6 +36,9 @@ export function registerUpdateIPC() {
 }
 
 export function initUpdater() {
+    // TODO
+    setInterval(() => checkForUpdate(), 50000);
+
     if (!app.isPackaged) {
         info('Development mode: Auto-updater disabled.');
         return;
@@ -83,10 +87,13 @@ async function checkForUpdate() {
 
         const release = await response.json() as any;
         const latestVersion = release.tag_name.replace('v', '');
-        const currentVersion = app.getVersion();
+        const currentVersion = '0.0.8' // app.getVersion();
 
-        if (latestVersion > currentVersion) {
+        if (!lastNotifiedVersion) lastNotifiedVersion = currentVersion;
+
+        if (latestVersion > lastNotifiedVersion) {
             info(`Update found: ${latestVersion}. Current: ${currentVersion}`);
+            lastNotifiedVersion = latestVersion; // don't notify again for this version in this session
 
             updateUrl = release.html_url;
 
