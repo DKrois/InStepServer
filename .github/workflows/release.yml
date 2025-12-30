@@ -33,11 +33,11 @@ jobs:
           node-version: 22.18.0
 
       - name: Install dependencies
-        run: pnpm i
+        run: npm i
 
       - name: Build/make the application
         # This command runs your existing "make" script from package.json
-        run: pnpm make
+        run: npm run make
         env:
           # The GITHUB_TOKEN is automatically provided by GitHub Actions
           # It's needed for publishing to the release
