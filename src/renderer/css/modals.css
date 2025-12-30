@@ -167,6 +167,55 @@
     font-size: 0.9em;
 }
 
+/* --- QR modal --- */
+.qr-modal-dialog {
+    width: fit-content;
+    max-width: 90%;
+}
+
+.qr-content-wrapper {
+    display: flex;
+    align-items: center; /* Vertically align content in the middle */
+    gap: 25px;           /* Space between the columns */
+    margin-bottom: 20px;      /* Vertical spacing for the whole section */
+    height: 260px;
+}
+
+#qr-selection {
+    /* The subtle border line between the columns */
+    border-right: 1px solid #444;
+    padding-right: 25px;
+    flex-shrink: 0; /* Prevent this column from shrinking */
+    height: 100%;
+}
+
+#qr-selection p {
+    margin: 0;
+}
+
+#qr-selection button {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#qr-result {
+    flex-grow: 1; /* Allow the QR code container to take up remaining space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Set a minimum size to reserve space before the QR code loads */
+    min-width: 256px;
+    min-height: 256px;
+    padding-right: 5px; /* ensure space between section border and modal edge are the same (20px + 5px) */
+}
+
+/* Make sure the image doesn't overflow its container */
+#qr-result img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
 
 /* --- Update modal --- */
 .release-notes-container {
@@ -188,15 +237,4 @@
 #confirm-message {
     margin: 20px 0;
     line-height: 1.5;
-}
-
-
-/* --- Utility --- */
-
-.hidden {
-    display: none !important;
-}
-
-.no-click {
-    pointer-events: none;
 }

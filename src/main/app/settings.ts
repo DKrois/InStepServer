@@ -8,6 +8,7 @@ import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
 import { canWriteToPath } from '../util.js';
 import { isServerRunning } from '../api/server.js';
+import { IPCResponse } from '../../common/util.js';
 
 let initialPassword: string | null = null;
 export let enableIMDAPI = false;
@@ -55,7 +56,7 @@ export function registerSettingsIPC() {
     ipcMain.handle('set-project-data-path', (_event, currentlySelectedPath?: string) => handleUpdatePath(currentlySelectedPath));
 }
 
-async function handleUpdatePath(currentlySelected?: string): Promise<{ success: boolean, path: string | null, code?: 'user-canceled' | 'permission-denied' }> {
+async function handleUpdatePath(currentlySelected?: string): IPCResponse<'cancelled' | 'permission-denied', string> {
     const defaultPath = currentlySelected || defaultDBPath;
     const { canceled, filePaths } = await dialog.showOpenDialog({
         title: 'Select Project Storage Folder',
@@ -66,22 +67,22 @@ async function handleUpdatePath(currentlySelected?: string): Promise<{ success: 
     if (canceled || filePaths.length === 0) {
         // User canceled, use default path
         store.set('projectDataPath', defaultPath);
-        return { success: true, path: defaultPath, code: 'user-canceled' };
+        return { success: false, data: defaultPath, code: 'cancelled' };
     } else {
         const selectedPath = filePaths[0];
 
         const isWritable = await canWriteToPath(selectedPath);
         if (isWritable) {
             store.set('projectDataPath', selectedPath);
-            return { success: true, path: selectedPath };
+            return { success: true, data: selectedPath };
         } else {
             // path is not writeable (admin, ...)
-            return { success: false, path: null, code: 'permission-denied' };
+            return { success: false, code: 'permission-denied' };
         }
     }
 }
 
-// --- Password ---
+// --- Security ---
 export function registerSecurityIPC() {
     ipcMain.handle('get-initial-password', () => {
         const pass = initialPassword;
@@ -125,30 +126,30 @@ export function verifyPassword(password: string) {
     return bcrypt.compare(password, storedHash);
 }
 
-async function handleUpdatePassword(oldPassword: string, newPassword: string) {
+async function handleUpdatePassword(oldPassword: string, newPassword: string): IPCResponse<'permission-denied'> {
     // First, verify the old password
-    if (!verifyPassword(oldPassword)) return { success: false };
+    if (!verifyPassword(oldPassword)) return { success: false, code: 'permission-denied' };
 
     // If it matches, hash and save the new password
     const salt = await bcrypt.genSalt(10);
     const newHash = await bcrypt.hash(newPassword, salt);
     store.set('passwordHash', newHash);
 
-    return { success: true };
+    return { success: true, data: undefined };
 }
 
-async function handleReleaseIMDLock(currentPassword: string): Promise<{ success: boolean }> {
-    if (!verifyPassword(currentPassword)) return { success: false };
+async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permission-denied'> {
+    if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
     releaseLock('explicit');
-    return { success: true };
+    return { success: true, data: undefined };
 }
 
-async function handleToggleIMDAPI(enable: boolean, currentPassword: string): Promise<{ success: boolean }> {
-    if (!verifyPassword(currentPassword)) return { success: false };
+async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPCResponse<'permission-denied'> {
+    if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
     enableIMDAPI = enable;
-    return { success: true };
+    return { success: true, data: undefined };
 }
 
 async function handleUpdateSessionDuration(durationMs: number, currentPassword: string) {

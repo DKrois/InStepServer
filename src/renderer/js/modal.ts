@@ -1,15 +1,15 @@
 import { linkify, showTranslatedToast } from './logs';
-import { getTranslation } from './translate';
+import { getTranslation, type TranslationKey } from './translate';
 import { marked } from 'marked';
+import type { QRType } from '../../common/types.js';
 
-// Initial modal, update modal, confirmation
+// initial modal, qr, update, confirmation, popup
 
 // enable gfm (github flavoured markdown)
 marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 
 const initialModalBackdrop = document.getElementById('initial-modal')!;
 const closeInitialModalBtn = document.getElementById('close-modal-btn')!;
-
 const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
 const copyInitialPasswordBtn = document.getElementById('copy-initial-password-btn')!;
 
@@ -20,6 +20,19 @@ const pathErrorMessage = document.getElementById('path-error-message')!;
 const shortcutOptionsContainer = document.getElementById('shortcut-options-container')!;
 const createStartMenuShortcutBtn = document.getElementById('create-startMenu-shortcut-btn')!;
 const createDesktopShortcutsBtn = document.getElementById('create-desktop-shortcut-btn')!;
+
+const qrModal = document.getElementById('qr-modal')!;
+const generateQRBtn = document.getElementById('generate-qr-btn')!; // opens the modal
+const qrImage = document.getElementById('qr-image') as HTMLImageElement;
+const qrSaveBtn = document.getElementById('qr-save-btn')!;
+const qrCloseButton = document.getElementById('qr-close-btn')!;
+
+const generateIpBtn = document.getElementById('qr-btn-ip')!;
+const generateMdnsBtn = document.getElementById('qr-btn-mdns')!;
+const generateHostBtn = document.getElementById('qr-btn-hostname')!;
+const serverIPUrl = document.getElementById('server-ip-url')!;
+const mDNSUrl = document.getElementById('mdns-url')!;
+const hostnameMDNSUrl = document.getElementById('hostname-mdns-url')!;
 
 const updateModal = document.getElementById('update-modal')!;
 const updateVersionParagraph = document.getElementById('update-version-paragraph')!;
@@ -40,6 +53,7 @@ const popupMessage = document.getElementById('popup-message')!;
 const popupSideNote = document.getElementById('popup-side-note')!;
 const popupCloseBtn = document.getElementById('popup-close-btn')!;
 
+// --- Initial Modal ---
 window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
     const isWindows = await window.api.isWindows();
     if (isWindows) shortcutOptionsContainer.classList.remove('hidden');
@@ -65,11 +79,10 @@ changePathBtn.addEventListener('click', async () => {
 
     if (result.success) {
         // Update UI with new path
-        currentPathSpan.textContent = result.path;
-        currentPathSpan.title = result.path;
+        currentPathSpan.textContent = result.data;
+        currentPathSpan.title = result.data;
 
-        // only show additional toast if not cancelled
-        if (!result.code) showTranslatedToast('toastPathUpdated');
+        showTranslatedToast('toastPathUpdated');
         pathErrorMessage.textContent = '';
     } else { // not writeable (admin perms, ...)
         switch (result.code) {
@@ -80,11 +93,14 @@ changePathBtn.addEventListener('click', async () => {
                 pathErrorMessage.classList.remove('hidden');
                 break;
 
+            case 'cancelled':
+                showTranslatedToast('cancelled');
+                break;
+
             default:
                 showTranslatedToast('toastUnknownError', undefined, 'error');
                 break;
         }
-
     }
 });
 
@@ -109,6 +125,27 @@ closeInitialModalBtn.addEventListener('click', () => {
     closeModal(initialModalBackdrop);
 });
 
+// --- QR modal ---
+let currentQRType: QRType | null = null;
+
+generateQRBtn.addEventListener('click', async () => {
+    const urls = await window.api.getServerURLs();
+
+    serverIPUrl.innerText = urls.ip ?? '';
+    mDNSUrl.innerText = urls.mdns;
+    hostnameMDNSUrl.innerText = urls.hostname;
+
+    openModal(qrModal);
+});
+qrCloseButton.addEventListener('click', () => closeModal(qrModal));
+
+generateIpBtn.addEventListener('click', () => handleGenerateQR('ip'));
+generateMdnsBtn.addEventListener('click', () => handleGenerateQR('mdns'));
+generateHostBtn.addEventListener('click', () => handleGenerateQR('hostname'));
+
+qrSaveBtn.addEventListener('click', handleSaveQR);
+
+// --- Update modal ---
 window.api.onUpdateAvailable(showUpdateModal);
 
 updateDownloadBtn.addEventListener('click', () => {
@@ -124,12 +161,14 @@ updateNeverBtn.addEventListener('click', () => {
     window.api.setUpdateNotification('never');
 });
 
+// --- Popup modal ---
+window.api.onShowPopupModal(showPopupModal);
+
 popupCloseBtn.addEventListener('click', () => {
     closeModal(popupModal);
 });
 
-window.api.onShowPopupModal(showPopupModal);
-
+// --- Helpers ---
 export function openModal(el: HTMLElement) {
     el.classList.remove('hidden');
     el.classList.remove('closing');
@@ -153,6 +192,37 @@ export function closeModal(el: HTMLElement) {
     }, { once: true });
 }
 
+// --- QR Modal ---
+const handleGenerateQR = async (type: QRType) => {
+    currentQRType = type;
+    try {
+        const response = await window.api.generateQRCode(type);
+
+        if (response.success) {
+            qrImage.src = response.data;
+            qrImage.classList.remove('hidden');
+            qrSaveBtn.classList.remove('hidden');
+        } else {
+            if (response.code === 'ip-failed') showTranslatedToast('toastIPFailed', undefined, 'error');
+            else showTranslatedToast('toastUnknownError', undefined, 'error');
+        }
+    } catch (error) {
+        showTranslatedToast('toastUnknownError', undefined, 'error');
+    }
+};
+
+async function handleSaveQR() {
+    if (!currentQRType) return;
+
+    const result = await window.api.saveQRCode(currentQRType);
+    if (result.success) {
+        showTranslatedToast('toastQRSaveSuccess');
+    } else {
+        if (result.code === 'cancelled') showTranslatedToast('cancelled');
+        else showTranslatedToast('toastQRSaveFailed', undefined, 'error');
+    }
+}
+
 // --- Update modal ---
 function showUpdateModal(details: { version: string, oldVersion: string, releaseNotes: string, url: string }) {
     // populate modal with version info
@@ -168,7 +238,7 @@ function showUpdateModal(details: { version: string, oldVersion: string, release
 }
 
 // --- Confirmation dialog ---
-export async function showConfirmation(messageKey: string, titleKey: string = 'confirmTitle'): Promise<boolean> {
+export async function showConfirmation(messageKey: TranslationKey, titleKey: TranslationKey = 'confirmTitle'): Promise<boolean> {
     // set text from translation keys
     confirmTitle.textContent = getTranslation(titleKey);
     confirmMessage.textContent = getTranslation(messageKey);
@@ -205,7 +275,7 @@ export async function showConfirmation(messageKey: string, titleKey: string = 'c
  * @param messageKey
  * @param sideNoteKey
  */
-export function showPopupModal(titleKey: string, messageKey: string, sideNoteKey?: string) {
+export function showPopupModal(titleKey: TranslationKey, messageKey: TranslationKey, sideNoteKey?: TranslationKey) {
     // set text from translation keys
     popupTitle.textContent = getTranslation(titleKey);
     popupMessage.textContent = getTranslation(messageKey);

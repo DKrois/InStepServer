@@ -14,7 +14,7 @@ startBtn.addEventListener('click', () => {
 
     if (port && port > 79 && port < 65536) {
         startBtn.disabled = true;
-        startBtn.textContent = 'Starting...';
+        startBtn.textContent = getTranslation('serverStarting');
 
         const success = window.api.startServer(port);
         if (!success) showTranslatedToast('toastStartFailed', undefined, 'error');

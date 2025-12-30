@@ -52,6 +52,12 @@ button:disabled:active {
     margin-top: 10px;
 }
 
+.vertical-buttons {
+    flex-direction: column;
+    /* ensure all buttons have the same width */
+    align-items: stretch;
+}
+
 .icon-button {
     display: flex;
     align-items: center;

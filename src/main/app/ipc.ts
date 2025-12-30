@@ -7,6 +7,7 @@ import { registerShortcutsIPC, registerUpdateIPC } from './installer.js';
 import { registerSecurityIPC, registerSettingsIPC, store } from './settings.js';
 import { registerTimeSettingsIPC } from './timeScheduler.js';
 import { mainWindow } from './window.js';
+import { registerQRIPC } from './qr.js';
 
 export let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;
@@ -20,6 +21,7 @@ export async function registerIPCHandlers() {
     registerUpdateIPC();
     registerSecurityIPC();
     registerServerIPC();
+    registerQRIPC();
     registerShortcutsIPC();
     registerStatsIPC();
 

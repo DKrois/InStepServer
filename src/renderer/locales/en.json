@@ -21,6 +21,16 @@
   "toastStartFailed": "Error starting server",
   "toastInvalidPort": "Invalid port number",
 
+  "generateQR": "Generate QR codes",
+  "qrCodeSelectionPrompt": "Select the URL to use:",
+  "saveQRCode": "Save QR code",
+  "qrCodeIP": "Server IP address",
+  "qrCodeMDNS": "mDNS address",
+  "qrCodeHostname": "OS hostname mDNS",
+  "toastQRSaveSuccess": "Saved QR code",
+  "toastQRSaveFailed": "Failed to save QR code",
+  "toastIPFailed": "Failed to get IP",
+
 
   "security": "Security",
   "currentPassword": "Current Password:",

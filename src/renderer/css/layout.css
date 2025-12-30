@@ -62,9 +62,26 @@ hr {
     gap: 15px;
 }
 
-/* Generic right align helper */
+/* --- Utility --- */
+.hidden {
+    display: none !important;
+}
+
+.no-click {
+    pointer-events: none;
+}
+
+/* right align helper */
 .ml-auto {
     margin-left: auto;
+}
+/* left align */
+.mr-auto {
+    margin-right: auto;
+}
+
+.zero-margin {
+    margin: 0 !important;
 }
 
 .small {

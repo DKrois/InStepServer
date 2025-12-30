@@ -1,4 +1,3 @@
-// @ts-expect-error import works fine
 import ejs from 'ejs';
 import express from 'express';
 import session from 'express-session';
@@ -13,7 +12,7 @@ import { join } from 'node:path';
 import { enableIMDAPI, store } from '../app/settings.js';
 import { Routes, SitesPaths, userDataPath } from '../constants.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
-import { getOwnIPs } from '../util.js';
+import { getLocalIPv4 } from '../util.js';
 import * as api from './api.js';
 import { isDBInitialized, projectDB } from './database.js';
 import { createDocsRouter } from './docs.js';
@@ -49,8 +48,7 @@ export async function initServer(port: number) {
     }
 
     const app = createExpressApp();
-    const localIPs = getOwnIPs();
-    const localIP = localIPs.pick ?? localIPs.allResults[0];
+    const localIP = getLocalIPv4();
     httpServer = http.createServer(app).listen(port, '0.0.0.0', () =>
         info(`Server listening on http://${localIP}:${port}`)
     );
@@ -96,7 +94,7 @@ function createExpressApp() {
         cookie: {
             secure: 'auto',
             httpOnly: true,
-            maxAge: store.get('sessionMaxAge') || undefined, // sessions don't expire if sessionMaxAge is 0
+            maxAge: store.get('sessionMaxAge') || undefined, // sessions don't expire if sessionMaxAge is 0 (per default 30d)
             path: Routes.imd,
         }
     }));

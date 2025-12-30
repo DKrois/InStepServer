@@ -5,7 +5,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
 
-    "lib": ["ES6", "DOM"]
+    "lib": ["ES6", "DOM"],
+
+    "baseUrl": "../..",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
   },
   "include": [
     "js/**/*"

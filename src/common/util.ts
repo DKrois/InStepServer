@@ -1,3 +1,7 @@
+import type { IPCCodes, IPCPacket } from './types.js';
+
+export type IPCResponse<C extends IPCCodes | '' = '', T = undefined> = Promise<IPCPacket<C, T>>
+
 export function formatNumber(x: number, fractionDigits = 0, useGrouping = true): string {
     const [intPart, fracPart = ''] = x
         .toFixed(fractionDigits)

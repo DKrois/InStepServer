@@ -10,6 +10,8 @@ const themeSwitcher = document.getElementById('theme-switcher')!;
 const languageSwitcher = document.getElementById('language-switcher') as HTMLSelectElement;
 
 // --- Translation ---
+export type TranslationKey = keyof typeof en;
+
 i18next.init({
     lng: 'en',
     debug: false,
@@ -37,7 +39,7 @@ export async function setInitialLanguage(language: string) {
     updateUIText();
 }
 
-export function getTranslation(str: string, options?: TOptions) {
+export function getTranslation(str: TranslationKey, options?: TOptions) {
     return i18next.t(str, options);
 }
 

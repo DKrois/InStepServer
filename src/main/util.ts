@@ -1,6 +1,6 @@
 import { app } from 'electron';
 import fs from 'node:fs/promises';
-import { networkInterfaces } from 'node:os';
+import { NetworkInterfaceInfo, networkInterfaces } from 'node:os';
 import { join } from 'node:path';
 import { formatNumber } from '../common/util.js';
 
@@ -17,7 +17,7 @@ export function normalizeSize(bytes: number, decimals: number = 2): string {
 
     // Return a string that formats the number of bytes according to the given number of decimal places
     // and then appends the corresponding unit from the sizes array
-    return `${formatNumber(bytes / Math.pow(k, i), dm)} ${sizes[i]}`
+    return `${formatNumber(bytes / Math.pow(k, i), dm)} ${sizes[i]}`;
 }
 
 export function attempt<T>(fn: () => T): T | undefined;
@@ -30,31 +30,66 @@ export function attempt<T>(fn: () => T, fallback?: T): T | undefined {
     }
 }
 
-export function getOwnIPs(): { allResults: string[], pick: string | undefined } {
+interface IPCollection {
+    ethernet: string | undefined;
+    wifi: string | undefined;
+    mobileData: string | undefined;
+}
+
+export function getLocalIPv4(): string {
+    const ips = getOwnIPs();
+    return ips.ipv4 ?? ips.ipv4Results[0];
+}
+export function getLocalIPs() {
+    const ips = getOwnIPs();
+    const ipv4 = ips.ipv4 ?? ips.ipv4Results[0];
+    const ipv6 = ips.ipv6 ?? ips.ipv6Results[0];
+
+    return { ipv4, ipv6 };
+}
+function getOwnIPs(): { ipv4Results: string[], ipv6Results: string[], ipv4: string | undefined, ipv6: string | undefined } {
     const interfaces = networkInterfaces();
-    const results: string[] = [];
-    let ethernetIP: string | undefined = undefined;
-    let wifiIP: string | undefined = undefined;
-    let mobileDataIP: string | undefined = undefined;
+    const ipv4Results: string[] = [];
+    const ipv6Results: string[] = [];
+
+    const ipv4: IPCollection = {
+        ethernet: undefined,
+        wifi: undefined,
+        mobileData: undefined,
+    };
+    const ipv6: IPCollection = {
+        ethernet: undefined,
+        wifi: undefined,
+        mobileData: undefined,
+    };
+
+    const check = (lowercaseKey: string, net: NetworkInterfaceInfo, arr: string[], obj: IPCollection) => {
+        arr.push(net.address);
+
+        if (!obj.ethernet) {
+            // don't check further if ethernet is already found as it takes highest priority
+            if (lowercaseKey.startsWith('ethernet')) {
+                obj.ethernet = net.address;
+            } else if (lowercaseKey.startsWith('wlan') || lowercaseKey.startsWith('wifi') || lowercaseKey.startsWith('wi-fi')) {
+                obj.wifi = net.address;
+            } else if (lowercaseKey.startsWith('rmnet')) {
+                obj.mobileData = net.address;
+            }
+        }
+    };
 
     Object.keys(interfaces).forEach(key => {
         const lowercaseKey = key.toLowerCase();
         interfaces[key]?.forEach(net => {
-            if (net.family === 'IPv4' && !net.internal) {
-                results.push(net.address);
-                if (ethernetIP) return; // don't check further as ethernet takes highest priority anyway
-                if (lowercaseKey.startsWith('ethernet')) {
-                    ethernetIP = net.address;
-                } else if (lowercaseKey.startsWith('wlan') || lowercaseKey.startsWith('wifi') || lowercaseKey.startsWith('wi-fi')) {
-                    wifiIP = net.address;
-                } else if (lowercaseKey.startsWith('rmnet')) {
-                    mobileDataIP = net.address;
-                }
+            if (!net.internal) {
+                if (net.family === 'IPv4') check(lowercaseKey, net, ipv4Results, ipv4);
+                if (net.family === 'IPv6') check(lowercaseKey, net, ipv6Results, ipv6);
             }
         });
     });
 
-    return { allResults: results, pick: ethernetIP || wifiIP || mobileDataIP };
+    const getPrioritised = (obj: IPCollection) => obj.ethernet || obj.wifi || obj.mobileData;
+    return { ipv4Results, ipv6Results, ipv4: getPrioritised(ipv4), ipv6: getPrioritised(ipv6) };
 }
 
 

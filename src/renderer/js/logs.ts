@@ -1,7 +1,7 @@
 import AnsiToHTML from 'ansi-to-html';
 import type { TOptions } from 'i18next';
 import { toastTimeout } from '../../../config.json';
-import { getTranslation } from './translate';
+import { getTranslation, type TranslationKey } from './translate';
 
 const convert = new AnsiToHTML();
 
@@ -100,7 +100,7 @@ function showToast(message: string, type: 'info' | 'error' = 'info') {
     }, toastTimeout);
 }
 
-export function showTranslatedToast(key: string, options?: TOptions, type: 'info' | 'error' = 'info') {
+export function showTranslatedToast(key: TranslationKey, options?: TOptions, type: 'info' | 'error' = 'info') {
     const message = getTranslation(key, options);
     showToast(message, type);
 }

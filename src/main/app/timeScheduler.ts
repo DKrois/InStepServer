@@ -12,6 +12,7 @@ import {
 } from './ipc.js';
 import { store } from './settings.js';
 import { mainWindow } from './window.js';
+import { IPCResponse } from '../../common/util.js';
 
 let schedulerInterval: NodeJS.Timeout | null = null;
 
@@ -55,10 +56,10 @@ export function registerTimeSettingsIPC() {
     });
 }
 
-async function handleExport(): Promise<{ success: boolean, code?: 'cancelled' }> {
+async function handleExport(): IPCResponse<'cancelled' | ''> {
     if (!mainWindow) {
         warn('Main window not available');
-        return { success: false };
+        return { success: false, code: '' };
     }
 
     const { filePath } = await dialog.showSaveDialog(mainWindow, {
@@ -71,19 +72,19 @@ async function handleExport(): Promise<{ success: boolean, code?: 'cancelled' }>
         try {
             const settings = store.get('timeSettings');
             await writeFile(filePath, JSON.stringify(settings, null, 2));
-            return { success: true };
+            return { success: true, data: undefined };
         } catch (error: any) {
             error('Error exporting time settings', error);
-            return { success: false };
+            return { success: false, code: '' };
         }
     }
     return { success: false, code: 'cancelled' };
 }
 
-async function handleImport(): Promise<{ success: boolean, data?: TimeSettings, code?: 'cancelled' }> {
+async function handleImport(): IPCResponse<'cancelled' | '', TimeSettings> {
     if (!mainWindow) {
         warn('Main window not available');
-        return { success: false };
+        return { success: false, code: '' };
     }
 
     const { filePaths } = await dialog.showOpenDialog(mainWindow, {
@@ -99,7 +100,7 @@ async function handleImport(): Promise<{ success: boolean, data?: TimeSettings, 
             return { success: true, data: settings };
         } catch (error: any) {
             error('Error importing time settings', error);
-            return { success: false };
+            return { success: false, code: '' };
         }
     }
     return { success: false, code: 'cancelled' };
