@@ -1,8 +1,8 @@
 import { app, dialog, ipcMain } from 'electron';
+import { getOSHostname } from '../api/mdns.js';
 import { getLocalIPv4 } from '../util.js';
 import { store } from './settings.js';
 import { hostname } from '../../../config.json';
-import * as os from 'node:os';
 import QRCode from 'qrcode';
 import { error } from 'electron-log';
 import { warn } from '../log.js';
@@ -45,7 +45,7 @@ async function generateQRCode(type: QRType): IPCResponse<'ip-failed' | 'error', 
 async function saveQRCode(type: QRType): IPCResponse<'cancelled' | 'ip-failed' | 'error', string> {
     const { canceled, filePath } = await dialog.showSaveDialog({
         title: 'Save QR Code',
-        defaultPath: `${app.getPath('downloads')}/instep-qr-code.png`,
+        defaultPath: `${app.getPath('downloads')}/instep-qr-code-${type}.png`,
         filters: [
             { name: 'PNG Images', extensions: ['png'] }
         ]
@@ -70,7 +70,7 @@ async function saveQRCode(type: QRType): IPCResponse<'cancelled' | 'ip-failed' |
     }
 }
 
-function getURL<T extends QRType>(type: T): T extends 'ip' ? (string | null) : string {
+export function getURL<T extends QRType>(type: T): T extends 'ip' ? (string | null) : string {
     const port = store.get('port');
 
     switch (type) {
@@ -86,7 +86,7 @@ function getURL<T extends QRType>(type: T): T extends 'ip' ? (string | null) : s
             return `http://${hostname}.local:${port}`;
 
         case 'hostname':
-            return `http://${os.hostname()}.local:${port}`;
+            return `http://${getOSHostname()}.local:${port}`;
 
         default:
             throw new Error('Invalid QR code type specified.');

@@ -9,10 +9,10 @@ import { mkdtempSync } from 'node:fs';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { getURL } from '../app/qr.js';
 import { enableIMDAPI, store } from '../app/settings.js';
 import { Routes, SitesPaths, userDataPath } from '../constants.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
-import { getLocalIPv4 } from '../util.js';
 import * as api from './api.js';
 import { isDBInitialized, projectDB } from './database.js';
 import { createDocsRouter } from './docs.js';
@@ -48,9 +48,8 @@ export async function initServer(port: number) {
     }
 
     const app = createExpressApp();
-    const localIP = getLocalIPv4();
     httpServer = http.createServer(app).listen(port, '0.0.0.0', () =>
-        info(`Server listening on http://${localIP}:${port}`)
+        info(`Server listening on ${getURL('ip')}`)
     );
 
     await startMDNSAdvertisement(port);

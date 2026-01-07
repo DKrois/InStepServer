@@ -20,6 +20,7 @@
 .modal-dialog {
     max-width: 500px;
     width: 90%;
+    max-height: 90%;
 }
 
 .modal-buttons {
@@ -219,15 +220,30 @@
 
 /* --- Update modal --- */
 .release-notes-container {
-    max-height: 200px;
     overflow-y: auto;
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--border-color);
     border-radius: 5px;
     padding: 10px;
     margin: 15px 0;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    white-space: pre-wrap; /* Respects newlines from the release notes */
+    border: 1px solid var(--accent-color);
+
+    p {
+        margin: 0.5em 0;
+    }
+
+    h2, h3 {
+        margin: 0.5em 0 0.4em;
+    },
+
+    ul, ol {
+        margin: 0.4em 0;
+    }
+
+    li {
+        margin: 0.3em 0;
+    }
 }
+
 
 /* --- Confirmation Modal --- */
 #confirm-modal {

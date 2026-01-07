@@ -36,9 +36,6 @@ export function registerUpdateIPC() {
 }
 
 export function initUpdater() {
-    // TODO
-    setInterval(() => checkForUpdate(), 50000);
-
     if (!app.isPackaged) {
         info('Development mode: Auto-updater disabled.');
         return;
@@ -80,20 +77,32 @@ async function checkForUpdate() {
 
     try {
         const response = await fetch('https://api.github.com/repos/DKrois/InStepServer/releases/latest');
+
         if (!response.ok) {
-            warn(`Failed to fetch releases: ${response.statusText}`);
+            let msg = '';
+            try {
+                const data: any = await response.json();
+                msg = 'message' in data ? data.message : '';
+            } catch (_) {}
+
+            warn(`Failed to fetch releases: ${response.statusText}${msg ? ` / ${msg}` : ''}`);
+
+            // disable further updates for this session if rate limited
+            if (response.statusText === 'rate limit exceeded') clearInterval(updateNotificationInterval);
             return;
         }
 
-        const release = await response.json() as any;
+        const release: any = await response.json();
+
+        //const release = await response.json() as any;
         const latestVersion = release.tag_name.replace('v', '');
-        const currentVersion = '0.0.8' // app.getVersion();
+        const currentVersion = app.getVersion();
 
         if (!lastNotifiedVersion) lastNotifiedVersion = currentVersion;
 
         if (latestVersion > lastNotifiedVersion) {
             info(`Update found: ${latestVersion}. Current: ${currentVersion}`);
-            lastNotifiedVersion = latestVersion; // don't notify again for this version in this session
+            //lastNotifiedVersion = latestVersion; // don't notify again for this version in this session
 
             updateUrl = release.html_url;
 
