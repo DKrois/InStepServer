@@ -64,7 +64,9 @@ hr {
 
 /* --- Utility --- */
 .hidden {
-    display: none !important;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
 
 .no-click {

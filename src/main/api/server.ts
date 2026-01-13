@@ -48,7 +48,7 @@ export async function initServer(port: number) {
     }
 
     const app = createExpressApp();
-    httpServer = http.createServer(app).listen(port, '0.0.0.0', () =>
+    httpServer = app.listen(port, '0.0.0.0', () =>
         info(`Server listening on ${getURL('ip')}`)
     );
 
@@ -138,15 +138,8 @@ function createExpressApp() {
     app.get(`${Routes.publicAPI}/:id/:version`, api.handleGETRequest);
 
     // IMD routes with auth
-    app.post(`${Routes.imdAPI}/release-lock`, isIMDAPIEnabled, isAuth, api.handleReleaseLock);
-
-    const authMiddleware = [isIMDAPIEnabled, isAuth, manageImdLock];
-    app.use(Routes.imd, ...authMiddleware, express.static(SitesPaths.imd));
-    app.put(`${Routes.imdAPI}/:id`, ...authMiddleware, api.handlePUTRequest);
-    app.put(`${Routes.imdAPI}/:id/:version`, ...authMiddleware, api.handlePUTRequest);
-    app.post(`${Routes.imdAPI}/:id/:version/floorplans`, ...authMiddleware, upload.array('floorplans'), api.handleFloorplanUpload);
-    app.delete(`${Routes.imdAPI}/:id`, ...authMiddleware, api.handleDELETERequest);
-    app.delete(`${Routes.imdAPI}/:id/:version`, ...authMiddleware, api.handleDELETERequest);
+    app.use(Routes.imdAPI, createIMDRouter());
+    app.use(Routes.imd, isIMDAPIEnabled, isAuth, manageImdLock, express.static(SitesPaths.imd));
 
     // handle non-existing routes
     app.use((req: express.Request, res: express.Response) => {
@@ -171,6 +164,23 @@ function createExpressApp() {
     });
 
     return app;
+}
+
+function createIMDRouter() {
+    const router = express.Router();
+
+    router.post(`/release-lock`, isIMDAPIEnabled, isAuth, api.handleReleaseLock);
+
+    // add auth middleware
+    router.use(isIMDAPIEnabled, isAuth, manageImdLock);
+
+    router.put(`/:id`, api.handlePUTRequest);
+    router.put(`/:id/:version`, api.handlePUTRequest);
+    router.post(`/:id/:version/floorplans`, upload.array('floorplans'), api.handleFloorplanUpload);
+    router.delete(`/:id`, api.handleDELETERequest);
+    router.delete(`/:id/:version`, api.handleDELETERequest);
+
+    return router;
 }
 
 function getSessionSecret(): string {

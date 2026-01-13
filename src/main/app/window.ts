@@ -17,8 +17,8 @@ export let mainWindow: BrowserWindow | null = null;
 export function createWindow() {
     const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size;
     // calc width
-    const defaultWindowWidthPx = screenWidth * defaultWindowWidthPercent;
-    const defaultWindowHeightPx = screenHeight * defaultWindowHeightPercent;
+    const defaultWindowWidthPx = Math.floor(screenWidth * defaultWindowWidthPercent);
+    const defaultWindowHeightPx = Math.floor(screenHeight * defaultWindowHeightPercent);
 
     // maximize if screen is too small
     const shouldMaximize = minWindowWidth > defaultWindowWidthPx || minWindowHeight > defaultWindowHeightPx;

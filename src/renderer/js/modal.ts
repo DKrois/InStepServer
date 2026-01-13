@@ -8,6 +8,11 @@ import type { QRType } from '../../common/types.js';
 // enable gfm (github flavoured markdown)
 marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 
+// store handlers in case esc is pressed within modal
+// you can't just apply an event listener to each modal as that would require an element within the modal to be focused.
+// adding the event listener to 'document' and detecting the currently opened modal should work better
+const modalEscapeHandlers = new WeakMap<HTMLElement, () => void>();
+
 const initialModalBackdrop = document.getElementById('initial-modal')!;
 const closeInitialModalBtn = document.getElementById('close-modal-btn')!;
 const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
@@ -52,6 +57,18 @@ const popupTitle = document.getElementById('popup-title')!;
 const popupMessage = document.getElementById('popup-message')!;
 const popupSideNote = document.getElementById('popup-side-note')!;
 const popupCloseBtn = document.getElementById('popup-close-btn')!;
+
+// close on esc
+document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+
+    let openModal = document.querySelector('.modal.visible') as HTMLElement | null;
+    openModal ??= document.querySelector('.modal.opening') as HTMLElement | null;
+    if (!openModal) return;
+
+    const handler = modalEscapeHandlers.get(openModal);
+    handler?.();
+});
 
 // --- Initial Modal ---
 window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
@@ -146,7 +163,21 @@ generateHostBtn.addEventListener('click', () => handleGenerateQR('hostname'));
 qrSaveBtn.addEventListener('click', handleSaveQR);
 
 // --- Update modal ---
-window.api.onUpdateAvailable(showUpdateModal);
+window.api.onUpdateAvailable((details: { version: string, oldVersion: string, releaseNotes: string, url: string }) => {
+    // populate modal with version info
+    updateVersionParagraph.textContent = getTranslation('newVersionAvailable', {
+        version: details.version,
+        oldVersion: details.oldVersion
+    });
+
+    const releaseNotes = details.releaseNotes || getTranslation('noReleaseNotes');
+    updateReleaseNotes.innerHTML = marked.parse(releaseNotes, { async: false});
+
+    openModal(updateModal, () => {
+        closeModal(updateModal);
+        window.api.setUpdateNotification('later');
+    });
+});
 
 updateDownloadBtn.addEventListener('click', () => {
     closeModal(updateModal);
@@ -164,32 +195,37 @@ updateNeverBtn.addEventListener('click', () => {
 // --- Popup modal ---
 window.api.onShowPopupModal(showPopupModal);
 
-popupCloseBtn.addEventListener('click', () => {
-    closeModal(popupModal);
-});
+popupCloseBtn.addEventListener('click', () => closeModal(popupModal));
 
 // --- Helpers ---
-export function openModal(el: HTMLElement) {
-    el.classList.remove('hidden');
-    el.classList.remove('closing');
+export function openModal(modal: HTMLElement, closeHandler?: () => void) {
+    modal.classList.remove('hidden');
+    modal.classList.remove('closing');
 
-    requestAnimationFrame(() => el.classList.add('opening'));
+    requestAnimationFrame(() => modal.classList.add('opening'));
 
     // after animation ends → lock state to visible
-    el.addEventListener('transitionend', () => {
-        el.classList.remove('opening');
-        el.classList.add('visible');
+    modal.addEventListener('transitionend', () => {
+        modal.classList.remove('opening');
+        modal.classList.add('visible');
+
+        modal.setAttribute('tabindex', '-1');
+        modal.focus();
     }, { once: true });
+
+    modalEscapeHandlers.set(modal, closeHandler ?? (() => closeModal(modal)));
 }
 
-export function closeModal(el: HTMLElement) {
-    el.classList.remove('opening');
-    el.classList.remove('visible');
-    el.classList.add('closing');
-    el.addEventListener('transitionend', () => {
-        el.classList.remove('closing');
-        el.classList.add('hidden');
+export function closeModal(modal: HTMLElement) {
+    modal.classList.remove('opening');
+    modal.classList.remove('visible');
+    modal.classList.add('closing');
+    modal.addEventListener('transitionend', () => {
+        modal.classList.remove('closing');
+        modal.classList.add('hidden');
     }, { once: true });
+
+    modalEscapeHandlers.delete(modal);
 }
 
 // --- QR Modal ---
@@ -223,33 +259,17 @@ async function handleSaveQR() {
     }
 }
 
-// --- Update modal ---
-function showUpdateModal(details: { version: string, oldVersion: string, releaseNotes: string, url: string }) {
-    // populate modal with version info
-    updateVersionParagraph.textContent = getTranslation('newVersionAvailable', {
-        version: details.version,
-        oldVersion: details.oldVersion
-    });
-
-    const releaseNotes = details.releaseNotes || getTranslation('noReleaseNotes');
-    updateReleaseNotes.innerHTML = marked.parse(releaseNotes, { async: false});
-
-    openModal(updateModal);
-}
-
 // --- Confirmation dialog ---
 export async function showConfirmation(messageKey: TranslationKey, titleKey: TranslationKey = 'confirmTitle'): Promise<boolean> {
     // set text from translation keys
     confirmTitle.textContent = getTranslation(titleKey);
     confirmMessage.textContent = getTranslation(messageKey);
 
-    // show modal
-    openModal(confirmModal);
-
     return new Promise(resolve => {
         // define cleanup function to remove listeners
         const cleanup = () => {
             closeModal(confirmModal);
+
             confirmBtnOk.removeEventListener('click', handleOk);
             confirmBtnCancel.removeEventListener('click', handleCancel);
         };
@@ -263,6 +283,9 @@ export async function showConfirmation(messageKey: TranslationKey, titleKey: Tra
             cleanup();
             resolve(false); // User cancelled
         };
+
+        // show modal
+        openModal(confirmModal, handleCancel);
 
         confirmBtnOk.addEventListener('click', handleOk);
         confirmBtnCancel.addEventListener('click', handleCancel);

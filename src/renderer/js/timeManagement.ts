@@ -29,7 +29,10 @@ let lastSavedSettings: TimeSettings = JSON.parse(JSON.stringify(defaultTimeSetti
 const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 // --- Event Listeners ---
-advancedBtn.addEventListener('click', () => openModal(timeModalBackdrop));
+advancedBtn.addEventListener('click', () => openModal(timeModalBackdrop, () => {
+    populateUI(lastSavedSettings); // Revert to last saved state
+    closeModal(timeModalBackdrop);
+}));
 modalCancelBtn.addEventListener('click', () => {
     populateUI(lastSavedSettings); // Revert to last saved state
     closeModal(timeModalBackdrop);
@@ -65,9 +68,7 @@ weekdayList.addEventListener('click', (event) => {
 });
 window.api.onClearTimeInput((inputId) => {
     const input = document.getElementById(inputId) as HTMLInputElement;
-    if (input) {
-        input.value = '';
-    }
+    if (input) input.value = '';
 });
 
 // Listen for server status changes to keep countdown accurate
@@ -181,13 +182,16 @@ function readUIState() {
 function handleSave() {
     const newSettings = readUIState();
 
-    window.api.saveTimeSettings(newSettings);
-    lastSavedSettings = newSettings;
-    timeSettings = newSettings;
+    if (JSON.stringify(lastSavedSettings) !== JSON.stringify(newSettings)) {
+        window.api.saveTimeSettings(newSettings);
+        lastSavedSettings = newSettings;
+        timeSettings = newSettings;
 
-    showTranslatedToast('toastTimeSettingsSaved');
+        showTranslatedToast('toastTimeSettingsSaved');
+        startOrUpdateCountdown();
+    }
+
     closeModal(timeModalBackdrop);
-    startOrUpdateCountdown();
 }
 
 async function handleClear(save = false) {
