@@ -24,8 +24,8 @@ npm run build
 if ($LASTEXITCODE -ne 0) { throw "npm build failed!" }
 
 Write-Host "-- Replacing '/assets' with 'assets'..."
-$indexFile = Join-Path $distPath "index.html"
 $distPath = Join-Path $imdProjectPath "dist"
+$indexFile = Join-Path $distPath "index.html"
 
 (Get-Content $indexFile -Raw) `
     -replace '/assets', 'assets' |
