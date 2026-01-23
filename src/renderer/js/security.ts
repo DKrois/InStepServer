@@ -64,6 +64,13 @@ toggleNewPasswordBtn.addEventListener('click', () => {
     toggleNewPasswordBtn.classList.toggle('password-shown', isPassword);
 });
 
+export function setInitialSecuritySettings(settings: { imdEnabled: boolean, sessionDuration: number }) {
+    const { imdEnabled, sessionDuration } = settings;
+
+    loadCurrentSessionDuration(sessionDuration);
+    enableIMDAPICheckbox.checked = imdEnabled;
+}
+
 function setLockedState(locked: boolean) {
     securityCard.classList.toggle('is-locked', locked);
 
@@ -168,8 +175,8 @@ async function releaseIMDLock() {
 }
 
 let currentTotalMs = 0;
-async function loadCurrentSessionDuration() {
-    currentTotalMs = await window.api.getSessionDuration();
+async function loadCurrentSessionDuration(ms?: number) {
+    currentTotalMs = ms ?? await window.api.getSessionDuration();
     const duration = normalizeDuration(currentTotalMs, false, 'y', ['M', 'w']);
 
     sessionYearsInput.value = String(duration.years);

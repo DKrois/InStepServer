@@ -32,12 +32,19 @@ jobs:
         with:
           node-version: 22.21.1
 
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install dependencies
         run: npm i
 
+      - name: Build docs
+        run: bun run build:docs
+
       - name: Build/make the application
-        # This command runs your existing "make" script from package.json
-        run: npm run make
+        run: bun run make
         env:
           # The GITHUB_TOKEN is automatically provided by GitHub Actions
           # It's needed for publishing to the release

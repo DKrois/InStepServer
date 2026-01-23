@@ -44,11 +44,11 @@ export function initStore() {
 
 export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', () => {
-        const { port, language, timeSettings } = store.store;
+        const { port, language, timeSettings, imdEnabled, sessionMaxAge } = store.store;
         const isDarkMode = nativeTheme.shouldUseDarkColors;
         const serverEnabled = isServerRunning();
 
-        return { isDarkMode, language, port, serverEnabled, timeSettings };
+        return { isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration: sessionMaxAge };
     });
 
     ipcMain.on('save-lang', (_event, language: string) => store.set('language', language));
@@ -148,7 +148,7 @@ async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permi
 async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPCResponse<'permission-denied'> {
     if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
-    store.set('imdEnabled', true);
+    store.set('imdEnabled', enable);
     return { success: true, data: undefined };
 }
 

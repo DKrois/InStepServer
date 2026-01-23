@@ -1,8 +1,8 @@
+import { setInitialSecuritySettings } from './security';
 import { setInitialServerSettings } from './serverStatus';
 import { setInitialTimeSettings } from './timeManagement';
 import { setInitialLanguage, updateTheme } from './translate';
-import './security'; // to register event listeners
-import './stats';
+import './stats'; // to register event listeners
 
 import '../css/theme.css';
 import '../css/layout.css';
@@ -19,12 +19,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // update to stored settings
     const settings = await window.api.getInitialSettings();
-    const { isDarkMode, language, port, serverEnabled, timeSettings } = settings;
+    const { isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration } = settings;
 
     updateTheme(isDarkMode);
     setInitialLanguage(language);
     setInitialServerSettings({ port, serverEnabled });
     setInitialTimeSettings(timeSettings);
+    setInitialSecuritySettings({ imdEnabled, sessionDuration })
 
     // refresh stats on load → done in stats.ts after projectDB init
 });

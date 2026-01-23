@@ -11,9 +11,9 @@
   "license": "MIT",
   "main": ".webpack/main",
   "scripts": {
-    "start": "npm run build:docs && electron-forge start",
-    "package": "npm run build:docs && electron-forge package",
-    "make": "npm run build:docs && electron-forge make",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
     "build:docs": "bun build sites/docs/src/*.ts --outdir sites/docs/assets/js --target=browser --format=esm --splitting --minify"
   },
   "dependencies": {
