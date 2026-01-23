@@ -30,7 +30,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 22.18.0
+          node-version: 22.21.1
 
       - name: Install dependencies
         run: npm i

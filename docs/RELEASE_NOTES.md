@@ -1,4 +1,4 @@
-## v1.1.0
+## v1.1.1
 
-### Server
-- Setting "Enable IMD API" now persists across restarts
+### Docs
+- Fixed docs js not being included in installer version
