@@ -11,7 +11,6 @@ import { isServerRunning } from '../api/server.js';
 import { IPCResponse } from '../../common/util.js';
 
 let initialPassword: string | null = null;
-export let enableIMDAPI = false;
 
 export const store = new Store({
     defaults: {
@@ -26,6 +25,7 @@ export const store = new Store({
         passwordHash: '', // set on startup or update ipc
         sessionSecret: '', // set on server init
         sessionMaxAge: 30 * Durations.msInDay,
+        imdEnabled: false,
         projectDataPath: '', // set on initial modal close
     }
 });
@@ -148,7 +148,7 @@ async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permi
 async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPCResponse<'permission-denied'> {
     if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
-    enableIMDAPI = enable;
+    store.set('imdEnabled', true);
     return { success: true, data: undefined };
 }
 

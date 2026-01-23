@@ -1,18 +1,4 @@
-## v0.1.0
+## v1.1.0
 
-- Updated IMD
-
-### Server & API
-- 404
-- Enable / disable IMD API
-- Session lock
-- List projects
-- mDNS
-- QR code generation
-
-### Database
-- Project cache
-- Data validation on write
-
-### Docs
-- Basic pages
+### Server
+- Setting "Enable IMD API" now persists across restarts

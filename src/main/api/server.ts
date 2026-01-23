@@ -10,7 +10,7 @@ import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getURL } from '../app/qr.js';
-import { enableIMDAPI, store } from '../app/settings.js';
+import { store } from '../app/settings.js';
 import { Routes, SitesPaths, userDataPath } from '../constants.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import * as api from './api.js';
@@ -131,7 +131,7 @@ function createExpressApp() {
 
     // GET routes without auth
     app.get(`${Routes.imdAPI}/random-id`, api.getRandomProjectID);
-    app.get(`${Routes.imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.json({ enabled: enableIMDAPI }));
+    app.get(`${Routes.imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.json({ enabled: store.get('imdEnabled') }));
     app.get(`${Routes.publicAPI}/list`, api.handleListProjectsRequest);
     app.get(`${Routes.publicAPI}/:id/list`, api.handleListProjectVersionsRequest);
     app.get(`${Routes.publicAPI}/:id`, api.handleGETRequest);

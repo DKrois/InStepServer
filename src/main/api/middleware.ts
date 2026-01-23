@@ -1,6 +1,6 @@
 import express from 'express';
 import { imdLockDurationSeconds } from '../../../config.json';
-import { enableIMDAPI } from '../app/settings.js';
+import { store } from '../app/settings.js';
 import { Routes, SitesPaths } from '../constants.js';
 import { errorToJSON } from '../errorformatting.js';
 import { info as _info } from '../log.js';
@@ -43,7 +43,7 @@ export function manageImdLock(req: express.Request, res: express.Response, next:
 }
 
 export function isIMDAPIEnabled(req: express.Request, res: express.Response, next: express.NextFunction) {
-    if (enableIMDAPI) return next();
+    if (store.get('imdEnabled')) return next();
 
     sendFileIfBrowser(req, res, {
         status: 503,
