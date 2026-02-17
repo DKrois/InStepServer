@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
 Push-Location $tempPath
 
 Write-Host "-- Downloading IMD from git..."
-git clone "https://github.com/DKrois/InStepIMD"
+git clone "https://DKrois@github.com/DKrois/InStepIMD"
 if ($LASTEXITCODE -ne 0) { throw "git clone failed!" }
 
 Set-Location $imdProjectPath

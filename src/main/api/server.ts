@@ -120,7 +120,6 @@ function createExpressApp() {
 
     app.use(Routes.assets, express.static(SitesPaths.assets));
     app.use(Routes.staticAPI, express.static(projectDB.path)); // serve db path for image access
-
     app.use(Routes.docsAssets, express.static(SitesPaths.docs.assets));
 
     app.use(Routes.docs, createDocsRouter({ sidebarType: 'full', basePath: Routes.docs }));

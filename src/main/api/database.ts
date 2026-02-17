@@ -23,7 +23,7 @@ export interface SimplifiedProject {
     properties: {
         projectName: string;
     };
-    floorplanImages: Record<string, string | null>;
+    floorplanImages: Record<string, string | null> | null;
 }
 export interface SimplifiedState {
     project: SimplifiedProject;
@@ -218,17 +218,13 @@ class ProjectDatabase {
         if (versions.length === 0) await fs.rm(this._createPath(id), { recursive: true, force: true });
     }
 
-    async get(id: number, returnFull: false, version?: number): Promise<{ data: SimplifiedProject, version: number }>;
-    async get(id: number, returnFull: true, version?: number): Promise<{ data: SimplifiedState, version: number }>;
-
     /**
      * Reads a project file.
      * If 'returnFull' is set to false, only the project data will be returned. Otherwise, the entire state will be used.
      * @param id project id
-     * @param returnFull whether to return the full state object
      * @param version version to read. If absent, uses most recent one
      */
-    async get(id: number, returnFull: boolean, version?: number): Promise<{ data: SimplifiedState | SimplifiedProject, version: number }> {
+    async get(id: number, version?: number): Promise<{ data: SimplifiedProject, version: number }> {
         const v = version ?? (await this.getLatestVersion(id))?.version;
         if (!v) throw new Error(`${id}/@latest not found.`);
 
@@ -238,13 +234,8 @@ class ProjectDatabase {
             return JSON.parse(json);
         };
 
-        // don't use cache if returning full data
-        if (returnFull) {
-            const state = await read();
-            return { data: state, version: v };
-        }
-
         const cacheKey = this._getCacheKey(id, v);
+        // use cached if available
         if (this.cache.has(cacheKey)) return { data: this.cache.get(cacheKey)!, version: v };
 
         const state = await read();
@@ -275,7 +266,7 @@ class ProjectDatabase {
             const projectIDs = await fs.readdir(path);
             const projects = projectIDs.map(async idStr => {
                 const id = parseInt(idStr, 10);
-                const { data, version } = await this.get(id, false);
+                const { data, version } = await this.get(id);
 
                 return { name: data.properties.projectName, id, latestVersion: version };
             });

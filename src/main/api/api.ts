@@ -123,7 +123,7 @@ export async function handleFloorplanUpload(req: express.Request, res: express.R
 export async function handleGETRequest(req: express.Request, res: express.Response) {
     const id = parseInt(req.params.id);
     const version = req.params.version ? parseInt(req.params.version) : undefined;
-    const returnFull = Boolean(req.params.full);
+    const includeFloorplans = Boolean(req.params.floorplans);
 
     const v = version ?? (await projectDB.getLatestVersion(id))?.version;
     const handler = async () => {
@@ -134,24 +134,25 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
 
         const imageFiles = await projectDB.listImages(id, v);
 
-        // @ts-expect-error returnFull is a runtime boolean → ts complains
-        const { data } = await projectDB.get(id, returnFull, v);
-        const project = returnFull ? data.project : data;
+        const { data } = await projectDB.get(id, v);
 
-        project.floorplanImages = {};
-        for (const filename of imageFiles) {
-            // The filename is the floor name (e.g., 'floor1.png')
-            // Construct the static URL
-            project.floorplanImages[filename] = `${Routes.staticAPI}/${id}/v${v}/${filename}`;
+        if (includeFloorplans) {
+            data.floorplanImages = {};
+            for (const filename of imageFiles) {
+                // The filename is the floor name (e.g., 'floor1.png')
+                // Construct the static URL
+                data.floorplanImages[filename] = `${Routes.staticAPI}/${id}/v${v}/${filename}`;
+            }
+        } else {
+            data.floorplanImages = null;
         }
 
         res.status(200).send(data);
     };
     const onSuccess = () => {
         const versionString = projectDB.createVersionString(v) ?? '@latest';
-        const returnFullStr = returnFull ? ' (full data)' : '';
 
-        info(`Requested ${id}/${versionString}${returnFullStr}`);
+        info(`Requested ${id}/${versionString}`);
     };
 
     return handle(handler, onSuccess, res, {
