@@ -3,14 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IMD Editor</title>
+    <meta name="description" content="InStep -IMD Editor" />
+    <meta name="theme-color" content="#54176e" />
+    <meta name="color-scheme" content="light dark" />
+    <meta property="og:title" content="InStep-IMD Editor" />
+    <meta property="og:description" content="Bearbeiten Sie Grundrisse und 3D-Ansichten direkt im Browser." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/logo_outline.png" />
+    <title>InStep-IMD Editor</title>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.mjs"
       type="module"
     ></script>
     <link rel="icon" type="image/png" href="assets/logo_transparent.png" />
-    <script type="module" crossorigin src="assets/index-D2oOUytM.js"></script>
-    <link rel="stylesheet" crossorigin href="assets/index-CcCKA6hj.css">
+    <script type="module" crossorigin src="assets/index-COThXori.js"></script>
+    <link rel="stylesheet" crossorigin href="assets/index-BY00Q3rj.css">
   </head>
   <body data-theme="light">
     <div id="backstage-container"></div>
@@ -66,7 +73,6 @@
             id="theme-icon"
             src="assets/darkMode.png"
             alt="Theme Icon"
-            style="width: 18px; height: 18px; vertical-align: middle"
           />
         </button>
       </div>
@@ -91,6 +97,7 @@
             <canvas id="canvas"></canvas>
             <div id="crosshair-h" class="crosshair horizontal"></div>
             <div id="crosshair-v" class="crosshair vertical"></div>
+            <div id="coordinate-display" class="coordinate-display">X: 0.00 m | Y: 0.00 m</div>
             <div id="scrollbar-x" class="scrollbar">
               <div id="thumb-x" class="thumb"></div>
             </div>

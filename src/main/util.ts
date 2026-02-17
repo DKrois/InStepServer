@@ -102,7 +102,7 @@ export function getResource(path: string, nonPackagedBase: string = ''): string 
  * This avoids corrupted or half-written files in case of a crash.
  */
 export async function writeJSON(path: string, data: any) {
-    const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    const dataStr = typeof data === 'string' ? data : JSON.stringify(data);
 
     const tmp = `${path}.tmp`;
     await fs.writeFile(tmp, dataStr, { encoding: 'utf8'});
