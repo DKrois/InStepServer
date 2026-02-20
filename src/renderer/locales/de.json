@@ -21,12 +21,16 @@
   "toastStartFailed": "Server konnte nicht gestartet werden",
   "toastInvalidPort": "Ungültige Portnummer",
 
+  "clearCache": "Projekt-Cache leeren",
+  "cacheCleared": "Cache geleert",
+
   "generateQR": "QR-Codes generieren",
   "qrCodeSelectionPrompt": "URL auswählen:",
   "saveQRCode": "QR-Code speichern",
   "qrCodeIP": "Server IP-Adresse",
   "qrCodeMDNS": "mDNS-Adresse",
   "qrCodeHostname": "OS-Hostname mDNS",
+  "hostnameMDNSInfo": "In manchen Fällen funktioniert die normale mDNS-Adresse nicht richtig. In diesem Fall kann der Name des PCs als Adresse verwendet werden.",
   "toastQRSaveSuccess": "QR-Code gespeichert",
   "toastQRSaveFailed": "QR-Code speichern fehlgeschlagen",
   "toastIPFailed": "IP nicht gefunden",

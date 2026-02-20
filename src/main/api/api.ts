@@ -4,7 +4,7 @@ import { verifyPassword } from '../app/settings.js';
 import { Routes } from '../constants.js';
 import { errorToJSON } from '../errorformatting.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
-import { projectDB } from './database.js';
+import { projectDB, type SimplifiedProject } from './database.js';
 import { activeUserLock, releaseLock } from './middleware.js';
 
 const logSource = 'api';
@@ -32,7 +32,7 @@ export async function handleLogin(req: express.Request, res: express.Response, n
                 return res.status(200).json({ message: 'Login successful.' });
             });
         } else {
-            warn('Failed login attempt.');
+            warn(`Failed login attempt by ${req.ip}.`);
             return res.status(401).json(errorToJSON('Invalid password.'));
         }
     } catch (e) {
@@ -73,16 +73,20 @@ export async function handlePUTRequest(req: express.Request, res: express.Respon
     const version = req.params.version ? parseInt(req.params.version) : undefined;
 
     // keys.length === 0 checks if body is empty
-    const data = req.body;
+    const data: { project: SimplifiedProject } = req.body;
     if (!data || Object.keys(data).length === 0) return res.status(400).send(errorToJSON({
         message: 'No data provided',
         id, version,
+    }));
+    if (!data.project) return res.status(400).send(errorToJSON({
+        message: 'Project not found',
+        id, version
     }));
 
     const v = version ?? ((await projectDB.getLatestVersion(id))?.version ?? 0) + 1;
 
     const handler = async () => {
-        await projectDB.add(id, v, data);
+        await projectDB.add(id, v, data.project);
         res.sendStatus(204);
     };
     const onSuccess = () => info(`Added / updated ${id}/v${v}`);
@@ -123,7 +127,6 @@ export async function handleFloorplanUpload(req: express.Request, res: express.R
 export async function handleGETRequest(req: express.Request, res: express.Response) {
     const id = parseInt(req.params.id);
     const version = req.params.version ? parseInt(req.params.version) : undefined;
-    const includeFloorplans = Boolean(req.params.floorplans);
 
     const v = version ?? (await projectDB.getLatestVersion(id))?.version;
     const handler = async () => {
@@ -132,19 +135,16 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
             id, version: v,
         }));
 
-        const imageFiles = await projectDB.listImages(id, v);
-
         const { data } = await projectDB.get(id, v);
 
-        if (includeFloorplans) {
-            data.floorplanImages = {};
-            for (const filename of imageFiles) {
-                // The filename is the floor name (e.g., 'floor1.png')
-                // Construct the static URL
-                data.floorplanImages[filename] = `${Routes.staticAPI}/${id}/v${v}/${filename}`;
-            }
-        } else {
-            data.floorplanImages = null;
+        // add image file static urls
+        const imageFiles = await projectDB.listImages(id, v);
+        data.floorplanImages = {};
+
+        const baseString = `${Routes.staticAPI}/${id}/v${v}/`;
+        for (const filename of imageFiles) {
+            // filename is the floor name (like 'floor1.png')
+            data.floorplanImages[filename] = `${baseString}${filename}`;
         }
 
         res.status(200).send(data);

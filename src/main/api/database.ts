@@ -23,56 +23,16 @@ export interface SimplifiedProject {
     properties: {
         projectName: string;
     };
-    floorplanImages: Record<string, string | null> | null;
-}
-export interface SimplifiedState {
-    project: SimplifiedProject;
+    floorplanImages: Record<string, string | null>;
 }
 
-const stateSchema = {
-    project: {
-        type: 'string',
-        properties: {
-            projectName: 'string',
-            elementTypeStyles: 'object',
-        },
-        floorplanImages: 'object',
+const projectSchema = {
+    type: 'string',
+    properties: {
+        projectName: 'string',
+        elementTypeStyles: 'object',
     },
-
-    worldSize: ['width', 'height'],
-
-    pan: ['x', 'y'],
-    scale: 'number',
-
-    threeDPan: ['x', 'y'],
-    threeDScale: 'number',
-    threeDIsDragging: 'boolean',
-    threeDStartPos: ['x', 'y'],
-    
-    activeLanguage: 'string',
-    activeTheme: 'string',
-    currentMode: 'string',
-
-    mousePos: ['x', 'y'],
-    mousePosScreen: ['x', 'y'],
-
-    gridSize: 'number',
-    isGridVisible: 'boolean',
-    isSnapEnabled: 'boolean',
-    
-    isShiftPressed: 'boolean',
-    isCtrlPressed: 'boolean',
-    isAltPressed: 'boolean',
-
-    isMovingElement: 'boolean',
-    dragStartPos: ['x', 'y'],
-
-    isEditingPath: 'boolean',
-
-    panStart: ['x', 'y'],
-    isPanning: 'boolean',
-
-    visibleLayers: 'object',
+    floorplanImages: 'object',
 };
 
 class ProjectDatabase {
@@ -117,65 +77,72 @@ class ProjectDatabase {
     }
 
     /**
-     * Checks if the provided structure is a valid state object.
-     * @param state
+     * Checks if the provided structure is a valid project object.
+     * @param project
      * @private
      */
-    private validateState(state: any): boolean {
-        // Check top-level keys in schema only
-        for (const key of Object.keys(stateSchema)) {
-            if (!(key in state)) return false;
+    private validateProject(project: any): { valid: true } | { valid: false, message: string } {
+        try {
+            // Check top-level keys in schema only
+            for (const key of Object.keys(projectSchema)) {
+                if (!(key in project)) return { valid: false, message: `${key} not found in project` };
 
-            const rule = (stateSchema as Record<string, any>)[key];
-            const value = state[key];
+                const rule = (project as Record<string, any>)[key];
+                const value = project[key];
 
-            // If the rule is a list → check required subkeys
-            if (Array.isArray(rule)) {
-                for (const sub of rule) {
-                    if (!(sub in value)) return false;
+                // If the rule is a list → check required subkeys
+                if (Array.isArray(rule)) {
+                    for (const sub of rule) {
+                        if (!(sub in value)) return { valid: false, message: `${sub} is not in ${key}` };
+                    }
+                }
+
+                // If the rule is "object" → just ensure it's an object
+                if (rule === 'object' && (typeof value !== 'object' || value === null)) {
+                    return { valid: false, message: `${key} is not in object` };
+                }
+
+                // If it's the `properties` object → check nested structure
+                if (key === 'properties') {
+                    for (const [k, type] of Object.entries(rule)) {
+                        if (!(k in value)) return { valid: false, message: `${k} is not in project properties` };
+
+                        const propertyType = typeof value[k];
+                        if (propertyType !== type) return { valid: false, message: `${k} is of invalid type ${propertyType} (required ${type})` };
+                    }
+
+                    const { floorplanImages } = value;
+                    if (typeof floorplanImages !== 'object' && floorplanImages !== null) {
+                        return { valid: false, message: `floorplanImages is not an object` };
+                    }
                 }
             }
 
-            // If the rule is "object" → just ensure it's an object
-            if (rule === 'object' && (typeof value !== 'object' || value === null)) {
-                return false;
-            }
-
-            // If it's the `project` object → check nested structure
-            if (key === 'project') {
-                const { properties: requiredProps } = rule;
-                const { properties, floorplanImages } = value;
-
-                for (const [k, type] of Object.entries(requiredProps)) {
-                    if (!(k in properties)) return false;
-                    if (typeof properties[k] !== type) return false;
-                }
-
-                if (
-                    typeof floorplanImages !== 'object' ||
-                    floorplanImages === null
-                ) {
-                    return false;
-                }
-            }
+            return { valid: true };
+        } catch (e) {
+            error('Error validating project', e);
+            return { valid: false, message: 'error' };
         }
+    }
 
-        return true;
+    clearCache(): void {
+        this.cache.clear();
     }
 
     /**
      * Creates a new version and saves the JSON data.
      * floorplanImages will be removed.
      */
-    async add(id: number, version: number, data: any) {
-        if (!this.validateState(data)) throw new Error(`State structure not valid`);
+    async add(id: number, version: number, data: SimplifiedProject) {
+        if (!this.validateProject(data)) throw new Error(`Project structure not valid`);
         const versionPath = this._createPath(id, version);
         await fs.mkdir(versionPath, { recursive: true });
 
-        const { floorplanImages, ...projectData } = data;
+        // set all floorplanImages to null
+        Object.keys(data.floorplanImages).forEach(k => data.floorplanImages[k] = null);
 
         const path = join(versionPath, 'data.json');
-        await writeJSON(path, projectData);
+        await writeJSON(path, data);
 
         // cache invalid → remove old
         this.cache.delete(this._getCacheKey(id, version));
@@ -228,28 +195,23 @@ class ProjectDatabase {
         const v = version ?? (await this.getLatestVersion(id))?.version;
         if (!v) throw new Error(`${id}/@latest not found.`);
 
-        const read = async (): Promise<SimplifiedState> => {
-            const filePath = this._createPath(id, v, 'data.json');
-            const json = await fs.readFile(filePath, 'utf8');
-            return JSON.parse(json);
-        };
-
         const cacheKey = this._getCacheKey(id, v);
         // use cached if available
         if (this.cache.has(cacheKey)) return { data: this.cache.get(cacheKey)!, version: v };
 
-        const state = await read();
-        const data = state.project;
-        this.cache.set(cacheKey, data);
+        const filePath = this._createPath(id, v, 'data.json');
+        const json = await fs.readFile(filePath, 'utf8');
+        const data = JSON.parse(json);
 
         // update cache
+        this.cache.set(cacheKey, data);
         return { data, version: v };
     }
 
     /**
      * Checks if a project already exists.<br>
      * It is not recommended to call this function before accessing a project to check whether it exists,
-     * but rather handling the error separately.
+     * but rather handling the error separately to avoid race conditions.
      * @param id Project ID
      */
     async exists(id: number): Promise<boolean> {
@@ -397,9 +359,7 @@ export function isDBInitialized(): boolean {
 // proxy to avoid always using projectDB() and undefined errors
 export const projectDB: ProjectDatabase = new Proxy({} as ProjectDatabase, {
     get(_, prop) {
-        if (!_db) {
-            throw new Error('Database has not been initialized.');
-        }
+        if (!_db) throw new Error('Database has not been initialized.');
         return _db[prop as keyof ProjectDatabase];
     }
 });

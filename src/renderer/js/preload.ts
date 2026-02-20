@@ -24,10 +24,11 @@ const api = {
 
     startServer: (port: number): Promise<boolean> => ipcRenderer.invoke('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
-    savePort: (port: number) => ipcRenderer.send('save-port', port),
     onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number }) => void) => {
         ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
     },
+
+    clearCache: () => ipcRenderer.send('clear-cache'),
 
     getServerURLs: (): Promise<{ ip: string | null, mdns: string, hostname: string }> => ipcRenderer.invoke('get-server-urls'),
     generateQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'ip-failed' | 'error', string> => ipcRenderer.invoke('generate-qr-code', type), // { success: boolean, code?: 'ip-failed' | 'error', data?: string }

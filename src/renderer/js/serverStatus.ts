@@ -7,6 +7,7 @@ const portInput = document.getElementById('port-input') as HTMLInputElement;
 const serverStatusIndicator = document.getElementById('server-status-indicator')!;
 
 const restartServerInfo = document.getElementById('restart-server-info')!;
+const clearCacheBtn = document.getElementById('clear-cache-btn')!;
 
 let previousPortValue: number | null = null;
 startBtn.addEventListener('click', () => {
@@ -18,7 +19,6 @@ startBtn.addEventListener('click', () => {
 
         const success = window.api.startServer(port);
         if (!success) showTranslatedToast('toastStartFailed', undefined, 'error');
-        window.api.savePort(port); // save port on start
     } else {
         showTranslatedToast('toastInvalidPort', undefined, 'error');
     }
@@ -33,6 +33,11 @@ stopBtn.addEventListener('click', () => {
 portInput.addEventListener('focusout', () => {
     // only show warning if port was actually changed since last start
     if (previousPortValue !== parseInt(portInput.value, 10)) setRestartServerInfoVisible(true);
+});
+
+clearCacheBtn.addEventListener('click', async () => {
+    window.api.clearCache();
+    showTranslatedToast('cacheCleared');
 });
 
 window.api.onServerStatusChanged(serverStatusChanged);

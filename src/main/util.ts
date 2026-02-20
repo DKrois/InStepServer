@@ -105,7 +105,7 @@ export async function writeJSON(path: string, data: any) {
     const dataStr = typeof data === 'string' ? data : JSON.stringify(data);
 
     const tmp = `${path}.tmp`;
-    await fs.writeFile(tmp, dataStr, { encoding: 'utf8'});
+    await fs.writeFile(tmp, dataStr, { encoding: 'utf8' });
     await fs.rename(tmp, path);
 }
 

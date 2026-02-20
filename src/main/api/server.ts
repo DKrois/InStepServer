@@ -119,7 +119,6 @@ function createExpressApp() {
     app.set('views', SitesPaths.docs.views);
 
     app.use(Routes.assets, express.static(SitesPaths.assets));
-    app.use(Routes.staticAPI, express.static(projectDB.path)); // serve db path for image access
     app.use(Routes.docsAssets, express.static(SitesPaths.docs.assets));
 
     app.use(Routes.docs, createDocsRouter({ sidebarType: 'full', basePath: Routes.docs }));
@@ -129,6 +128,7 @@ function createExpressApp() {
     app.post(Routes.login, isIMDAPIEnabled, api.handleLogin);
 
     // GET routes without auth
+    app.get(`${Routes.publicAPI}/ping`, (_req: express.Request, res: express.Response) => res.sendStatus(204));
     app.get(`${Routes.imdAPI}/random-id`, api.getRandomProjectID);
     app.get(`${Routes.imdAPI}/enabled`, (_req: express.Request, res: express.Response) => res.json({ enabled: store.get('imdEnabled') }));
     app.get(`${Routes.publicAPI}/list`, api.handleListProjectsRequest);
@@ -172,6 +172,8 @@ function createIMDRouter() {
 
     // add auth middleware
     router.use(isIMDAPIEnabled, isAuth, manageImdLock);
+
+    router.use(Routes.staticAPIRelative, express.static(projectDB.path)); // serve db path for image access
 
     router.put(`/:id`, api.handlePUTRequest);
     router.put(`/:id/:version`, api.handlePUTRequest);

@@ -115,7 +115,7 @@ export function createDuration(duration: Partial<SplitDuration> | number[]): Spl
             minutes: duration[5],
             seconds: duration[6],
             milliseconds: duration[7],
-        }
+        };
     } else {
         return {
             years: duration.years ?? 0,
@@ -126,7 +126,7 @@ export function createDuration(duration: Partial<SplitDuration> | number[]): Spl
             minutes: duration.minutes ?? 0,
             seconds: duration.seconds ?? 0,
             milliseconds: duration.milliseconds ?? 0,
-        }
+        };
     }
 }
 

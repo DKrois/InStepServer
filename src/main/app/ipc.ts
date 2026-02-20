@@ -43,6 +43,7 @@ function registerThemeIPC() {
 function registerServerIPC() {
     ipcMain.handle('start-server', (_event, port: number) => {
         manualTimeOverride = true;
+        store.set('port', port);
         return handleStartServer(port);
     });
 
@@ -51,7 +52,7 @@ function registerServerIPC() {
         return handleStopServer();
     });
 
-    ipcMain.on('save-port', (_event, port: number) => store.set('port', port));
+    ipcMain.on('clear-cache', () => projectDB.clearCache());
 }
 
 function registerStatsIPC() {

@@ -25,7 +25,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     setInitialLanguage(language);
     setInitialServerSettings({ port, serverEnabled });
     setInitialTimeSettings(timeSettings);
-    setInitialSecuritySettings({ imdEnabled, sessionDuration })
+    setInitialSecuritySettings({ imdEnabled, sessionDuration });
 
     // refresh stats on load → done in stats.ts after projectDB init
 });

@@ -26,10 +26,11 @@ const docsAssetsRoute = `/docs/assets`;
 export const Routes = Object.freeze({
     assets: '/assets',
     publicAPI: '/api',
-    staticAPI: '/api/static',
     login: '/app/login',
     imd: '/app',
     imdAPI: '/app/api',
+    staticAPI: `/app/api/static`,
+    staticAPIRelative: '/static',
 
     docs: '/docs',
     userDocs: '/user-docs',
