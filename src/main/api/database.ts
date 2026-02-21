@@ -139,7 +139,7 @@ class ProjectDatabase {
         await fs.mkdir(versionPath, { recursive: true });
 
         // set all floorplanImages to null
-        Object.keys(data.floorplanImages).forEach(k => data.floorplanImages[k] = null);
+        if (data.floorplanImages) Object.keys(data.floorplanImages).forEach(k => data.floorplanImages[k] = null);
 
         const path = join(versionPath, 'data.json');
         await writeJSON(path, data);
@@ -228,14 +228,18 @@ class ProjectDatabase {
             const projectIDs = await fs.readdir(path);
             const projects = projectIDs.map(async idStr => {
                 const id = parseInt(idStr, 10);
-                const { data, version } = await this.get(id);
-
-                return { name: data.properties.projectName, id, latestVersion: version };
+                try {
+                    const { data, version } = await this.get(id);
+                    return { name: data.properties.projectName, id, latestVersion: version };
+                } catch (e) { // possibly missing data.json
+                    return undefined;
+                }
             });
 
             return Promise.allSettled(projects)
                 .then(results =>
                     results.map(result => {
+                        if (result === null) return undefined;
                         if (result.status === 'fulfilled') {
                             return result.value;
                         } else {

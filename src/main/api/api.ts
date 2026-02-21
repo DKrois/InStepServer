@@ -6,6 +6,7 @@ import { errorToJSON } from '../errorformatting.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { projectDB, type SimplifiedProject } from './database.js';
 import { activeUserLock, releaseLock } from './middleware.js';
+import { basename, extname } from 'node:path';
 
 const logSource = 'api';
 const info = (str: string) => _info(str, logSource);
@@ -57,7 +58,7 @@ export async function getRandomProjectID(_req: express.Request, res: express.Res
     let id;
     do {
         // generate random number; most likely unique
-        id = randomInt(10e9, 10e13);
+        id = randomInt(10e4, 10e7);
     } while (await projectDB.exists(id));
 
     try {
@@ -143,8 +144,8 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
 
         const baseString = `${Routes.staticAPI}/${id}/v${v}/`;
         for (const filename of imageFiles) {
-            // filename is the floor name (like 'floor1.png')
-            data.floorplanImages[filename] = `${baseString}${filename}`;
+            // filename is the floor name (like 'floor1')
+            data.floorplanImages[basename(filename, extname(filename))] = `${baseString}${filename}`;
         }
 
         res.status(200).send(data);
