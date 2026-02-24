@@ -1,4 +1,4 @@
-## v1.1.2
+## v1.1.3
 
 ### Database
 - Only store project data rather than entire state
