@@ -1,4 +1,8 @@
-## v1.1.1
+## v1.1.2
 
-### Docs
-- Fixed docs js not being included in installer version
+### Database
+- Only store project data rather than entire state
+- Switched LRU-Cache to TTL-Cache
+
+### Bugs
+- Fixed floorplan images not appearing in loaded project
