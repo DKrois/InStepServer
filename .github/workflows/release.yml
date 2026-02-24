@@ -27,10 +27,13 @@ jobs:
       - name: Check out git repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22.21.1
+      #- name: Install Node.js
+      #  uses: actions/setup-node@v3
+      #  with:
+      #    node-version: 22.21.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
@@ -38,7 +41,7 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: npm i
+        run: pnpm i --frozen-lockfile
 
       - name: Build docs
         run: bun run build:docs
