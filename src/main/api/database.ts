@@ -1,4 +1,4 @@
-import { LRUCache } from 'lru-cache';
+import { TTLCache } from '@isaacs/ttlcache';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { cacheMaxAgeSeconds, cacheSize } from '../../../config.json';
@@ -36,12 +36,12 @@ const projectSchema = {
 };
 
 class ProjectDatabase {
-    private cache: LRUCache<string, SimplifiedProject>;
+    private cache: TTLCache<string, SimplifiedProject>;
 
     constructor(private dbPath: string) {
         fs.mkdir(dbPath, { recursive: true }); // nothing happens if dir already exists
 
-        this.cache = new LRUCache<string, SimplifiedProject>({
+        this.cache = new TTLCache<string, SimplifiedProject>({
             // num of items to store, oldest are removed first
             max: cacheSize,
 
@@ -67,7 +67,7 @@ class ProjectDatabase {
         return joinIfDefined(fullPath, ...additional);
     }
 
-    public createVersionString(version?: number): string | undefined {
+    createVersionString(version?: number): string | undefined {
         return version ? `v${version}` : undefined;
     }
 
@@ -125,16 +125,13 @@ class ProjectDatabase {
         }
     }
 
-    clearCache(): void {
-        this.cache.clear();
-    }
-
     /**
      * Creates a new version and saves the JSON data.
      * floorplanImages will be removed.
      */
-    async add(id: number, version: number, data: SimplifiedProject) {
+    async add(id: number, version: number, data: SimplifiedProject): Promise<void> {
         if (!this.validateProject(data)) throw new Error(`Project structure not valid`);
+
         const versionPath = this._createPath(id, version);
         await fs.mkdir(versionPath, { recursive: true });
 
@@ -144,7 +141,7 @@ class ProjectDatabase {
         const path = join(versionPath, 'data.json');
         await writeJSON(path, data);
 
-        // cache invalid → remove old
+        // cache invalid -> remove old
         this.cache.delete(this._getCacheKey(id, version));
     }
 
@@ -154,7 +151,7 @@ class ProjectDatabase {
      * @param version version number
      * @param file The uploaded file object.
      */
-    async addImage(id: number, version: number, file: Express.Multer.File) {
+    async addImage(id: number, version: number, file: Express.Multer.File): Promise<void> {
         const versionPath = this._createPath(id, version);
         const newPath = join(versionPath, file.originalname); // Use originalname as filename
 
@@ -168,7 +165,7 @@ class ProjectDatabase {
      * @param id project id
      * @param version version to remove. If absent, removes the entire project.
      */
-    async delete(id: number, version?: number) {
+    async delete(id: number, version?: number): Promise<void> {
         const path = this._createPath(id, version);
         await fs.rm(path, { recursive: true, force: true });
 
@@ -185,15 +182,18 @@ class ProjectDatabase {
         if (versions.length === 0) await fs.rm(this._createPath(id), { recursive: true, force: true });
     }
 
+    clearCache(): void {
+        this.cache.clear();
+    }
+
     /**
      * Reads a project file.
-     * If 'returnFull' is set to false, only the project data will be returned. Otherwise, the entire state will be used.
      * @param id project id
      * @param version version to read. If absent, uses most recent one
      */
     async get(id: number, version?: number): Promise<{ data: SimplifiedProject, version: number }> {
         const v = version ?? (await this.getLatestVersion(id))?.version;
-        if (!v) throw new Error(`${id}/@latest not found.`);
+        if (v === undefined) throw new Error(`${id}/@latest not found.`);
 
         const cacheKey = this._getCacheKey(id, v);
         // use cached if available
@@ -274,6 +274,7 @@ class ProjectDatabase {
         const versionPath = this._createPath(id, version);
         try {
             const files = await fs.readdir(versionPath);
+            // assume all non-json files are .pngs
             return files.filter(file => !file.endsWith('.json'));
         } catch (e) {
             // If directory doesn't exist or is empty, return empty array
@@ -281,20 +282,23 @@ class ProjectDatabase {
         }
     }
 
-    async getLatestVersion(id: number) {
+    async getLatestVersion(id: number): Promise<{ path: string, version: number } | null> {
         const path = this._createPath(id);
         const entries = await fs.readdir(path).catch(() => []);
 
         const versioned = entries
-            .map(entry => ({ path: entry, version: this._extractVersionNumber(entry) }))
-            .filter(e => e.version !== null) as ({ path: string, version: number })[];
+            .map(entry => {
+                const version = this._extractVersionNumber(entry);
+                if (version === null) return null;
+                return { path: entry, version }
+            }).filter(e => e !== null);
 
         if (versioned.length === 0) return null;
         return versioned.reduce((a, b) => (b.version > a.version ? b : a));
     }
 
     /**
-     * Efficiently counts subdirectories, files and their sizes within a given directory and subdirectories.
+     * counts subdirectories, files and their sizes within a given directory and subdirectories
      * @param directoryPath The path to the directory to scan.
      * @param isTopLevel whether the specified path is the top directory (containing projects)
      * @returns An object containing the total size and subdirectory and file counts.
@@ -340,8 +344,8 @@ class ProjectDatabase {
 }
 
 /**
- * Initializes the database with a specific path. This should only be
- * called once at startup from the main process.
+ * Initializes the database with a specific path.
+ * This should only be called once at startup from the main process.
  * @param path absolute path to the project data folder
  */
 export function initDB(path: string) {
