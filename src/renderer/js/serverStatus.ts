@@ -13,7 +13,7 @@ let previousPortValue: number | null = null;
 startBtn.addEventListener('click', () => {
     const port = parseInt(portInput.value, 10);
 
-    if (port && port > 79 && port < 65536) {
+    if (port && port > 1023 && port < 65536) {
         startBtn.disabled = true;
         startBtn.textContent = getTranslation('serverStarting');
 

@@ -5,7 +5,6 @@ import { initDB } from '../api/database.js';
 import { initLogging } from '../log.js';
 import { handleSquirrelCommands, initUpdater } from './installer.js';
 import { registerIPCHandlers } from './ipc.js';
-import { createTray } from './menu.js';
 import { initStore, store } from './settings.js';
 import { createWindow, mainWindow } from './window.js';
 
@@ -32,7 +31,7 @@ export function initApp() {
         nativeTheme.themeSource = store.get('theme') as 'system' | 'light' | 'dark';
 
         createWindow();
-        createTray();
+        // tray is created on db init
         initStore();
 
         // db init

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, screen, session, shell } from 'electron';
-import { defaultWindowHeightPercent, defaultWindowWidthPercent, minWindowHeight, minWindowWidth } from '../../../config.json';
+import { defaultWindowHeightPercent, defaultWindowWidthPercent, defaultWindowWidthPx, defaultWindowHeightPx, minWindowHeight, minWindowWidth } from '../../../config.json';
 import { isServerRunning } from '../api/server.js';
 import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
@@ -17,15 +17,19 @@ export let mainWindow: BrowserWindow | null = null;
 export function createWindow() {
     const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().size;
     // calc width
-    const defaultWindowWidthPx = Math.floor(screenWidth * defaultWindowWidthPercent);
-    const defaultWindowHeightPx = Math.floor(screenHeight * defaultWindowHeightPercent);
+    const calcDefaultWindowWidthPx = Math.floor(screenWidth * defaultWindowWidthPercent);
+    const calcDefaultWindowHeightPx = Math.floor(screenHeight * defaultWindowHeightPercent);
+
+    // if px default is bigger than % default => use max
+    const defaultWindowWidth = Math.max(calcDefaultWindowWidthPx, defaultWindowWidthPx);
+    const defaultWindowHeight = Math.max(calcDefaultWindowHeightPx, defaultWindowHeightPx);
 
     // maximize if screen is too small
-    const shouldMaximize = minWindowWidth > defaultWindowWidthPx || minWindowHeight > defaultWindowHeightPx;
+    const shouldMaximize = minWindowWidth > defaultWindowWidth || minWindowHeight > defaultWindowHeight;
 
     mainWindow = new BrowserWindow({
-        width: shouldMaximize ? screenWidth : defaultWindowWidthPx,
-        height: shouldMaximize ? screenHeight : defaultWindowHeightPx,
+        width: shouldMaximize ? screenWidth : defaultWindowWidth,
+        height: shouldMaximize ? screenHeight : defaultWindowHeight,
         minWidth: minWindowWidth,
         minHeight: minWindowHeight,
         show: false, // prevent visual flash of resize

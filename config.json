@@ -13,6 +13,8 @@
 
   "defaultWindowWidthPercent": 0.8,
   "defaultWindowHeightPercent": 0.8,
+  "defaultWindowWidthPx": 1350,
+  "defaultWindowHeightPx": 800,
   "minWindowWidth": 730,
   "minWindowHeight": 500
 }

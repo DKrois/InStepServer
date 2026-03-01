@@ -115,20 +115,18 @@ export async function writeJSON(path: string, data: any) {
  * @returns {Promise<boolean>} True if writeable, false otherwise.
  */
 export async function canWriteToPath(directoryPath: string): Promise<boolean> {
-    // Generate a unique, temporary filename
+    // unique, temporary filename
     const testFile = join(directoryPath, `.write-test-${Date.now()}`);
 
     try {
-        // Step 1: Try to write a file. If this fails, the catch block will be executed.
+        // try to write a file
         await fs.writeFile(testFile, 'test');
 
-        // Step 2: If writing succeeded, immediately delete the file.
+        // if writing succeeded, immediately delete the file
         await fs.rm(testFile);
-
-        // If both operations succeeded, we have write permission.
         return true;
     } catch (error) {
-        // If any error occurred (e.g., EPERM, EACCES), we don't have permission.
+        // error -> no permission / doesn't exist (EPERM, ENOENT, ...)
         return false;
     }
 }

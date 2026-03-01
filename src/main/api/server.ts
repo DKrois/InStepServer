@@ -5,7 +5,7 @@ import { createHttpTerminator, HttpTerminator } from 'http-terminator';
 import multer from 'multer';
 import makeStore from 'nedb-promises-session-store';
 import * as crypto from 'node:crypto';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readdirSync } from 'node:fs';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -24,7 +24,10 @@ const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
 const error = (str: string, err: unknown) => _error(str, err, logSource);
 
-const uploadDir = mkdtempSync(join(tmpdir(), 'InStepServer-uploads'));
+const uploadDirBase = 'InStepServer-uploads-';
+// check if upload already exists
+const tmp = tmpdir();
+const uploadDir = readdirSync(tmp).find(dir => dir.startsWith(uploadDirBase)) ?? mkdtempSync(join(tmp, uploadDirBase));
 const upload = multer({ dest: uploadDir });
 
 // add isAuthenticated flag to session
@@ -106,7 +109,7 @@ function createExpressApp() {
             if (req.session?.isAuthenticated && pathMatches) return res.redirect(Routes.imd);
 
             // not authenticated and accessing root: redirect to login
-            // (don't check for Routes.login here as it'll result in a redirect loop
+            // (don't check for Routes.login here as it'll result in a redirect loop)
             if (req.path === '/') return res.redirect(Routes.login);
             else return next();
         } else {

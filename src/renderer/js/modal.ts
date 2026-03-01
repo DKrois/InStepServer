@@ -34,10 +34,10 @@ const qrCloseButton = document.getElementById('qr-close-btn')!;
 
 const generateIpBtn = document.getElementById('qr-btn-ip')!;
 const generateMdnsBtn = document.getElementById('qr-btn-mdns')!;
-const generateHostBtn = document.getElementById('qr-btn-hostname')!;
+//const generateHostBtn = document.getElementById('qr-btn-hostname')!;
 const serverIPUrl = document.getElementById('server-ip-url')!;
 const mDNSUrl = document.getElementById('mdns-url')!;
-const hostnameMDNSUrl = document.getElementById('hostname-mdns-url')!;
+//const hostnameMDNSUrl = document.getElementById('hostname-mdns-url')!;
 
 const updateModal = document.getElementById('update-modal')!;
 const updateVersionParagraph = document.getElementById('update-version-paragraph')!;
@@ -150,7 +150,7 @@ generateQRBtn.addEventListener('click', async () => {
 
     serverIPUrl.innerText = urls.ip ?? '';
     mDNSUrl.innerText = urls.mdns;
-    hostnameMDNSUrl.innerText = urls.hostname;
+    //hostnameMDNSUrl.innerText = urls.hostname;
 
     openModal(qrModal);
 });
@@ -158,7 +158,7 @@ qrCloseButton.addEventListener('click', () => closeModal(qrModal));
 
 generateIpBtn.addEventListener('click', () => handleGenerateQR('ip'));
 generateMdnsBtn.addEventListener('click', () => handleGenerateQR('mdns'));
-generateHostBtn.addEventListener('click', () => handleGenerateQR('hostname'));
+//generateHostBtn.addEventListener('click', () => handleGenerateQR('hostname'));
 
 qrSaveBtn.addEventListener('click', handleSaveQR);
 

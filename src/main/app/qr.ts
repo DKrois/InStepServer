@@ -15,7 +15,7 @@ export function registerQRIPC() {
     ipcMain.handle('save-qr-code', (_event, type: QRType) => saveQRCode(type));
 }
 
-function getServerURLs(): { ip: string | null, mdns: string, hostname: string } {
+function getServerURLs(): { ip: string | null, mdns: string | null, hostname: string | null } {
     const ip = getURL('ip');
     const mdns = getURL('mdns');
     const hostname = getURL('hostname');
@@ -70,7 +70,7 @@ async function saveQRCode(type: QRType): IPCResponse<'cancelled' | 'ip-failed' |
     }
 }
 
-export function getURL<T extends QRType>(type: T): T extends 'ip' ? (string | null) : string {
+export function getURL(type: QRType): string | null {
     const port = store.get('port');
 
     switch (type) {
@@ -78,15 +78,15 @@ export function getURL<T extends QRType>(type: T): T extends 'ip' ? (string | nu
             const ip = getLocalIPv4();
             if (!ip) {
                 warn('Could not determine local IP address.');
-                return null as (T extends 'ip' ? (string | null) : string);
+                return null;
             }
             return `http://${ip}:${port}/`;
 
         case 'mdns':
-            return `http://${hostname}.local:${port}`;
+            return `http://${hostname}.local:${port}/`;
 
         case 'hostname':
-            return `http://${getOSHostname()}.local:${port}`;
+            return `http://${getOSHostname()}.local:${port}/`;
 
         default:
             throw new Error('Invalid QR code type specified.');

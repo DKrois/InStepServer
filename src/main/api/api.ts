@@ -1,12 +1,10 @@
 import express from 'express';
 import { randomInt } from 'node:crypto';
 import { verifyPassword } from '../app/settings.js';
-import { Routes } from '../constants.js';
 import { errorToJSON } from '../errorformatting.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { projectDB, type SimplifiedProject } from './database.js';
 import { activeUserLock, releaseLock } from './middleware.js';
-import { basename, extname } from 'node:path';
 
 const logSource = 'api';
 const info = (str: string) => _info(str, logSource);
@@ -17,7 +15,7 @@ const error = (str: string, err: unknown) => _error(str, err, logSource);
 export async function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         const { password } = req.body;
-        if (!password) return res.status(400).send(errorToJSON('Password is required.'));
+        if (!password) return res.status(400).json(errorToJSON('Password is required.'));
 
         const isValid = await verifyPassword(password);
         if (isValid) {
@@ -64,8 +62,8 @@ export async function getRandomProjectID(_req: express.Request, res: express.Res
     try {
         return res.status(200).json({ id });
     } catch (e: any) {
-        if (e.code === 'ENOENT') return res.status(400).send(errorToJSON({ message: 'File / directory not found.', path: e.path }));
-        return res.status(500).send(errorToJSON(e));
+        if (e.code === 'ENOENT') return res.status(400).json(errorToJSON({ message: 'File / directory not found.', path: e.path }));
+        return res.status(500).json(errorToJSON(e));
     }
 }
 
@@ -73,13 +71,13 @@ export async function handlePUTRequest(req: express.Request, res: express.Respon
     const id = parseInt(req.params.id);
     const version = req.params.version ? parseInt(req.params.version) : undefined;
 
-    // keys.length === 0 checks if body is empty
     const data: { project: SimplifiedProject } = req.body;
-    if (!data || Object.keys(data).length === 0) return res.status(400).send(errorToJSON({
+    // keys.length === 0 checks if body is empty
+    if (!data || Object.keys(data).length === 0) return res.status(400).json(errorToJSON({
         message: 'No data provided',
         id, version,
     }));
-    if (!data.project) return res.status(400).send(errorToJSON({
+    if (!data.project) return res.status(400).json(errorToJSON({
         message: 'Project not found',
         id, version
     }));
@@ -88,7 +86,7 @@ export async function handlePUTRequest(req: express.Request, res: express.Respon
 
     const handler = async () => {
         await projectDB.add(id, v, data.project);
-        res.sendStatus(204);
+        res.status(200).json({ version: v });
     };
     const onSuccess = () => info(`Added / updated ${id}/v${v}`);
 
@@ -105,14 +103,13 @@ export async function handleFloorplanUpload(req: express.Request, res: express.R
     const version = parseInt(req.params.version);
 
     const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) return res.status(400).send(errorToJSON({
+    if (!files || files.length === 0) return res.status(400).json(errorToJSON({
         message: 'No files provided.',
         id, version,
     }));
 
     const handler = async () => {
-        for (const file of files) await projectDB.addImage(id, version, file);
-
+        await Promise.allSettled(files.map(f => projectDB.addImage(id, version, f)));
         res.sendStatus(204);
     };
     const onSuccess = () => info(`Added ${files.length} floorplans to ${id}/v${version}`);
@@ -120,7 +117,7 @@ export async function handleFloorplanUpload(req: express.Request, res: express.R
     return handle(handler, onSuccess, res, {
         id,
         requireId: true,
-        version, // don't require version in case of multiple requests sent at once
+        version,
         requireVersion: false,
     });
 }
@@ -129,30 +126,12 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
     const id = parseInt(req.params.id);
     const version = req.params.version ? parseInt(req.params.version) : undefined;
 
-    const v = version ?? (await projectDB.getLatestVersion(id))?.version;
     const handler = async () => {
-        if (v === undefined) return res.status(500).send(errorToJSON({
-            message: 'No versions found for this project',
-            id, version: v,
-        }));
-
-        const { data } = await projectDB.get(id, v);
-
-        // add image file static urls
-        const imageFiles = await projectDB.listImages(id, v);
-        data.floorplanImages = {};
-
-        const baseString = `${Routes.staticAPI}/${id}/v${v}/`;
-        for (const filename of imageFiles) {
-            // filename is the floor name (like 'floor1')
-            data.floorplanImages[basename(filename, extname(filename))] = `${baseString}${filename}`;
-        }
-
-        res.status(200).send(data);
+        const { data } = await projectDB.get(id, version);
+        res.status(200).json(data);
     };
     const onSuccess = () => {
-        const versionString = projectDB.createVersionString(v) ?? '@latest';
-
+        const versionString = projectDB.createVersionString(version) ?? '@latest';
         info(`Requested ${id}/${versionString}`);
     };
 
@@ -167,7 +146,7 @@ export async function handleGETRequest(req: express.Request, res: express.Respon
 export async function handleListProjectsRequest(_req: express.Request, res: express.Response) {
     const handler = async () => {
         const projects = await projectDB.listProjects();
-        res.status(200).send(projects);
+        res.status(200).json(projects);
     };
     const onSuccess = () => info('Listed all projects');
 
@@ -182,7 +161,7 @@ export async function handleListProjectVersionsRequest(req: express.Request, res
 
     const handler = async () => {
         const versions = await projectDB.listVersionsForProject(id);
-        res.status(200).send({ versions });
+        res.status(200).json({ versions });
     };
     const onSuccess = () => info(`Listed ${id}/`);
 
@@ -222,13 +201,13 @@ async function handle(handler: () => Promise<any>, onSuccess: () => any, res: ex
 
     const check = (name: string, num: number | undefined, require: boolean | undefined) => {
         if (num !== undefined && isNaN(num)) {
-            res.status(400).send(errorToJSON({
+            res.status(400).json(errorToJSON({
                 message: `Invalid ${name} provided.`,
                 id, version,
             }));
             return false;
         } else if (require && (num === undefined || num === null)) {
-            res.status(400).send(errorToJSON({
+            res.status(400).json(errorToJSON({
                 message: `No ${name} provided.`,
                 id, version,
             }));
@@ -243,11 +222,11 @@ async function handle(handler: () => Promise<any>, onSuccess: () => any, res: ex
     try {
         return await handler().then(onSuccess);
     } catch (e: any) {
-        if (e.code === 'ENOENT') return res.status(400).send(errorToJSON({
+        if (e.code === 'ENOENT') return res.status(400).json(errorToJSON({
             message: 'File / directory not found.',
             path: e.path,
             id, version,
         }));
-        return res.status(e.message.includes('structure not valid') ? 400 : 500).send(errorToJSON(e));
+        return res.status(e.message.includes('structure not valid') ? 400 : 500).json(errorToJSON(e));
     }
 }

@@ -1,8 +1,10 @@
 import { TTLCache } from '@isaacs/ttlcache';
 import * as fs from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, basename, extname } from 'node:path';
 import { cacheMaxAgeSeconds, cacheSize } from '../../../config.json';
+import { createTray } from '../app/menu.js';
 import { mainWindow } from '../app/window.js';
+import { Routes } from '../constants.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { writeJSON } from '../util.js';
 
@@ -203,6 +205,16 @@ class ProjectDatabase {
         const json = await fs.readFile(filePath, 'utf8');
         const data = JSON.parse(json);
 
+        // add image file static urls
+        const imageFiles = await projectDB.listImages(id, v);
+        data.floorplanImages = {};
+
+        const baseString = `${Routes.staticAPI}/${id}/v${v}/`;
+        for (const filename of imageFiles) {
+            // filename without ext is the floor name (like 'floor1')
+            data.floorplanImages[basename(filename, extname(filename))] = `${baseString}${filename}`;
+        }
+
         // update cache
         this.cache.set(cacheKey, data);
         return { data, version: v };
@@ -217,8 +229,8 @@ class ProjectDatabase {
     async exists(id: number): Promise<boolean> {
         const path = this._createPath(id);
         return fs.access(path).then(
-            () => true,
-            () => false,
+            () => true, // on resolve (exists)
+            () => false, // on reject (does not exist)
         );
     }
 
@@ -290,7 +302,7 @@ class ProjectDatabase {
             .map(entry => {
                 const version = this._extractVersionNumber(entry);
                 if (version === null) return null;
-                return { path: entry, version }
+                return { path: entry, version };
             }).filter(e => e !== null);
 
         if (versioned.length === 0) return null;
@@ -358,6 +370,7 @@ export function initDB(path: string) {
 
     // tell the renderer process that the database is initialized → request stats
     mainWindow?.webContents.send('project-db-initialized');
+    createTray(); // only create tray now to avoid starting & accessing server (db) via tray before db init
 }
 
 export function isDBInitialized(): boolean {
