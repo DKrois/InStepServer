@@ -1,8 +1,18 @@
-## v1.1.3
+## v1.1.4
+
+### Pages
+- Download page
 
 ### Database
-- Only store project data rather than entire state
-- Switched LRU-Cache to TTL-Cache
+- Also store floorplanImage URLs in cache
+
+### App
+- Create tray on db init
+- GUI width changes
 
 ### Bugs
-- Fixed floorplan images not appearing in loaded project
+- lots of fixes
+
+### Internal
+- Improved type safety
+  - more shared types between main/renderer
