@@ -1,7 +1,8 @@
 import { dialog, ipcMain, Menu } from 'electron';
 import { readFile, writeFile } from 'node:fs/promises';
 import { schedulerIntervalTime } from '../../../config.json';
-import { generateScheduleEvents, TimeSettings } from '../../common/time.js';
+import { generateScheduleEvents } from '../../common/time.js';
+import type { TimeSettings } from '../../common/types.js';
 import { info as _info, warn as _warn } from '../log.js';
 import {
     handleStartServer,

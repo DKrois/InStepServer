@@ -80,6 +80,7 @@
   "projectsAmount": "Anzahl an Projekten",
   "filesAmount": "Anzahl an Dateien",
   "storageSize": "Belegter Speicher",
+  "appDownloadCount": "Anzahl an InStep App Downloads",
 
   "refresh": "Aktualisieren",
   "showStatistics": "Statistiken anzeigen",

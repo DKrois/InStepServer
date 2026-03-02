@@ -24,10 +24,12 @@ const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
 const error = (str: string, err: unknown) => _error(str, err, logSource);
 
+// store in variable to avoid constant writes; only save to store on exit
+export let appDownloadCount = store.get('downloadCount');
+
 const uploadDirBase = 'InStepServer-uploads-';
 // check if upload already exists
-const tmp = tmpdir();
-const uploadDir = readdirSync(tmp).find(dir => dir.startsWith(uploadDirBase)) ?? mkdtempSync(join(tmp, uploadDirBase));
+const uploadDir = getUploadDir();
 const upload = multer({ dest: uploadDir });
 
 // add isAuthenticated flag to session
@@ -101,34 +103,20 @@ function createExpressApp() {
         }
     }));
 
-    // automatic redirect if already authenticated
-    app.use('/', (req, res, next) => {
-        if (req.method === 'GET') {
-            // authenticated: redirect to app
-            const pathMatches = req.path === '/' || req.path === Routes.login || req.path === Routes.login + '/';
-            if (req.session?.isAuthenticated && pathMatches) return res.redirect(Routes.imd);
+    app.use(handleRedirects);
 
-            // not authenticated and accessing root: redirect to login
-            // (don't check for Routes.login here as it'll result in a redirect loop)
-            if (req.path === '/') return res.redirect(Routes.login);
-            else return next();
-        } else {
-            return next();
-        }
-    });
+    app.use(Routes.assets, express.static(SitesPaths.assets));
+    app.use(Routes.download, (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+        if (req.path.endsWith('InStep-latest.apk')) appDownloadCount++;
+        return next();
+    }, express.static(SitesPaths.download));
 
     app.engine('ejs', ejs.renderFile);
     app.set('view engine', 'ejs');
     app.set('views', SitesPaths.docs.views);
-
-    app.use(Routes.assets, express.static(SitesPaths.assets));
     app.use(Routes.docsAssets, express.static(SitesPaths.docs.assets));
-
     app.use(Routes.docs, createDocsRouter({ sidebarType: 'full', basePath: Routes.docs }));
     app.use(Routes.userDocs, createDocsRouter({ sidebarType: 'user', basePath: Routes.userDocs })); // only show the 'User App' section
-
-    app.use(Routes.login, isIMDAPIEnabled, express.static(SitesPaths.login));
-    app.post(Routes.login, isIMDAPIEnabled, api.handleLogin);
 
     // GET routes without auth
     app.get(`${Routes.publicAPI}/ping`, (_req: express.Request, res: express.Response) => res.sendStatus(204));
@@ -139,31 +127,14 @@ function createExpressApp() {
     app.get(`${Routes.publicAPI}/:id`, api.handleGETRequest);
     app.get(`${Routes.publicAPI}/:id/:version`, api.handleGETRequest);
 
-    // IMD routes with auth
+    // login & IMD routes with auth
+    app.use(Routes.login, isIMDAPIEnabled, express.static(SitesPaths.login));
+    app.post(Routes.login, isIMDAPIEnabled, api.handleLogin);
     app.use(Routes.imdAPI, createIMDRouter());
     app.use(Routes.imd, isIMDAPIEnabled, isAuth, manageImdLock, express.static(SitesPaths.imd));
 
-    // handle non-existing routes
-    app.use((req: express.Request, res: express.Response) => {
-        sendFileIfBrowser(req, res, {
-            status: 404,
-            filepath: `${SitesPaths.public}/404.html`,
-            error: {
-                error: 'Not Found',
-                path: req.originalUrl,
-            }
-        });
-    });
-
-    // unhandled error
-    app.use((err: any, _req: express.Request, res: express.Response) => {
-        error('Unhandled http error', err);
-        if (!res.headersSent) {
-            res.status(err.status || 500).json({
-                error: err.message || 'Internal Server Error',
-            });
-        }
-    });
+    // 404 and unhandled errors
+    app.use(handle404, handleErrors);
 
     return app;
 }
@@ -185,6 +156,47 @@ function createIMDRouter() {
     router.delete(`/:id/:version`, api.handleDELETERequest);
 
     return router;
+}
+
+function handleRedirects(req: express.Request, res: express.Response, next: express.NextFunction) {
+    if (req.method === 'GET') {
+        // authenticated: redirect to app
+        const pathMatches = req.path === Routes.login || req.path === Routes.login + '/';
+        if (req.session?.isAuthenticated && pathMatches) return res.redirect(Routes.imd);
+
+        // not authenticated and accessing root: redirect to download
+        if (req.path === '/') return res.redirect(Routes.download);
+        else return next();
+    } else {
+        return next();
+    }
+}
+
+function handle404(req: express.Request, res: express.Response) {
+    return sendFileIfBrowser(req, res, {
+        status: 404,
+        filepath: `${SitesPaths.public}/404.html`,
+        error: {
+            error: 'Not Found',
+            path: req.originalUrl,
+        }
+    });
+}
+
+function handleErrors(err: any, _req: express.Request, res: express.Response) {
+    error('Unhandled http error', err);
+    if (!res.headersSent) {
+        res.status(err.status || 500).json({
+            error: err.message || 'Internal Server Error',
+        });
+    }
+}
+
+function getUploadDir() {
+    const tmp = tmpdir();
+    const existing = readdirSync(tmp).find(dir => dir.startsWith(uploadDirBase));
+
+    return existing ? join(tmp, existing) : mkdtempSync(join(tmp, uploadDirBase));
 }
 
 function getSessionSecret(): string {

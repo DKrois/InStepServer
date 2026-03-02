@@ -1,3 +1,5 @@
+import type { Time, TimeSettings } from './types.js';
+
 export function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
 }
@@ -131,25 +133,6 @@ export function createDuration(duration: Partial<SplitDuration> | number[]): Spl
 }
 
 // --- Scheduler ---
-export type Time = `${number}:${number}` | '';
-export type Mode = 'custom' | 'wholeday' | 'off';
-export interface GlobalRule {
-    start: Time;
-    end: Time;
-    mode: 'custom';
-}
-export interface WeekdayRule {
-    enabled: boolean;
-    mode: Mode;
-    start: Time;
-    end: Time;
-}
-export interface TimeSettings {
-    enabled: boolean;
-    global: GlobalRule;
-    weekdays: { [key: number]: WeekdayRule };
-}
-
 export const defaultTimeSettings: TimeSettings = {
     enabled: false,
     global: { start: '' as Time, end: '' as Time, mode: 'custom' },

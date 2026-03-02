@@ -1,5 +1,6 @@
-import { addZeroes, defaultTimeSettings, generateScheduleEvents, Mode, Time, TimeSettings } from '../../common/time';
+import { addZeroes, defaultTimeSettings, generateScheduleEvents } from '../../common/time';
 import { schedulerIntervalTime } from '../../../config.json';
+import type { Mode, Time, TimeSettings } from '../../common/types.js';
 import { showTranslatedToast } from './logs';
 import { closeModal, openModal, showConfirmation } from './modal';
 import { getTranslation } from './translate';

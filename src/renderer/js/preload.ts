@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { TOptions } from 'i18next';
-import { TimeSettings } from '../../common/time';
+import type { InitialSettings, Stats, TimeSettings } from '../../common/types.js';
 import { IPCResponse } from '../../common/util.js';
 import type { TranslationKey } from './translate.js';
 
@@ -19,7 +19,7 @@ const api = {
         // event can only happen once
         ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
     },
-    getInitialSettings: (): Promise<any> => ipcRenderer.invoke('get-initial-settings'),
+    getInitialSettings: (): Promise<InitialSettings> => ipcRenderer.invoke('get-initial-settings'),
     setProjectDataPath: (currentlySelectedPath?: string): IPCResponse<'cancelled' | 'permission-denied', string> => ipcRenderer.invoke('set-project-data-path', currentlySelectedPath),
 
     startServer: (port: number): Promise<boolean> => ipcRenderer.invoke('start-server', port),
@@ -34,7 +34,7 @@ const api = {
     generateQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'ip-failed' | 'error', string> => ipcRenderer.invoke('generate-qr-code', type), // { success: boolean, code?: 'ip-failed' | 'error', data?: string }
     saveQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'cancelled' | 'ip-failed' | 'error', string> => ipcRenderer.invoke('save-qr-code', type),
 
-    saveTimeSettings: (settings: any) => ipcRenderer.send('save-time-settings', settings),
+    saveTimeSettings: (settings: TimeSettings) => ipcRenderer.send('save-time-settings', settings),
     exportTimeSettings: (): IPCResponse<'cancelled'> => ipcRenderer.invoke('export-time-settings'),
     importTimeSettings: (): IPCResponse<'cancelled', TimeSettings> => ipcRenderer.invoke('import-time-settings'),
     showClearTimeContextMenu: (inputId: string) => ipcRenderer.send('show-clear-time-context-menu', inputId),
@@ -58,7 +58,7 @@ const api = {
     onUpdateStats: (callback: (stats: { uptime: string, memory: string }) => void) => {
         ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
     },
-    getStats: (): Promise<any> => ipcRenderer.invoke('get-stats'),
+    getStats: (): Promise<Stats> => ipcRenderer.invoke('get-stats'),
 
     closeInitialModal: () => ipcRenderer.send('initial-modal-closed'),
     onProjectDBInitialized: (callback: () => void) => {

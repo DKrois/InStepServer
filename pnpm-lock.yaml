@@ -124,7 +124,7 @@ importers:
         specifier: ^0.5.10
         version: 0.5.10
       '@vercel/webpack-asset-relocator-loader':
-        specifier: 1.7.3
+        specifier: ~1.7.3
         version: 1.7.3
       copy-webpack-plugin:
         specifier: ^13.0.1

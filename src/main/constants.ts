@@ -10,6 +10,7 @@ const docsPath = join(sitesPath, 'docs');
 export const SitesPaths = Object.freeze({
     public: join(sitesPath, 'public'),
     assets: join(sitesPath, 'assets'),
+    download: join(sitesPath, 'download'),
     login: join(sitesPath, 'login'),
     imd: join(sitesPath, 'protected'),
 
@@ -26,6 +27,7 @@ const docsAssetsRoute = `/docs/assets`;
 export const Routes = Object.freeze({
     assets: '/assets',
     publicAPI: '/api',
+    download: '/download',
     login: '/app/login',
     imd: '/app',
     imdAPI: '/app/api',

@@ -12,3 +12,5 @@
 /data
 /**/key.pem
 /**/cert.pem
+
+/scripts/e.ps1

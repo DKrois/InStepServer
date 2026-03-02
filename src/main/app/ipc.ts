@@ -1,6 +1,6 @@
 import { app, ipcMain, nativeTheme } from 'electron';
 import { initDB, projectDB } from '../api/database.js';
-import { initServer, stopServer } from '../api/server.js';
+import { appDownloadCount, initServer, stopServer } from '../api/server.js';
 import { defaultDBPath } from '../constants.js';
 import { normalizeSize } from '../util.js';
 import { registerShortcutsIPC, registerUpdateIPC } from './installer.js';
@@ -59,7 +59,7 @@ function registerStatsIPC() {
     ipcMain.handle('get-stats', async () => {
         const dbStats = await getDBStats();
         const version = app.getVersion();
-        return { version, ...dbStats };
+        return { version, appDownloadCount, ...dbStats };
     });
 }
 
@@ -118,7 +118,7 @@ function sendUsageStats() {
     });
 }
 
-async function getDBStats() {
+async function getDBStats(): Promise<{ projectsCount: number, fileCount: number, sizeUsed: string }> {
     const base = await projectDB.getStats();
 
     const { directoryCount: projectsCount, fileCount } = base;

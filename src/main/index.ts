@@ -5,8 +5,9 @@ process.env.FORCE_COLOR = '1';
 import { app } from 'electron';
 import { name } from '../../config.json';
 import 'source-map-support/register';
-import { isServerRunning, stopServer } from './api/server.js';
+import { appDownloadCount, isServerRunning, stopServer } from './api/server.js';
 import { initApp } from './app/app.js';
+import { store } from './app/settings.js';
 import { error, info } from './log.js';
 
 /*
@@ -38,6 +39,7 @@ async function main() {
 
 async function cleanup() {
     info('Cleaning up...');
+    store.set('downloadCount', appDownloadCount);
     if (isServerRunning()) await stopServer();
 }
 

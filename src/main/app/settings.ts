@@ -3,6 +3,7 @@ import { app, dialog, ipcMain, nativeTheme } from 'electron';
 import Store from 'electron-store';
 import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
+import type { InitialSettings } from '../../common/types.js';
 import { releaseLock } from '../api/middleware.js';
 import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
@@ -27,6 +28,7 @@ export const store = new Store({
         sessionMaxAge: 30 * Durations.msInDay,
         imdEnabled: false,
         projectDataPath: '', // set on initial modal close
+        downloadCount: 0
     }
 });
 
@@ -43,7 +45,7 @@ export function initStore() {
 }
 
 export function registerSettingsIPC() {
-    ipcMain.handle('get-initial-settings', () => {
+    ipcMain.handle('get-initial-settings', (): InitialSettings => {
         const { port, language, timeSettings, imdEnabled, sessionMaxAge } = store.store;
         const isDarkMode = nativeTheme.shouldUseDarkColors;
         const serverEnabled = isServerRunning();
