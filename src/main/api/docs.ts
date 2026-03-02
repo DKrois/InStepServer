@@ -66,7 +66,6 @@ export function createDocsRouter(config: DocConfig) {
     // main page handler
     router.get('/:lang/*path', async (req, res) => {
         const lang = req.params.lang;
-        // @ts-expect-error works fine
         const pathParam = req.params.path.join('/').replaceAll('.md', '') || 'introduction'; // e.g. "server/overview"
 
         // validate language

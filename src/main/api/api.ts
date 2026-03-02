@@ -68,8 +68,8 @@ export async function getRandomProjectID(_req: express.Request, res: express.Res
 }
 
 export async function handlePUTRequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = req.params.version ? parseInt(req.params.version) : undefined;
+    const id = parseParam(req.params.id);
+    const version = req.params.version ? parseParam(req.params.version) : undefined;
 
     const data: { project: SimplifiedProject } = req.body;
     // keys.length === 0 checks if body is empty
@@ -99,8 +99,8 @@ export async function handlePUTRequest(req: express.Request, res: express.Respon
 }
 
 export async function handleFloorplanUpload(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = parseInt(req.params.version);
+    const id = parseParam(req.params.id);
+    const version = parseParam(req.params.version);
 
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) return res.status(400).json(errorToJSON({
@@ -123,8 +123,8 @@ export async function handleFloorplanUpload(req: express.Request, res: express.R
 }
 
 export async function handleGETRequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = req.params.version ? parseInt(req.params.version) : undefined;
+    const id = parseParam(req.params.id);
+    const version = req.params.version ? parseParam(req.params.version) : undefined;
 
     const handler = async () => {
         const { data } = await projectDB.get(id, version);
@@ -157,7 +157,7 @@ export async function handleListProjectsRequest(_req: express.Request, res: expr
 }
 
 export async function handleListProjectVersionsRequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
+    const id = parseParam(req.params.id);
 
     const handler = async () => {
         const versions = await projectDB.listVersionsForProject(id);
@@ -173,8 +173,8 @@ export async function handleListProjectVersionsRequest(req: express.Request, res
 }
 
 export async function handleDELETERequest(req: express.Request, res: express.Response) {
-    const id = parseInt(req.params.id);
-    const version = req.params.version ? parseInt(req.params.version) : undefined;
+    const id = parseParam(req.params.id);
+    const version = req.params.version ? parseParam(req.params.version) : undefined;
 
     const handler = async () => {
         await projectDB.delete(id, version);
@@ -188,6 +188,11 @@ export async function handleDELETERequest(req: express.Request, res: express.Res
         version,
         requireVersion: false,
     });
+}
+
+function parseParam(p: string | string[]): number {
+    // usually it'll only be one param specified, but type of req.param.x is string | string[]
+    return parseInt(Array.isArray(p) ? p[0] : p);
 }
 
 interface HandleOptions {
