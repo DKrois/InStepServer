@@ -131,21 +131,6 @@ class ProjectDatabase {
         }
     }
 
-    async getLatestVersion(id: number): Promise<{ path: string, version: number } | null> {
-        const path = this._createPath(id);
-        const entries = await fs.readdir(path).catch(() => []);
-
-        const versioned = entries
-            .map(entry => {
-                const version = this._extractVersionNumber(entry);
-                if (version === null) return null;
-                return { path: entry, version };
-            }).filter(e => e !== null);
-
-        if (versioned.length === 0) return null;
-        return versioned.reduce((a, b) => (b.version > a.version ? b : a));
-    }
-
     /**
      * Reads a project file.
      * @param id project id
@@ -256,6 +241,21 @@ class ProjectDatabase {
         } catch {
             return [];
         }
+    }
+
+    async getLatestVersion(id: number): Promise<{ path: string, version: number } | null> {
+        const path = this._createPath(id);
+        const entries = await fs.readdir(path).catch(() => []);
+
+        const versioned = entries
+            .map(entry => {
+                const version = this._extractVersionNumber(entry);
+                if (version === null) return null;
+                return { path: entry, version };
+            }).filter(e => e !== null);
+
+        if (versioned.length === 0) return null;
+        return versioned.reduce((a, b) => (b.version > a.version ? b : a));
     }
 
     /**
