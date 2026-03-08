@@ -1,0 +1,209 @@
+/* Light Mode (Default) */
+body.light-mode {
+    --bg-color: #f0f2f5;
+    --text-color: #1c1e21;
+    --accent-color: #1877f2;
+    --card-bg: #ffffff;
+    --button-bg: #e4e6eb;
+    --button-text: #050505;
+    --primary-button-bg: #1877f2;
+    --primary-button-text: #ffffff;
+    --secondary-button-bg: color-mix(in srgb, var(--primary-button-bg) 70%, var(--button-bg));
+}
+
+/* Dark Mode */
+body.dark-mode {
+    --bg-color: #000000;
+    --text-color: #e4e6eb;
+    --accent-color: #2d88ff;
+    --card-bg: #1c1c1c;
+    --button-bg: #3a3b3c;
+    --button-text: #e4e6eb;
+    --primary-button-bg: #2d88ff;
+    --primary-button-text: #ffffff;
+    --secondary-button-bg: color-mix(in srgb, var(--primary-button-bg) 65%, var(--button-bg));
+}
+
+/* Apply variables */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+a {
+    color: #cba8ff;
+}
+
+body.light-mode .light-icon {
+    display: block;
+}
+body.light-mode .dark-icon {
+    display: none !important;
+}
+
+body.dark-mode .light-icon {
+    display: none !important;
+}
+body.dark-mode .dark-icon {
+    display: block;
+}
+
+body.light-mode .icon-button:hover {
+    background-color: #e0e0e0;
+}
+body.dark-mode .icon-button:hover {
+    background-color: #333333;
+}
+
+/* Scrollbar Styling */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--button-bg) var(--card-bg);
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--card-bg);
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--button-bg);
+    border-radius: 10px;
+    border: 2px solid var(--card-bg);
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-color);
+    border-color: var(--card-bg);
+}
+
+.top-bar, .card {
+    background-color: var(--card-bg);
+}
+.top-bar {
+    border-bottom-color: var(--button-bg);
+}
+
+button, select {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid transparent;
+}
+
+input[type="number"] {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--button-bg);
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+#start-btn {
+    background-color: var(--primary-button-bg);
+    color: var(--primary-button-text);
+}
+
+/* Status Indicator Colors */
+#server-status-indicator {
+    background-color: #909090;
+}
+#server-status-indicator.status-running {
+    background-color: #2ecc71;
+}
+#server-status-indicator.status-stopped {
+    background-color: #e74c3c;
+}
+
+input[type="time"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid var(--button-bg);
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input[type="time"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: none; /* Remove calendar picker as can't be styled*/
+}
+
+.weekday-row {
+    border-bottom: 1px solid var(--button-bg);
+}
+
+.password-wrapper input, #initial-password-display {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--button-bg);
+}
+.password-wrapper input:focus, #initial-password-display:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+#save-security-btn {
+    background-color: var(--secondary-button-bg);
+    color: var(--primary-button-text);
+}
+
+.path-display-wrapper {
+    background-color: var(--bg-color);
+}
+
+.sidebar {
+    background-color: var(--card-bg);
+    border-left: 1px solid var(--button-bg);
+}
+
+#logs-container {
+    background-color: var(--card-bg);
+    border-color: var(--button-bg);
+}
+
+.app-footer {
+    background-color: var(--card-bg); /* Use the card background for consistency */
+    border-top-color: var(--button-bg);
+}
+
+.toast {
+    color: #ffffff;
+}
+
+.toast-info {
+    background-color: #2c3e50; /* A dark blue/grey */
+}
+
+.toast-error {
+    background-color: #c0392b; /* A strong red */
+}
+
+.error-text {
+    color: #ff5555; /* A standard error red color */
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 0;
+    min-height: 1.2em; /* Prevents layout shift */
+    line-height: 1.4;
+
+    max-height: 100px; /* Should be large enough to contain the message */
+    opacity: 1;
+}
+
+.error-text.hidden {
+    transition: max-height 0.2s ease-out, opacity 0.2s ease-out, margin-top 0.2s ease-out;
+}

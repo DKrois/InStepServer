@@ -1,0 +1,172 @@
+{
+  "title": "InStep Server Control Panel",
+  "toggleTheme": "Toggle Theme",
+  "toastLangSwitch": "Switched language to {{lang}}",
+
+
+  "serverControls": "Server Controls",
+  "startServer": "Start Server",
+  "stopServer": "Stop Server",
+  "portLabel": "Port:",
+
+  "restartServerInfo": "Please restart the server for changes to take effect.",
+
+  "serverStarting": "Starting...",
+  "serverStopping": "Stopping...",
+  "statusRunning": "Server is running",
+  "statusStopped": "Server is stopped",
+
+  "toastServerStarted": "Server started on port {{port}}",
+  "toastServerStopped": "Server stopped successfully",
+  "toastStartFailed": "Error starting server",
+  "toastInvalidPort": "Invalid port number",
+
+  "clearCache": "Clear project cache",
+  "cacheCleared": "Cache cleared",
+
+  "generateQR": "Generate QR codes",
+  "qrCodeSelectionPrompt": "Select the URL to use:",
+  "saveQRCode": "Save QR code",
+  "qrCodeIP": "Server IP address",
+  "qrCodeMDNS": "mDNS address",
+  "qrCodeHostname": "OS hostname mDNS",
+  "hostnameMDNSInfo": "In some cases, the normal mDNS address might not work correctly. In this case, your PC's name can be used as a fallback mDNS address.",
+  "toastQRSaveSuccess": "Saved QR code",
+  "toastQRSaveFailed": "Failed to save QR code",
+  "toastIPFailed": "Failed to get IP",
+
+
+  "security": "Security",
+  "currentPassword": "Current Password:",
+  "unlock": "Unlock",
+  "lock": "Lock",
+  "save": "Save",
+  "togglePassword": "Show/Hide Password",
+
+
+  "sessionTitle": "Session",
+  "enableIMDAPI": "Enable Indoor Map Digitalizer API",
+  "toastIMDAPIEnabled": "Enabled IMD API",
+  "toastIMDAPIDisabled": "Disabled IMD API",
+  "releaseIMDLock": "Release IMD Lock",
+  "toastIMDLockReleased": "Released IMD lock",
+
+  "sessionDuration": "Session duration",
+  "years": "Years",
+  "days": "Days",
+  "hours": "Hours",
+  "minutes": "Minutes",
+
+  "toastDurationUpdated": "Session duration updated",
+  "toastInvalidDuration": "Invalid duration entered",
+
+
+  "newPassword": "Login",
+  "changePassword": "Change password:",
+  "maxLoginAttempts": "Login attempts",
+  "lockoutDuration": "Lockout duration",
+  "toastInvalidLoginSecuritySettings": "Invalid login security settings",
+  "toastLoginSecuritySettingsUpdated": "Updated login security settings",
+
+  "toastPasswordIncorrect": "Incorrect password",
+  "toastPasswordEmpty": "Password cannot be empty",
+  "toastPasswordUpdated": "Password updated successfully",
+
+  "initialPasswordTitle": "Initial Password",
+  "initialPasswordDesc": "This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.",
+  "copyPassword": "Copy to Clipboard",
+  "toastPasswordCopied": "Password copied to clipboard",
+
+
+  "statistics": "Statistics",
+  "uptime": "Uptime",
+  "memoryUsage": "Memory Usage",
+  "projectsAmount": "Amount of projects",
+  "filesAmount": "Amount of files",
+  "storageSize": "Storage used",
+  "appDownloadCount": "InStep App download count",
+
+  "refresh": "Refresh",
+  "showStatistics": "Show Statistics",
+  "hideStatistics": "Hide Statistics",
+
+  "sponsoredBy": "Sponsored by",
+
+
+  "logs": "Logs",
+  "showLogs": "Show Logs",
+  "hideLogs": "Hide Logs",
+  "clearLogs": "Clear Logs",
+
+
+  "timeManagement": "Time Management",
+  "countdownLabel": "Server {{nextAction}}",
+  "startup": "startup",
+  "shutdown": "shutdown",
+  "enableAt": "Enable At:",
+  "disableAt": "Disable At:",
+  "advanced": "Advanced",
+  "clear": "Clear",
+  "export": "Export",
+  "import": "Import",
+
+  "advancedTimeSettings": "Advanced Time Settings",
+  "customTime": "Custom Time",
+  "wholeday": "Entire day",
+  "off": "Off",
+  "clearDaySettings": "Clear settings for this day",
+
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+
+  "confirmClearTimeSettings": "Are you sure you want to clear all time management settings? This cannot be undone.",
+  "toastTimeSettingsSaved": "Time settings saved",
+  "toastTimeSettingsCleared": "Time settings cleared",
+
+  "toastExportSuccess": "Time settings exported successfully",
+  "toastExportFailed": "Failed to export settings",
+  "toastImportSuccess": "Time settings imported. Click Save to apply them.",
+  "toastImportFailed": "Failed to import settings",
+
+  "projectPathTitle": "Project Storage Path",
+  "projectPathDesc": "Choose a directory where all project data will be stored.",
+  "currentPath": "Current storage path",
+  "changePath": "Change...",
+  "pathPermissionError": "The application does not have permission to write to the selected directory. Please choose a different folder.",
+
+  "toastPathUpdated": "Storage path updated successfully",
+  "toastPathError": "Error updating storage path",
+
+
+  "shortcutsTitle": "Create shortcuts",
+  "createStartMenuShortcut": "Create start menu shortcut",
+  "createDesktopShortcut": "Create desktop shortcut",
+  "toastShortcutCreated": "Created {{type}} shortcut",
+  "toastShortcutFailed": "Failed to create {{type}} shortcut",
+
+
+  "updateAvailableTitle": "Update Available",
+  "newVersionAvailable": "A new version ({{version}}) is available. You are currently on version {{oldVersion}}.",
+  "releaseNotes": "Release Notes",
+  "noReleaseNotes": "No release notes provided.",
+  "download": "Download",
+  "later": "Later",
+  "dontAskAgain": "Don't ask again",
+
+
+  "close": "Close",
+  "confirmTitle": "Are you sure?",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "cancelled": "Cancelled",
+  "toastUnknownError": "An unknown error occurred",
+
+  "documentationUnavailableTitle": "Documentation not available",
+  "documentationUnavailableDesc": "In order to view the InStep documentation, the server needs to be enabled. Please enable the server and try again",
+  "documentationUnavailableNote": "Alternatively, you can view part of the documentation at https://github.com/DKrois/InStepServer/tree/master/sites/docs/content"
+}

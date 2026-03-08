@@ -1,0 +1,80 @@
+# .github/workflows/release.yml
+# git tag v1.x.x
+# git push origin v1.x.x
+
+name: Build & Release
+run-name: Release ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # This is the trigger: runs only when you push a tag like v1.0.1, v1.2.0, etc.
+
+jobs:
+  build-and-release:
+    # Use a build strategy that runs a job for each OS
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    # Use the OS from the matrix for the runner
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+
+      #- name: Install Node.js
+      #  uses: actions/setup-node@v3
+      #  with:
+      #    node-version: 22.21.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Build docs
+        run: bun run build:docs
+
+      - name: Build/make the application
+        run: bun run make
+        env:
+          # The GITHUB_TOKEN is automatically provided by GitHub Actions
+          # It's needed for publishing to the release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # IMPORTANT: For macOS signing and notarization, you would need to add these
+          # as secrets in your GitHub repository settings. The build will succeed without them,
+          # but the resulting app won't be runnable on modern macOS without user workarounds.
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Upload artifacts to release
+        # This action finds the release corresponding to your tag and uploads files to it
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: docs/RELEASE_NOTES.md
+          files: |
+            out/make/**/RELEASES
+            out/make/**/*.nupkg
+            out/make/**/*.exe
+            out/make/**/*.msi
+            out/make/**/*.dmg
+            out/make/**/*.zip
+            out/make/**/*.deb
+            out/make/**/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

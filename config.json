@@ -1,0 +1,20 @@
+{
+  "name": "InStep Server",
+  "hostname": "instep",
+  "exeBaseName": "InStepServer",
+
+  "cacheSize": 10,
+  "cacheMaxAgeSeconds": 900,
+
+  "imdLockDurationSeconds": 300,
+
+  "toastTimeout": 2000,
+  "schedulerIntervalTime": 20000,
+
+  "defaultWindowWidthPercent": 0.8,
+  "defaultWindowHeightPercent": 0.8,
+  "defaultWindowWidthPx": 1350,
+  "defaultWindowHeightPx": 800,
+  "minWindowWidth": 730,
+  "minWindowHeight": 500
+}

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* Language & emit */
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+
+    /* Browser environment */
+    "lib": ["ESNext", "DOM"],
+
+    /* Type safety */
+    "strict": true,
+    "useDefineForClassFields": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+
+    /* Interop */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+
+    /* Quality of life */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Don't allow importing node/bun stuff
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}

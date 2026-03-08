@@ -1,0 +1,16 @@
+/tmp
+/temp
+
+/node_modules
+/dist
+/.idea
+/.webpack
+/out
+
+/sites/docs/assets/js
+
+/data
+/**/key.pem
+/**/cert.pem
+
+/scripts/e.ps1

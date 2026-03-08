@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+    <head>
+        <meta charset="UTF-8">
+        <title id="title">InStep Server Control Panel vx.x.x</title>
+        <link rel="icon" type="image/png" href="assets/icon.png">
+    </head>
+
+    <body class="light-mode">
+        <header class="top-bar">
+            <h1 data-i18n="title">InStep Server Control Panel</h1>
+
+            <div class="controls">
+                <div class="select-wrapper">
+                    <img src="assets/language-light.png" class="language-icon dark-icon" alt="🌐">
+                    <img src="assets/language-dark.png" class="language-icon light-icon" alt="🌐">
+                    <label for="language-switcher"></label>
+                    <select id="language-switcher">
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+
+                <button id="theme-switcher" class="icon-button" data-i18n-title="toggleTheme">
+                    <!-- CSS handles which icon is shown -->
+                    <!-- light mode icon -->
+                    <img src="assets/lightMode.png" class="button-image light-icon" alt="☀️">
+                    <!-- dark mode icon -->
+                    <img src="assets/darkMode.png" class="button-image dark-icon" alt="🌙">
+                </button>
+            </div>
+        </header>
+
+        <div id="app-body">
+            <main class="main-content">
+                <div class="cards-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 data-i18n="serverControls">Server Controls</h2>
+                            <div id="server-status-indicator" title="Server is stopped" class="status-stopped"></div>
+                        </div>
+
+                        <div class="button-group">
+                            <button id="start-btn" data-i18n="startServer">Start Server</button>
+                            <button id="stop-btn" data-i18n="stopServer" disabled>Stop Server</button>
+                        </div>
+
+                        <div class="form-group zero-margin">
+                            <label for="port-input" data-i18n="portLabel">Port:</label>
+                            <input type="number" id="port-input" value="5000" min="1024" max="65535"> <!-- on linux, ports below 1024 can only be opened as root -->
+                        </div>
+
+                        <div class="form-group">
+                            <p id="restart-server-info" data-i18n="restartServerInfo" class="error-text hidden">Please restart the server for changes to take effect.</p>
+                            <button id="clear-cache-btn" data-i18n="clearCache" class="ml-auto">Clear project cache</button>
+                            <button id="generate-qr-btn" data-i18n="generateQR">Generate QR codes</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 data-i18n="timeManagement">Time Management</h2>
+                            <div id="time-countdown" class="time-countdown hidden" aria-hidden="true">
+                                <strong><span id="countdown-label" data-i18n="countdownLabel">Server startup / shutdown</span>:</strong>
+                                <span id="countdown-display">00:00:00</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="time-global-start" data-i18n="enableAt">Enable At:</label>
+                            <input type="time" id="time-global-start">
+                        </div>
+                        <div class="form-group">
+                            <label for="time-global-end" data-i18n="disableAt">Disable At:</label>
+                            <input type="time" id="time-global-end">
+                        </div>
+                        <div class="button-group time-buttons">
+                            <div class="button-subgroup">
+                                <button id="time-advanced-btn" data-i18n="advanced">Advanced</button>
+                                <button id="time-save-btn" data-i18n="save">Save</button>
+                                <button id="time-clear-btn" data-i18n="clear">Clear</button>
+                            </div>
+                            <div class="button-subgroup">
+                                <button id="time-export-btn" class="ml-auto" data-i18n="export">Export</button>
+                                <button id="time-import-btn" data-i18n="import">Import</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="security-card" class="card is-locked"> <!-- let css handle showing locked elements -->
+                        <div class="card-header">
+                            <h2 data-i18n="security">Security</h2>
+                        </div>
+
+                        <!-- section for unlocking the form -->
+                        <div id="unlock-section">
+                            <div class="form-group password-wrapper">
+                                <div class="input-with-icon">
+                                    <label for="current-password-input" data-i18n="currentPassword">Current Password:</label>
+                                    <input type="password" id="current-password-input" autocomplete="current-password">
+                                    <button id="toggle-current-password" class="icon-button password-toggle" data-i18n-title="togglePassword">
+                                        <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
+                                        <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="button-group">
+                                <button id="unlock-btn" data-i18n="unlock">Unlock</button>
+                                <button id="lock-btn" data-i18n="lock" class="requires-unlock ml-auto">Lock</button>
+                                <button id="save-security-btn" data-i18n="save" class="requires-unlock">Save</button>
+                            </div>
+                        </div>
+
+                        <!-- hidden by default -->
+                        <div id="locked-section" class="requires-unlock">
+                            <hr>
+                            <div id="session-section">
+                                <h3 data-i18n="sessionTitle">Session</h3>
+
+                                <!-- add hyperlink to docs -->
+                                <div class="form-group">
+                                    <input type="checkbox" id="imd-api-toggle">
+                                    <label for="imd-api-toggle" data-i18n="enableIMDAPI">Enable IMD API</label>
+                                    <button id="release-imd-lock" data-i18n="releaseIMDLock" class="ml-auto">Release IMD Lock</button>
+                                </div>
+
+                                <h4 data-i18n="sessionDuration">Duration</h4>
+                                <!-- add hyperlink to docs -->
+
+                                <div class="duration-controls">
+                                    <div class="duration-input-group">
+                                        <label for="session-years-input" data-i18n="years">Years</label>
+                                        <input type="number" id="session-years-input" min="0" value="0">
+                                    </div>
+                                    <div class="duration-input-group">
+                                        <label for="session-days-input" data-i18n="days">Days</label>
+                                        <input type="number" id="session-days-input" min="0" value="30">
+                                    </div>
+                                    <div class="duration-input-group">
+                                        <label for="session-hours-input" data-i18n="hours">Hours</label>
+                                        <input type="number" id="session-hours-input" min="0" max="23" value="0">
+                                    </div>
+                                    <div class="duration-input-group">
+                                        <label for="session-minutes-input" data-i18n="minutes">Minutes</label>
+                                        <input type="number" id="session-minutes-input" min="0" max="59" value="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h3 data-i18n="login">Login</h3>
+                            <div class="form-group password-wrapper">
+                                <div class="input-with-icon">
+                                    <label for="new-password-input" data-i18n="changePassword">Chagnge Password:</label>
+                                    <input type="password" id="new-password-input" autocomplete="new-password">
+                                    <button id="toggle-new-password" class="icon-button password-toggle" title="Show/Hide Password">
+                                        <img src="assets/eye-dark-open.png" class="light-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-dark-closed.png" class="light-icon eye-closed-icon" alt="👁️">
+                                        <img src="assets/eye-light-open.png" class="dark-icon eye-open-icon" alt="👁️">
+                                        <img src="assets/eye-light-closed.png" class="dark-icon eye-closed-icon" alt="👁️">
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="settings-group">
+                                    <!-- Max Attempts Input -->
+                                    <div class="form-group">
+                                        <label for="max-attempts-input" data-i18n="maxLoginAttempts">Max Login Attempts</label>
+                                        <input type="number" id="max-attempts-input" min="1" max="100" value="5">
+                                    </div>
+
+                                    <!-- Lockout Duration Input -->
+                                    <div class="form-group">
+                                        <label for="lockout-minutes-input" data-i18n="lockoutDuration">Lockout Duration (minutes)</label>
+                                        <input type="number" id="lockout-minutes-input" min="1" max="1440" value="10">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- add more cards here -->
+                </div>
+            </main>
+
+            <aside id="stats-sidebar" class="sidebar">
+                <div class="statistics">
+                    <h2 data-i18n="statistics">Statistics</h2>
+                    <p>
+                        <span data-i18n="uptime">Uptime</span>: <span id="uptime-display">00:00:00</span><br>
+                        <span data-i18n="memoryUsage">Memory Usage</span>: <span id="memory-display">0 MB</span>
+                    </p>
+                    <p>
+                        <span data-i18n="projectsAmount">Amount of projects stored</span>: <span id="projects-amount">0</span><br>
+                        <span data-i18n="filesAmount">Amount of version files stored</span>: <span id="files-amount">0</span><br>
+                        <span data-i18n="storageSize">Total storage size used</span>: <span id="storage-used">0</span>
+                    </p>
+                    <p>
+                        <span data-i18n="appDownloadCount">App download count</span>: <span id="app-download-count">0</span>
+                    </p>
+                    <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
+
+                    <div class="sidebar-bottom">
+                        <div class="sponsor-display">
+                            <p data-i18n="sponsoredBy"></p>
+                            <div class="sponsor-images">
+                                <img class="sponsor-logo" src="assets/sponsors/palfinger.png" alt="Palfinger">
+                                <img class="sponsor-logo" src="assets/sponsors/minew.webp" alt="Minew">
+                            </div>
+                        </div>
+                        <div id="app-version">v1.0.0</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="logs-section hidden">
+            <div id="logs-container">
+                <pre id="logs-output"></pre>
+            </div>
+        </div>
+        <footer class="app-footer">
+            <div class="footer-left">
+                <button id="toggle-logs-btn" data-i18n="showLogs">Show Logs</button>
+                <div id="log-actions" class="hidden">
+                    <button id="clear-logs-btn" data-i18n="clearLogs">Clear Logs</button>
+                </div>
+            </div>
+            <div class="footer-right">
+                <button id="toggle-stats-btn" data-i18n="showStatistics">Show Statistics</button>
+            </div>
+        </footer>
+
+        <div id="toast-container"></div>
+
+        <!-- Initial Modal -->
+        <div id="initial-modal" class="modal hidden">
+            <div class="modal-dialog card">
+                <h3 data-i18n="initialPasswordTitle">Initial Password</h3>
+                <p data-i18n="initialPasswordDesc">This is the first time you are running the application. Please copy and store this randomly generated password in a safe place.</p>
+                <div class="password-display-wrapper">
+                    <label for="initial-password-display"></label><input type="text" id="initial-password-display" readonly>
+                    <button id="copy-initial-password-btn" class="icon-button" data-i18n-title="copyPassword">
+                        <img src="assets/copy-dark.png" class="light-icon" alt="Copy">
+                        <img src="assets/copy-light.png" class="dark-icon" alt="Copy">
+                    </button>
+                </div>
+
+                <hr>
+                <div class="path-config-section">
+                    <h3 data-i18n="projectPathTitle">Project Storage Path</h3>
+                    <p data-i18n="projectPathDesc">Choose a directory where all projects will be stored.</p>
+                    <div class="path-display-wrapper">
+                        <!-- updated by JS to show the actual current path -->
+                        <span id="current-project-path" data-i18n-title="currentPath" title="Current storage path">C:\Path\To\Data</span>
+                        <button id="change-path-btn" data-i18n="changePath">Change...</button>
+                    </div>
+                    <p id="path-error-message" class="error-text hidden"></p>
+                </div>
+
+                <hr>
+                <div id="shortcut-options-container" class="hidden"> <!-- only show on Windows -->
+                    <h3 data-i18n="shortcutsTitle">Create shortcuts</h3>
+                    <div class="button-group shortcut-buttons">
+                        <button id="create-startMenu-shortcut-btn" data-i18n="createStartMenuShortcut">Create Start Menu shortcut</button>
+                        <button id="create-desktop-shortcut-btn" data-i18n="createDesktopShortcut">Create Desktop shortcut</button>
+                    </div>
+                </div>
+
+                <button id="close-modal-btn" data-i18n="close">Close</button>
+            </div>
+        </div>
+
+        <!-- QR Modal -->
+        <div id="qr-modal" class="modal hidden">
+            <div class="modal-dialog qr-modal-dialog card">
+                <h2 data-i18n="generateQR">Generate QR Code</h2>
+
+                <div class="qr-content-wrapper">
+                    <div id="qr-selection">
+                        <p data-i18n="qrCodeSelectionPrompt">Select the url to use:</p>
+                        <div class="button-group vertical-buttons">
+                            <button id="qr-btn-ip">
+                                <span data-i18n="qrCodeIP">Server IP address</span>
+                                <span id="server-ip-url"></span>
+                            </button>
+                            <button id="qr-btn-mdns">
+                                <span data-i18n="qrCodeMDNS">mDNS address</span>
+                                <span id="mdns-url"></span>
+                            </button>
+                            <!--<button id="qr-btn-hostname" data-i18n-title="hostnameMDNSInfo">
+                                <span data-i18n="qrCodeHostname">OS Hostname mDNS</span>
+                                <span id="hostname-mdns-url"></span>
+                            </button>-->
+                        </div>
+                    </div>
+
+                    <div id="qr-result">
+                        <img id="qr-image" class="hidden" src="" alt="Generated QR Code">
+                    </div>
+                </div>
+
+                <div class="button-group modal-buttons">
+                    <button id="qr-save-btn" data-i18n="saveQRCode" class="mr-auto hidden">Save QR Code</button>
+                    <button id="qr-close-btn" data-i18n="close">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Modal -->
+        <div id="time-modal-backdrop" class="modal hidden">
+            <div class="modal-dialog card">
+                <h3 data-i18n="advancedTimeSettings">Advanced Time Settings</h3>
+
+                <ul id="weekday-list" class="weekday-list">
+                    <!-- Weekday rows will be generated by JavaScript -->
+                </ul>
+                <div class="button-group modal-buttons">
+                    <button id="time-modal-save-btn" data-i18n="save">Save</button>
+                    <button id="time-modal-clear-btn" data-i18n="clear">Clear</button>
+                    <button id="time-modal-cancel-btn" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- update modal -->
+        <div id="update-modal" class="modal hidden">
+            <div class="modal-dialog card">
+                <h3 data-i18n="updateAvailableTitle">Update Available</h3>
+                <p id="update-version-paragraph"></p>
+
+                <h4 data-i18n="releaseNotes">Release Notes:</h4>
+                <div id="update-release-notes" class="release-notes-container"></div>
+
+                <div class="modal-buttons button-group">
+                    <button id="update-download-btn" data-i18n="download">Download</button>
+                    <button id="update-later-btn" data-i18n="later">Later</button>
+                    <button id="update-never-btn" data-i18n="dontAskAgain">Don't ask again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- confirm modal -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-dialog card">
+                <h3 id="confirm-title">Confirmation</h3>
+                <p id="confirm-message">Are you sure?</p>
+                <div class="button-group modal-buttons">
+                    <button id="confirm-btn-ok" data-i18n="ok">OK</button>
+                    <button id="confirm-btn-cancel" data-i18n="cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- general notification popups too large for toasts -->
+        <div id="popup-modal" class="modal hidden">
+            <div class="modal-dialog card">
+                <h3 id="popup-title"></h3>
+                <p id="popup-message"></p>
+                <p id="popup-side-note" class="hidden small"></p>
+                <div class="button-group modal-buttons">
+                    <button id="popup-close-btn" data-i18n="close">Close</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,173 @@
+{
+  "title": "InStep Server-Bedienfeld",
+  "toggleTheme": "Theme wechseln",
+  "toastLangSwitch": "Sprache auf {{lang}} geändert",
+
+
+  "serverControls": "Serversteuerung",
+  "startServer": "Server starten",
+  "stopServer": "Server anhalten",
+  "portLabel": "Port:",
+
+  "restartServerInfo": "Bitte starten Sie den Server neu, damit Änderungen wirksam werden.",
+
+  "serverStarting": "Starten...",
+  "serverStopping": "Anhalten...",
+  "statusRunning": "Server läuft",
+  "statusStopped": "Server gestoppt",
+
+  "toastServerStarted": "Server auf Port {{port}} gestartet",
+  "toastServerStopped": "Server erfolgreich angehalten",
+  "toastStartFailed": "Server konnte nicht gestartet werden",
+  "toastInvalidPort": "Ungültige Portnummer",
+
+  "clearCache": "Projekt-Cache leeren",
+  "cacheCleared": "Cache geleert",
+
+  "generateQR": "QR-Codes generieren",
+  "qrCodeSelectionPrompt": "URL auswählen:",
+  "saveQRCode": "QR-Code speichern",
+  "qrCodeIP": "Server IP-Adresse",
+  "qrCodeMDNS": "mDNS-Adresse",
+  "qrCodeHostname": "OS-Hostname mDNS",
+  "hostnameMDNSInfo": "In manchen Fällen funktioniert die normale mDNS-Adresse nicht richtig. In diesem Fall kann der Name des PCs als Adresse verwendet werden.",
+  "toastQRSaveSuccess": "QR-Code gespeichert",
+  "toastQRSaveFailed": "QR-Code speichern fehlgeschlagen",
+  "toastIPFailed": "IP nicht gefunden",
+
+
+  "security": "Sicherheit",
+  "currentPassword": "Aktuelles Passwort:",
+  "unlock": "Entsperren",
+  "lock": "Sperren",
+  "save": "Speichern",
+  "togglePassword": "Passwort anzeigen/verbergen",
+
+
+  "sessionTitle": "Sitzung",
+  "enableIMDAPI": "Indoor Map Digitalizer-API aktivieren",
+  "toastIMDAPIEnabled": "IMD-API aktiviert",
+  "toastIMDAPIDisabled": "IMD-API deaktiviert",
+  "releaseIMDLock": "IMD-Sperre aufheben",
+  "toastIMDLockReleased": "IMD-Sperre aufgehoben",
+
+  "sessionDuration": "Sitzungsdauer",
+  "years": "Jahre",
+  "days": "Tage",
+  "hours": "Stunden",
+  "minutes": "Minuten",
+
+  "toastDurationUpdated": "Sitzungsdauer aktualisiert",
+  "toastInvalidDuration": "Ungültige Dauer eingegeben",
+
+
+  "login": "Login",
+  "changePassword": "Passwort ändern:",
+  "maxLoginAttempts": "Login-Versuche",
+  "lockoutDuration": "Login-Sperre-Dauer",
+  "toastInvalidLoginSecuritySettings": "Ungültige Login-Sicherheits-Einstellungen",
+  "toastLoginSecuritySettingsUpdated": "Login-Sicherheits-Einstellungen gespeichert",
+
+  "toastPasswordIncorrect": "Falsches Passwort",
+  "toastPasswordEmpty": "Passwort darf nicht leer sein",
+  "toastPasswordUpdated": "Passwort erfolgreich aktualisiert",
+
+  "initialPasswordTitle": "Initialpasswort",
+  "initialPasswordDesc": "Dies ist das erste Mal, dass Sie die Anwendung ausführen. Bitte kopieren und speichern Sie dieses zufällig generierte Passwort an einem sicheren Ort.",
+  "copyPassword": "In die Zwischenablage kopieren",
+  "toastPasswordCopied": "Passwort in die Zwischenablage kopiert",
+
+
+  "statistics": "Statistiken",
+  "uptime": "Laufzeit",
+  "memoryUsage": "Arbeitsspeichernutzung",
+  "projectsAmount": "Anzahl an Projekten",
+  "filesAmount": "Anzahl an Dateien",
+  "storageSize": "Belegter Speicher",
+  "appDownloadCount": "Anzahl an InStep App Downloads",
+
+  "refresh": "Aktualisieren",
+  "showStatistics": "Statistiken anzeigen",
+  "hideStatistics": "Statistiken ausblenden",
+
+  "sponsoredBy": "Gesponsored von",
+
+
+  "logs": "Protokolle",
+  "showLogs": "Protokolle anzeigen",
+  "hideLogs": "Protokolle ausblenden",
+  "clearLogs": "Protokolle leeren",
+
+
+  "timeManagement": "Zeitmanagement",
+  "countdownLabel": "Server-{{nextAction}}",
+  "startup": "Start",
+  "shutdown": "Shutdown",
+  "enableAt": "Einschalten um:",
+  "disableAt": "Ausschalten um:",
+  "advanced": "Erweitert",
+  "clear": "Löschen",
+  "export": "Exportieren",
+  "import": "Importieren",
+
+  "advancedTimeSettings": "Erweiterte Zeiteinstellungen",
+  "customTime": "Benutzerdefiniert",
+  "wholeday": "Ganztägig",
+  "off": "Aus",
+  "clearDaySettings": "Einstellungen für diesen Tag löschen",
+
+  "monday": "Montag",
+  "tuesday": "Dienstag",
+  "wednesday": "Mittwoch",
+  "thursday": "Donnerstag",
+  "friday": "Freitag",
+  "saturday": "Samstag",
+  "sunday": "Sonntag",
+
+  "confirmClearTimeSettings": "Sind Sie sicher, dass Sie alle Zeitmanagement-Einstellungen löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+  "toastTimeSettingsSaved": "Zeiteinstellungen gespeichert",
+  "toastTimeSettingsCleared": "Zeiteinstellungen gelöscht",
+
+  "toastExportSuccess": "Zeiteinstellungen erfolgreich exportiert",
+  "toastExportFailed": "Fehler beim Exportieren",
+  "toastImportSuccess": "Zeiteinstellungen importiert. Klicken Sie auf Speichern, um sie zu übernehmen.",
+  "toastImportFailed": "Fehler beim Importieren",
+
+
+  "projectPathTitle": "Projektspeicherpfad",
+  "projectPathDesc": "Wählen Sie ein Verzeichnis, in dem alle Projektdaten gespeichert werden.",
+  "currentPath": "Aktueller Speicherpfad",
+  "changePath": "Ändern...",
+  "pathPermissionError": "Die Anwendung hat keine Berechtigung, in das ausgewählte Verzeichnis zu schreiben. Bitte wählen Sie einen anderen Ordner.",
+
+  "toastPathUpdated": "Speicherpfad erfolgreich aktualisiert",
+  "toastPathError": "Speicherpfad konnte nicht aktualisiert werden",
+
+
+  "shortcutsTitle": "Verknüpfungen erstellen",
+  "createStartMenuShortcut": "Startmenü-Verknüpfung erstellen",
+  "createDesktopShortcut": "Desktop-Verknüpfung erstellen",
+  "toastShortcutCreated": "{{type}}-Verknüpfung erstellt",
+  "toastShortcutFailed": "Erstellen von {{type}}-Verknüpfung fehlgeschlagen",
+
+
+  "updateAvailableTitle": "Update verfügbar",
+  "newVersionAvailable": "Eine neue Version ({{version}}) ist verfügbar. Sie verwenden aktuell Version {{oldVersion}}.",
+  "releaseNotes": "Versionshinweise",
+  "noReleaseNotes": "Keine Versionshinweise vorhanden.",
+  "download": "Herunterladen",
+  "later": "Später",
+  "dontAskAgain": "Nicht erneut fragen",
+
+
+  "close": "Schließen",
+  "confirmTitle": "Sind Sie sicher?",
+  "ok": "OK",
+  "cancel": "Abbrechen",
+  "cancelled": "Abgebrochen",
+  "toastUnknownError": "Ein unbekannter Fehler ist aufgetreten",
+
+  "documentationUnavailableTitle": "Dokumentation nicht verfügbar",
+  "documentationUnavailableDesc": "Um auf die InStep-Dokumentation zugreifen zu können, muss der Server aktiviert sein. Bitte starten Sie den Server und versuchen Sie es erneut.",
+  "documentationUnavailableNote": "Alternativ können Sie auf einen Teil der Dokumentation zugreifen unter https://github.com/DKrois/InStepServer/tree/master/sites/docs/content"
+}

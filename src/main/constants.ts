@@ -1,0 +1,41 @@
+import { app } from 'electron';
+import { join } from 'node:path';
+import { getResource } from './util';
+
+export const userDataPath = app.getPath('userData');
+export const defaultDBPath = join(userDataPath, 'data');
+
+const sitesPath = getResource('sites');
+const docsPath = join(sitesPath, 'docs');
+export const SitesPaths = Object.freeze({
+    public: join(sitesPath, 'public'),
+    assets: join(sitesPath, 'assets'),
+    download: join(sitesPath, 'download'),
+    login: join(sitesPath, 'login'),
+    imd: join(sitesPath, 'protected'),
+
+    docs: {
+        config: join(docsPath, 'config'),
+        views: join(docsPath, 'views'),
+        content: join(docsPath, 'content'),
+        assets: join(docsPath, 'assets'),
+        locales: join(docsPath, 'locales'),
+    },
+});
+
+const docsAssetsRoute = `/docs/assets`;
+export const Routes = Object.freeze({
+    assets: '/assets',
+    publicAPI: '/api',
+    download: '/download',
+    login: '/app/login',
+    imd: '/app',
+    imdAPI: '/app/api',
+    staticAPI: `/app/api/static`,
+    staticAPIRelative: '/static',
+
+    docs: '/docs',
+    userDocs: '/user-docs',
+    docsAssets: docsAssetsRoute,
+    docsImages: `${docsAssetsRoute}/images`,
+});

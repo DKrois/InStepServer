@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download InStep App</title>
+    <link rel="icon" type="image/png" href="/assets/icon.png">
+    <meta name="description" content="Download the InStep Indoor Navigation App">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<main class="container">
+    <section class="hero">
+        <div class="logo-wrapper">
+            <img src="/assets/icon.png" alt="InStep Logo" class="logo">
+            <div class="logo-glow"></div>
+        </div>
+
+        <h1 class="title">InStep <span class="accent-text">App</span></h1>
+        <p class="subtitle">Indoor Map Navigation Client</p>
+
+        <div class="cta-container">
+            <a href="/download/InStep-latest.apk" class="btn btn-primary" id="download-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download APK</span>
+                <!--<span class="version">v1.0.2</span>-->
+            </a>
+            <!--<p class="meta-text" id="os-detect">Compatible with Android 10+</p>-->
+        </div>
+    </section>
+
+    <section class="info-grid">
+        <div class="card">
+            <h3>Installation</h3>
+            <ol>
+                <li>Download the <code>.apk</code> file.</li>
+                <li>Open file and allow "Install from Unknown Sources".</li>
+                <li>Connect to your local InStep Server.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h3>About</h3>
+            <p>
+                Manage sessions and visualize pathfinding data directly on your device.
+            </p>
+        </div>
+    </section>
+
+    <footer class="footer-links">
+        <a href="/user-docs" class="link-item">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Documentation
+        </a>
+    </footer>
+</main>
+
+<script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+import type { Configuration } from 'webpack';
+
+import { plugins } from './webpack.plugins';
+import { rules } from './webpack.rules';
+
+const mainBaseDir = './src/main';
+
+export const mainConfig: Configuration = {
+    /**
+     * This is the main entry point for your application, it's the first file
+     * that runs in the main process.
+     */
+    entry: `${mainBaseDir}/index.ts`,
+    // Put your normal webpack config below here
+    module: {
+        rules,
+    },
+    plugins,
+    resolve: {
+        extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
+        extensionAlias: {
+            '.js': ['.ts', '.js'],
+        },
+    },
+    mode: 'production',
+    devtool: 'source-map',
+    target: 'electron-main',
+    output: {
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+    },
+    cache: true,
+};

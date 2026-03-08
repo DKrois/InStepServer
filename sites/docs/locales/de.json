@@ -1,0 +1,19 @@
+{
+  "sidebar": {
+    "introduction": "Einleitung",
+    "imd": "Indoor Map Digitalizer",
+    "server": "Server",
+    "app": "Benutzer-App",
+    "overview": "Übersicht",
+    "quickstart": "Schnellstart",
+    "security": "Sicherheit"
+  },
+  "ui": {
+    "404": {
+      "title": "Seite nicht gefunden",
+      "heading": "404 Nicht gefunden",
+      "message": "Die angeforderte Dokumentationsseite konnte nicht gefunden werden.",
+      "button": "Zurück zur Einleitung"
+    }
+  }
+}

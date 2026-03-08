@@ -1,0 +1,26 @@
+<% function renderSidebar(items) {
+items.forEach(item => {
+if (item.children) { %>
+    <!-- Nested Group (Folder) -->
+    <div class="nav-group" data-key="<%= item.key %>">
+        <div class="nav-folder">
+            <span><%= item.title %></span>
+            <span class="folder-icon">▼</span>
+        </div>
+        <div class="nav-children">
+            <% renderSidebar(item.children); %>
+        </div>
+    </div>
+<% } else {
+    const linkHref = `${baseRoute}/${lang}/${item.href}`;
+    // Simple active check
+    const isActive = currentPath.startsWith(item.href);
+%>
+<!-- Leaf Node (Link) -->
+<a href="<%= linkHref %>" class="nav-link <%= isActive ? 'active' : '' %>">
+    <%= item.title %>
+</a>
+<% }
+});
+}
+renderSidebar(sidebar); %>
