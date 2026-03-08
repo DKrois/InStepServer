@@ -1,6 +1,7 @@
 import express from 'express';
 import { randomInt } from 'node:crypto';
 import { errorToJSON } from '../errorformatting.js';
+import { info as _info } from '../log.js';
 import { projectDB, type SimplifiedProject } from './database.js';
 
 const logSource = 'api';
