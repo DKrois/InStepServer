@@ -6,8 +6,9 @@ import { info } from '../log.js';
 import { isQuitting } from './app.js';
 import { handleStartServer } from './ipc.js';
 import { createMenu } from './menu.js';
-import { setInitialPassword, store } from './settings.js';
+import { store } from './settings.js';
 import { startScheduler } from './timeScheduler.js';
+import { setInitialPassword } from './security.js';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -91,7 +92,7 @@ async function finishedLoad() {
     info('Renderer finished loading...');
 
     if (store.get('firstTimeRunning')) {
-        info('First time running, sending first-time-running IPC and generating password...');
+        info('First time running, generating password and showing modal...');
         await setInitialPassword();
 
         mainWindow?.webContents.send('first-time-running', defaultDBPath);

@@ -4,10 +4,11 @@ import { appDownloadCount, initServer, stopServer } from '../api/server.js';
 import { defaultDBPath } from '../constants.js';
 import { normalizeSize } from '../util.js';
 import { registerShortcutsIPC, registerUpdateIPC } from './installer.js';
-import { registerSecurityIPC, registerSettingsIPC, store } from './settings.js';
+import { registerSettingsIPC, store } from './settings.js';
 import { registerTimeSettingsIPC } from './timeScheduler.js';
 import { mainWindow } from './window.js';
 import { registerQRIPC } from './qr.js';
+import { registerSecurityIPC } from './security.js';
 
 export let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;

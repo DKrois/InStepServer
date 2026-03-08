@@ -1,9 +1,10 @@
 import express from 'express';
 import { imdLockDurationSeconds } from '../../../config.json';
-import { store, verifyPassword } from '../app/settings.js';
+import { store } from '../app/settings.js';
 import { Routes, SitesPaths } from '../constants.js';
 import { errorToJSON } from '../errorformatting.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
+import { verifyPassword } from '../app/security.js';
 
 const logSource = 'auth';
 const info = (str: string) => _info(str, logSource);
@@ -20,7 +21,7 @@ const LOCK_DURATION_MS = 1000 * imdLockDurationSeconds; // safety net; lock will
 // In-memory store for tracking login attempts - <ip, data>
 const loginAttempts = new Map<string, { count: number; lockoutUntil: number | null }>();
 
-export async function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function handleLogin(req: express.Request, res: express.Response, next: express.NextFunction) {
     // --- Get settings from electron-store with sensible defaults ---
     const maxAttempts = store.get('maxLoginAttempts', 5);
     const lockoutMinutes = store.get('lockoutDurationMinutes', 10);
@@ -47,7 +48,7 @@ export async function handleLogin(req: express.Request, res: express.Response, n
         const { password } = req.body;
         if (!password) return res.status(400).json(errorToJSON('Password is required.'));
 
-        const isValid = await verifyPassword(password);
+        const isValid = verifyPassword(password);
         if (isValid) {
             // on successful login, clear any previous attempts for this IP
             loginAttempts.delete(clientIp);

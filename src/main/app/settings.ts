@@ -1,17 +1,11 @@
-import bcrypt from 'bcryptjs';
 import { app, dialog, ipcMain, nativeTheme } from 'electron';
 import Store from 'electron-store';
-import crypto from 'node:crypto';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
 import type { InitialSettings } from '../../common/types.js';
-import { releaseLock } from '../api/auth.js';
 import { defaultDBPath } from '../constants.js';
-import { info } from '../log.js';
 import { canWriteToPath } from '../util.js';
-import { generateSessionSecret, isServerRunning } from '../api/server.js';
+import { isServerRunning } from '../api/server.js';
 import { IPCResponse } from '../../common/util.js';
-
-let initialPassword: string | null = null;
 
 export const store = new Store({
     defaults: {
@@ -94,112 +88,4 @@ async function handleUpdatePath(currentlySelected?: string): IPCResponse<'cancel
             return { success: false, code: 'permission-denied' };
         }
     }
-}
-
-// --- Security ---
-export function registerSecurityIPC() {
-    ipcMain.handle('get-initial-password', () => {
-        const pass = initialPassword;
-        initialPassword = null; // Ensure it can only be retrieved once
-        return pass;
-    });
-
-    ipcMain.handle('verify-password',  (_event, password) => verifyPassword(password));
-    ipcMain.handle('update-password', async (_event, oldPassword, newPassword) => handleUpdatePassword(oldPassword, newPassword));
-
-    ipcMain.handle('toggle-imd-api', (_event, enable: boolean, currentPassword: string) => handleToggleIMDAPI(enable, currentPassword));
-    ipcMain.handle('release-imd-lock', (_event, currentPassword: string) => handleReleaseIMDLock(currentPassword));
-    ipcMain.handle('clear-sessions', (_event, currentPassword: string) => handleClearSessions(currentPassword));
-    ipcMain.handle('get-session-duration', () => store.get('sessionMaxAge'));
-    ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
-
-    ipcMain.handle('get-login-security-settings', () => {
-        const maxAttempts = store.get('maxLoginAttempts');
-        const lockoutMinutes = store.get('lockoutDurationMinutes');
-        return { maxAttempts, lockoutMinutes };
-    });
-
-    // Handler to update the settings
-    ipcMain.handle('update-login-security-settings', (_event, settings, currentPassword) => handleUpdateLoginSettings(settings, currentPassword));
-}
-
-export async function setInitialPassword() {
-    const newPassword = generateRandomPassword();
-    initialPassword = newPassword; // Store it to show the user once
-
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(newPassword, salt);
-    store.set('passwordHash', hash);
-
-    info('Initial password set', 'settings');
-}
-
-function generateRandomPassword() {
-    const length = 12;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
-    let password = '';
-    const randomBytes = crypto.randomBytes(length);
-    for (let i = 0; i < length; i++) {
-        password += charset[randomBytes[i] % charset.length];
-    }
-    return password;
-}
-
-export function verifyPassword(password: string) {
-    const storedHash = store.get('passwordHash');
-    return bcrypt.compare(password, storedHash);
-}
-
-async function handleUpdatePassword(oldPassword: string, newPassword: string): IPCResponse<'permission-denied'> {
-    // First, verify the old password
-    if (!verifyPassword(oldPassword)) return { success: false, code: 'permission-denied' };
-
-    // If it matches, hash and save the new password
-    const salt = await bcrypt.genSalt(10);
-    const newHash = await bcrypt.hash(newPassword, salt);
-    store.set('passwordHash', newHash);
-
-    return { success: true, data: undefined };
-}
-
-async function handleUpdateLoginSettings(settings: { maxAttempts: number, lockoutMinutes: number }, currentPassword: string): IPCResponse<'permission-denied'> {
-    const { maxAttempts, lockoutMinutes } = settings;
-
-    // verify current password
-    const isPasswordValid = await verifyPassword(currentPassword);
-    if (!isPasswordValid) return { success: false, code: 'permission-denied' };
-
-    store.set('maxLoginAttempts', maxAttempts);
-    store.set('lockoutDurationMinutes', lockoutMinutes);
-
-    return { success: true, data: undefined };
-}
-
-async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPCResponse<'permission-denied'> {
-    if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
-
-    store.set('imdEnabled', enable);
-    return { success: true, data: undefined };
-}
-
-async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permission-denied'> {
-    if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
-
-    releaseLock('explicit');
-    return { success: true, data: undefined };
-}
-
-async function handleClearSessions(currentPassword: string): IPCResponse<'permission-denied'> {
-    if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
-
-    generateSessionSecret();
-    return { success: true, data: undefined };
-}
-
-async function handleUpdateSessionDuration(durationMs: number, currentPassword: string) {
-    const isPasswordCorrect = await verifyPassword(currentPassword);
-    if (!isPasswordCorrect) return { success: false };
-
-    store.set('sessionMaxAge', durationMs);
-    return { success: true };
 }
