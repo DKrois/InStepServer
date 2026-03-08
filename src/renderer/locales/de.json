@@ -50,6 +50,8 @@
   "toastIMDAPIDisabled": "IMD-API deaktiviert",
   "releaseIMDLock": "IMD-Sperre aufheben",
   "toastIMDLockReleased": "IMD-Sperre aufgehoben",
+  "clearSessions": "Gespeicherte Sitzungen löschen",
+  "toastSessionsCleared": "Sitzungen gelöscht",
 
   "sessionDuration": "Sitzungsdauer",
   "years": "Jahre",

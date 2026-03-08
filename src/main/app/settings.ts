@@ -8,7 +8,7 @@ import { releaseLock } from '../api/auth.js';
 import { defaultDBPath } from '../constants.js';
 import { info } from '../log.js';
 import { canWriteToPath } from '../util.js';
-import { isServerRunning } from '../api/server.js';
+import { generateSessionSecret, isServerRunning } from '../api/server.js';
 import { IPCResponse } from '../../common/util.js';
 
 let initialPassword: string | null = null;
@@ -109,6 +109,7 @@ export function registerSecurityIPC() {
 
     ipcMain.handle('toggle-imd-api', (_event, enable: boolean, currentPassword: string) => handleToggleIMDAPI(enable, currentPassword));
     ipcMain.handle('release-imd-lock', (_event, currentPassword: string) => handleReleaseIMDLock(currentPassword));
+    ipcMain.handle('clear-sessions', (_event, currentPassword: string) => handleClearSessions(currentPassword));
     ipcMain.handle('get-session-duration', () => store.get('sessionMaxAge'));
     ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
 
@@ -174,6 +175,13 @@ async function handleUpdateLoginSettings(settings: { maxAttempts: number, lockou
     return { success: true, data: undefined };
 }
 
+async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPCResponse<'permission-denied'> {
+    if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
+
+    store.set('imdEnabled', enable);
+    return { success: true, data: undefined };
+}
+
 async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permission-denied'> {
     if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
@@ -181,10 +189,10 @@ async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permi
     return { success: true, data: undefined };
 }
 
-async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPCResponse<'permission-denied'> {
+async function handleClearSessions(currentPassword: string): IPCResponse<'permission-denied'> {
     if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
-    store.set('imdEnabled', enable);
+    generateSessionSecret();
     return { success: true, data: undefined };
 }
 

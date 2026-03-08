@@ -48,6 +48,7 @@ const api = {
 
     toggleIMDAPI: (enabled: boolean, password: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('toggle-imd-api', enabled, password),
     releaseIMDLock: (password: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('release-imd-lock', password),
+    clearSessions: (password: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('clear-sessions', password),
     updateSessionDuration: (ms: number, password: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('update-session-duration', ms, password),
     updateLoginSecuritySettings: (settings: { maxAttempts: number, lockoutMinutes: number }, password: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('update-login-security-settings', settings, password),
 

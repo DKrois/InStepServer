@@ -125,6 +125,10 @@ input[type="time"]:focus {
     opacity: 0.9;
 }
 
+#clear-sessions-btn {
+    height: fit-content;
+}
+
 .login-security-settings .description {
     font-size: 0.9em;
     color: #aaa; /* Adjust color to fit your theme */

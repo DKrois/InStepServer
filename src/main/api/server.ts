@@ -84,14 +84,14 @@ function createExpressApp() {
     const app = express();
     app.use(express.json());
 
-    const fileStore = makeStore({
+    const sessionStore = makeStore({
         connect: session,
         filename: join(userDataPath, 'sessions.db'),
     });
 
     app.use(session({
         secret: getSessionSecret(), // Used to sign the session ID cookie
-        store: fileStore,
+        store: sessionStore,
         resave: false, // Don't save session if unmodified
         saveUninitialized: false, // Don't create session until something stored
         cookie: {
@@ -206,17 +206,19 @@ function getUploadDir() {
 }
 
 function getSessionSecret(): string {
-    const key = 'sessionSecret';
-    let secret = store.get(key);
+    let secret = store.get('sessionSecret');
 
     // If no secret is found, generate a new one
     if (!secret) {
         _info('No session secret found. Generating a new one.', 'session');
-        secret = crypto.randomBytes(64).toString('hex');
-
-        // Save the new secret to the store for future restarts
-        store.set(key, secret);
+        generateSessionSecret();
     }
 
+    return secret;
+}
+
+export function generateSessionSecret() {
+    const secret = crypto.randomBytes(64).toString('hex');
+    store.set('sessionSecret', secret);
     return secret;
 }

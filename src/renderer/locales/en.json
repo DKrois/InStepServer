@@ -50,6 +50,8 @@
   "toastIMDAPIDisabled": "Disabled IMD API",
   "releaseIMDLock": "Release IMD Lock",
   "toastIMDLockReleased": "Released IMD lock",
+  "clearSessions": "Clear existing sessions",
+  "toastSessionsCleared": "Sessions cleared",
 
   "sessionDuration": "Session duration",
   "years": "Years",
@@ -61,7 +63,7 @@
   "toastInvalidDuration": "Invalid duration entered",
 
 
-  "newPassword": "Login",
+  "login": "Login",
   "changePassword": "Change password:",
   "maxLoginAttempts": "Login attempts",
   "lockoutDuration": "Lockout duration",

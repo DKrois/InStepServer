@@ -16,6 +16,7 @@ const toggleNewPasswordBtn = document.getElementById('toggle-new-password')!;
 
 const releaseIMDLockBtn = document.getElementById('release-imd-lock')!;
 const enableIMDAPICheckbox = document.getElementById('imd-api-toggle')! as HTMLInputElement;
+const clearSessionsBtn = document.getElementById('clear-sessions-btn')!;
 
 const sessionYearsInput = document.getElementById('session-years-input') as HTMLInputElement;
 const sessionDaysInput = document.getElementById('session-days-input') as HTMLInputElement;
@@ -35,7 +36,6 @@ let previousLockoutMinutes = 10;
 unlockBtn.addEventListener('click', handleUnlock);
 lockBtn.addEventListener('click', () => setLockedState(true));
 saveBtn.addEventListener('click', handleSave);
-releaseIMDLockBtn.addEventListener('click', releaseIMDLock);
 
 currentPasswordInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -69,6 +69,31 @@ toggleNewPasswordBtn.addEventListener('click', () => {
     const isPassword = newPasswordInput.type === 'password';
     newPasswordInput.type = isPassword ? 'text' : 'password';
     toggleNewPasswordBtn.classList.toggle('password-shown', isPassword);
+});
+
+releaseIMDLockBtn.addEventListener('click', async () => {
+    const currentPassword = currentPasswordInput.value;
+
+    const result = await window.api.releaseIMDLock(currentPassword);
+    if (result.success) {
+        showTranslatedToast( 'toastIMDLockReleased');
+    } else {
+        showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+        setLockedState(true);
+    }
+});
+
+clearSessionsBtn.addEventListener('click', async () => {
+    const currentPassword = currentPasswordInput.value;
+
+    const result = await window.api.clearSessions(currentPassword);
+    if (result.success) {
+        showTranslatedToast('toastSessionsCleared');
+        setRestartServerInfoVisible(true);
+    } else {
+        showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+        setLockedState(true);
+    }
 });
 
 export function setInitialSecuritySettings(settings: { imdEnabled: boolean, sessionDuration: number, maxLoginAttempts: number, lockoutMinutes: number }) {
@@ -226,19 +251,6 @@ async function handleSaveLockoutSettings() {
 }
 
 // --- Session config ---
-async function releaseIMDLock() {
-    const currentPassword = currentPasswordInput.value;
-
-    const result = await window.api.releaseIMDLock(currentPassword);
-    if (result.success) {
-        showTranslatedToast( 'toastIMDLockReleased');
-    } else {
-        showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
-        setLockedState(true);
-        return;
-    }
-}
-
 async function handleSaveDuration(): Promise<{ success: boolean, code?: 'invalid-duration' | 'unchanged-duration' | 'invalid-password' }> {
     const years = parseInt(sessionYearsInput.value) ?? 0;
     const days = parseInt(sessionDaysInput.value) ?? 0;
