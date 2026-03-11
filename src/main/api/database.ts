@@ -13,8 +13,6 @@ const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
 const error = (str: string, err: unknown) => _error(str, err, logSource);
 
-let _db: ProjectDatabase | null = null;
-
 export interface DirectoryStats {
     directoryCount: number;
     fileCount: number;
@@ -355,6 +353,7 @@ class ProjectDatabase {
     }
 }
 
+let _db: ProjectDatabase | null = null;
 /**
  * Initializes the database with a specific path.
  * This should only be called once at startup from the main process.

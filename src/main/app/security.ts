@@ -5,7 +5,7 @@ import { info } from '../log.js';
 import crypto from 'node:crypto';
 import type { IPCResponse } from '../../common/util.js';
 import { releaseLock } from '../api/auth.js';
-import { generateSessionSecret } from '../api/server.js';
+import { generateSessionSecret, sessionStore } from '../api/server.js';
 
 let initialPassword: string | null = null;
 
@@ -103,6 +103,8 @@ async function handleReleaseIMDLock(currentPassword: string): IPCResponse<'permi
 async function handleClearSessions(currentPassword: string): IPCResponse<'permission-denied'> {
     if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
+    // session.Store declares clear() as sync, but nedb-promises-session-store implements it as async
+    await sessionStore.clear?.();
     generateSessionSecret();
     return { success: true, data: undefined };
 }

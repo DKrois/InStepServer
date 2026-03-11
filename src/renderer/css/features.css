@@ -127,6 +127,7 @@ input[type="time"]:focus {
 
 #clear-sessions-btn {
     height: fit-content;
+    align-self: center;
 }
 
 .login-security-settings .description {

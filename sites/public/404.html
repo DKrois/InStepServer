@@ -111,16 +111,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const appButton = document.getElementById('app-button');
-
         try {
             const response = await fetch('/app/api/enabled');
-
             if (response.ok) {
                 const data = await response.json();
-                if (data.enabled) {
-                    // If the API is enabled, make the button visible
-                    appButton.classList.remove('hidden');
-                }
+                // If API enabled, make button visible
+                if (data.enabled) appButton.classList.remove('hidden');
             }
         } catch (error) {
             // If the request fails (e.g., server is down), the button remains hidden.

@@ -38,6 +38,12 @@ declare module 'express-session' {
     }
 }
 
+// define global to clear db later
+export const sessionStore = makeStore({
+    connect: session,
+    filename: join(userDataPath, 'sessions.db'),
+});
+
 let httpServer: http.Server | null = null;
 let httpTerminator: HttpTerminator | null = null;
 export async function initServer(port: number) {
@@ -84,20 +90,16 @@ function createExpressApp() {
     const app = express();
     app.use(express.json());
 
-    const sessionStore = makeStore({
-        connect: session,
-        filename: join(userDataPath, 'sessions.db'),
-    });
-
     app.use(session({
         secret: getSessionSecret(), // Used to sign the session ID cookie
         store: sessionStore,
         resave: false, // Don't save session if unmodified
         saveUninitialized: false, // Don't create session until something stored
+        name: 'instep_login',
         cookie: {
             secure: 'auto',
             httpOnly: true,
-            maxAge: store.get('sessionMaxAge') || undefined, // sessions don't expire if sessionMaxAge is 0 (per default 30d)
+            maxAge: store.get('sessionMaxAge') || undefined, // default 30d
             path: Routes.imd,
         }
     }));
@@ -206,15 +208,11 @@ function getUploadDir() {
 }
 
 function getSessionSecret(): string {
-    let secret = store.get('sessionSecret');
+    const secret = store.get('sessionSecret');
+    if (secret) return secret;
 
-    // If no secret is found, generate a new one
-    if (!secret) {
-        _info('No session secret found. Generating a new one.', 'session');
-        generateSessionSecret();
-    }
-
-    return secret;
+    _info('No session secret found. Generating a new one.', 'session');
+    return generateSessionSecret();
 }
 
 export function generateSessionSecret() {
