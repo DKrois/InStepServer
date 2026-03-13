@@ -119,19 +119,19 @@ async function checkForUpdate() {
 }
 
 // modified from https://www.npmjs.com/package/electron-squirrel-startup
-// (the same functionality except for creating shortcuts)
+// (same functionality except for creating shortcuts)
 export function handleSquirrelCommands() {
     if (process.platform === 'win32') {
         const cmd = process.argv[1];
-        if (!cmd) return false;
+        if (!cmd || cmd === '.') return false;
         info(`processing squirrel command \`${cmd}\``);
-        const target = basename(process.execPath);
 
         if (cmd === '--squirrel-install' || cmd === '--squirrel-updated') {
             // don't create shortcuts here
             return true;
         }
         if (cmd === '--squirrel-uninstall') {
+            const target = basename(process.execPath);
             run(['--removeShortcut=' + target + ''], app.quit);
             return true;
         }
@@ -170,7 +170,6 @@ export function createShortcut(location: ShortcutLocation) {
     const exeName = path.basename(process.execPath);
 
     if (fs.existsSync(updateExePath)) {
-        // --- Squirrel Update.exe ---
         info(`Using Update.exe to create ${location} shortcut`);
         try {
             const result = spawnSync(updateExePath, [

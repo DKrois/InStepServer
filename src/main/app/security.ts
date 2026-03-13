@@ -7,15 +7,7 @@ import type { IPCResponse } from '../../common/util.js';
 import { releaseLock } from '../api/auth.js';
 import { generateSessionSecret, sessionStore } from '../api/server.js';
 
-let initialPassword: string | null = null;
-
 export function registerSecurityIPC() {
-    ipcMain.handle('get-initial-password', () => {
-        const pass = initialPassword;
-        initialPassword = null; // Ensure it can only be retrieved once
-        return pass;
-    });
-
     ipcMain.handle('verify-password',  (_event, password) => verifyPassword(password));
     ipcMain.handle('update-password', async (_event, oldPassword, newPassword) => handleUpdatePassword(oldPassword, newPassword));
 
@@ -35,15 +27,15 @@ export function registerSecurityIPC() {
     ipcMain.handle('update-login-security-settings', (_event, settings, currentPassword) => handleUpdateLoginSettings(settings, currentPassword));
 }
 
-export async function setInitialPassword() {
+export function setInitialPassword() {
     const newPassword = generateRandomPassword();
-    initialPassword = newPassword; // Store it to show the user once
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(newPassword, salt);
     store.set('passwordHash', hash);
 
     info('Initial password set', 'auth');
+    return newPassword;
 }
 
 function generateRandomPassword() {

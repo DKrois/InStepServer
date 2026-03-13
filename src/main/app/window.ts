@@ -26,7 +26,7 @@ export function createWindow() {
     const defaultWindowHeight = Math.max(calcDefaultWindowHeightPx, defaultWindowHeightPx);
 
     // maximize if screen is too small
-    const shouldMaximize = minWindowWidth > defaultWindowWidth || minWindowHeight > defaultWindowHeight;
+    const shouldMaximize = defaultWindowHeight > screenHeight || defaultWindowWidth > screenWidth;
 
     mainWindow = new BrowserWindow({
         width: shouldMaximize ? screenWidth : defaultWindowWidth,
@@ -44,6 +44,20 @@ export function createWindow() {
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
     Menu.setApplicationMenu(createMenu());
 
+    if (shouldMaximize) mainWindow.maximize();
+
+    // only show window when ready to avoid flashes
+    mainWindow.once('ready-to-show', mainWindow?.show);
+
+    mainWindow.on('close', event => {
+        if (!isQuitting && store.get('hideToTray')) {
+            // hide window to tray rather than full close
+            event.preventDefault();
+            mainWindow?.hide();
+        }
+    });
+    mainWindow.on('closed', () => mainWindow = null);
+
     // set CSP
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
         callback({
@@ -56,20 +70,6 @@ export function createWindow() {
             }
         });
     });
-
-    if (shouldMaximize) mainWindow.maximize();
-
-    // once window is ready, show it. This avoids the flash
-    mainWindow.once('ready-to-show', mainWindow?.show);
-
-    mainWindow.on('close', event => {
-        if (!isQuitting && store.get('hideToTray')) {
-            // hide window to tray rather than full close
-            event.preventDefault();
-            mainWindow?.hide();
-        }
-    });
-    mainWindow.on('closed', () => mainWindow = null);
 
     // always open links in external browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -93,14 +93,14 @@ async function finishedLoad() {
 
     if (store.get('firstTimeRunning')) {
         info('First time running, generating password and showing modal...');
-        await setInitialPassword();
+        const initialPassword = setInitialPassword();
 
-        mainWindow?.webContents.send('first-time-running', defaultDBPath);
+        mainWindow?.webContents.send('first-time-running', defaultDBPath, initialPassword);
         // reset firstTimeRunning flag on initial modal close in case of program crash
     }
 
-    const timeSettings = store.get('timeSettings') as any;
-    // time management takes precedence over "start on open" setting
+    const timeSettings = store.get('timeSettings');
+    // time management takes precedence over 'start on open' setting
     if (timeSettings?.enabled) {
         await startScheduler();
     } else if (store.get('startServerOnOpen') && !isServerRunning()) {

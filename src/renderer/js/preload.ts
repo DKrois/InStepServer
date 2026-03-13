@@ -15,9 +15,9 @@ const api = {
     openDownloadURL: () => ipcRenderer.send('open-download-url'),
     setUpdateNotification: (notificationType: 'never' | 'later') => ipcRenderer.send('set-notification-update', notificationType),
 
-    onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
+    onFirstTimeRunning: (callback: (defaultDBPath: string, initialPassword: string) => void) => {
         // event can only happen once
-        ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
+        ipcRenderer.once('first-time-running', (_event, defaultDBPath: string, initialPassword: string) => callback(defaultDBPath, initialPassword));
     },
     getInitialSettings: (): Promise<InitialSettings> => ipcRenderer.invoke('get-initial-settings'),
     setProjectDataPath: (currentlySelectedPath?: string): IPCResponse<'cancelled' | 'permission-denied', string> => ipcRenderer.invoke('set-project-data-path', currentlySelectedPath),
@@ -38,11 +38,9 @@ const api = {
     exportTimeSettings: (): IPCResponse<'cancelled'> => ipcRenderer.invoke('export-time-settings'),
     importTimeSettings: (): IPCResponse<'cancelled', TimeSettings> => ipcRenderer.invoke('import-time-settings'),
     showClearTimeContextMenu: (inputId: string) => ipcRenderer.send('show-clear-time-context-menu', inputId),
-    onClearTimeInput: (callback: (inputId: string) => void) => {
-        ipcRenderer.on('clear-time-input', (_event, inputId) => callback(inputId as string));
-    },
+    onClearTimeInput: (callback: (inputId: string) => void) =>
+        ipcRenderer.on('clear-time-input', (_event, inputId) => callback(inputId as string)),
 
-    getInitialPassword: (): Promise<string> => ipcRenderer.invoke('get-initial-password'),
     verifyPassword: (password: string): Promise<boolean> => ipcRenderer.invoke('verify-password', password),
     updatePassword: (oldPassword: string, newPassword: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('update-password', oldPassword, newPassword),
 
@@ -67,7 +65,7 @@ const api = {
     },
 
     onLog: (callback: (log: string[]) => void) => {
-        ipcRenderer.on('log', (_event, value) => callback(value as string[]));
+        ipcRenderer.on('log', (_event, value) => callback(value));
     },
     onShowToast: (callback: (key: TranslationKey, options?: TOptions, type?: 'info' | 'error') => void) => {
         ipcRenderer.on('show-toast', (_event, key: TranslationKey, options?: TOptions, type: 'info' | 'error' = 'info') => callback(key, options, type));

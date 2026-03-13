@@ -71,11 +71,11 @@ document.addEventListener('keydown', event => {
 });
 
 // --- Initial Modal ---
-window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
+window.api.onFirstTimeRunning(async (defaultDBPath: string, initialPassword: string) => {
     const isWindows = await window.api.isWindows();
     if (isWindows) shortcutOptionsContainer.classList.remove('hidden');
 
-    initialPasswordDisplay.value = await window.api.getInitialPassword();
+    initialPasswordDisplay.value = initialPassword;
 
     currentPathSpan.textContent = defaultDBPath;
     currentPathSpan.title = defaultDBPath;

@@ -28,7 +28,7 @@ export async function registerIPCHandlers() {
 
     ipcMain.handle('get-app-version', () => app.getVersion());
     ipcMain.handle('is-windows', () => process.platform === 'win32');
-    ipcMain.on('initial-modal-closed', handleInitialModalClosed);
+    ipcMain.once('initial-modal-closed', handleInitialModalClosed);
 }
 
 function registerThemeIPC() {

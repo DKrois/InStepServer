@@ -10,15 +10,16 @@ import { createWindow, mainWindow } from './window.js';
 
 export let isQuitting = false;
 
-// request single instance lock (only one app instance allowed)
-const gotTheLock = app.requestSingleInstanceLock();
-
 export function initApp() {
     log.transports.console.level = false;
-    if (!gotTheLock) { // ensure single instance
+
+    // request single instance lock (only one app instance allowed)
+    const isPrimaryInstance = app.requestSingleInstanceLock();
+    if (!isPrimaryInstance) { // ensure single instance
         app.quit();
         return;
     }
+
     initUpdater();
     if (handleSquirrelCommands()) {
         app.quit();
@@ -34,7 +35,7 @@ export function initApp() {
         // tray is created on db init
         initStore();
 
-        // db init
+        // db init if path set
         // first run already handled by ipc / handleInitialModalClosed
         const projectDataPath = store.get('projectDataPath');
         if (projectDataPath) initDB(projectDataPath);
@@ -42,9 +43,7 @@ export function initApp() {
         await registerIPCHandlers();
     });
 
-    app.on('before-quit', () => {
-        isQuitting = true;
-    });
+    app.on('before-quit', () => isQuitting = true);
 
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') app.quit();

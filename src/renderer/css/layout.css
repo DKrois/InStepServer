@@ -149,7 +149,7 @@ body.stats-visible .sidebar {
 
 /* shrink logs section when stats sidebar is open */
 body.stats-visible .logs-section {
-    right: max(27%, 250px);
+    right: min(23%, 450px);
 }
 
 #logs-container {

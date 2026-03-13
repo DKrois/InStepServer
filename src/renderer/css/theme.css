@@ -30,6 +30,10 @@ body {
     color: var(--text-color);
 }
 
+p {
+    color: var(--text-color);
+}
+
 a {
     color: #cba8ff;
 }

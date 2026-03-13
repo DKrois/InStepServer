@@ -3,7 +3,9 @@ import type { TOptions } from 'i18next';
 import { toastTimeout } from '../../../config.json';
 import { getTranslation, type TranslationKey } from './translate';
 
-const convert = new AnsiToHTML();
+const convert = new AnsiToHTML({
+    fg: 'var(--text-color)' // use theme dependant css variables
+});
 
 const logsOutput = document.getElementById('logs-output')! as HTMLPreElement;
 const logsSection = document.querySelector('.logs-section')!;
@@ -52,6 +54,7 @@ function addLogMessage(message: string[]) {
 function formatLog(message: string) {
     const m = escapeHtml(message);
     const str = convert.toHtml(m);
+    console.log({ m, str });
     return linkify(str);
 }
 
