@@ -232,14 +232,14 @@ export function closeModal(modal: HTMLElement) {
 const handleGenerateQR = async (type: QRType) => {
     currentQRType = type;
     try {
-        const response = await window.api.generateQRCode(type);
+        const { success, data, code } = await window.api.generateQRCode(type);
 
-        if (response.success) {
-            qrImage.src = response.data;
+        if (success) {
+            qrImage.src = data;
             qrImage.classList.remove('hidden');
             qrSaveBtn.classList.remove('hidden');
         } else {
-            if (response.code === 'ip-failed') showTranslatedToast('toastIPFailed', undefined, 'error');
+            if (code === 'ip-failed') showTranslatedToast('toastIPFailed', undefined, 'error');
             else showTranslatedToast('toastUnknownError', undefined, 'error');
         }
     } catch (error) {

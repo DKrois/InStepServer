@@ -3,9 +3,9 @@ import { store } from './settings.js';
 import bcrypt from 'bcryptjs';
 import { info as _info } from '../log.js';
 import crypto from 'node:crypto';
-import type { IPCResponse } from '../../common/util.js';
 import { releaseLock } from '../api/auth.js';
 import { generateSessionSecret, sessionStore } from '../api/server.js';
+import type { IPCResponse } from '../../common/types.js';
 
 const logSource = 'security';
 const info = (str: string) => _info(str, logSource);

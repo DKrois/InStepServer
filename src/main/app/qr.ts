@@ -5,8 +5,7 @@ import { store } from './settings.js';
 import { hostname } from '../../../config.json';
 import QRCode from 'qrcode';
 import { info as _info, warn as _warn, error as _error } from '../log.js';
-import type { IPCResponse } from '../../common/util.js';
-import type { QRType } from '../../common/types.js'
+import type { IPCResponse, QRType } from '../../common/types.js'
 import { extname } from 'node:path';
 
 const logSource = 'qr';

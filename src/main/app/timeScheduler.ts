@@ -2,7 +2,7 @@ import { dialog, ipcMain, Menu } from 'electron';
 import { readFile, writeFile } from 'node:fs/promises';
 import { schedulerIntervalTime } from '../../../config.json';
 import { generateScheduleEvents } from '../../common/time.js';
-import type { TimeSettings } from '../../common/types.js';
+import type { IPCResponse, TimeSettings } from '../../common/types.js';
 import { info as _info, warn as _warn } from '../log.js';
 import {
     handleStartServer,
@@ -13,7 +13,6 @@ import {
 } from './ipc.js';
 import { store } from './settings.js';
 import { mainWindow } from './window.js';
-import { IPCResponse } from '../../common/util.js';
 
 let schedulerInterval: NodeJS.Timeout | null = null;
 

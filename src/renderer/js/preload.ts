@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { TOptions } from 'i18next';
-import type { InitialSettings, Stats, TimeSettings } from '../../common/types.js';
-import { IPCResponse } from '../../common/util.js';
+import type { InitialSettings, IPCResponse, QRType, Stats, TimeSettings } from '../../common/types.js';
 import type { TranslationKey } from './translate.js';
 
 const api = {
@@ -23,15 +22,14 @@ const api = {
 
     startServer: (port: number): Promise<boolean> => ipcRenderer.invoke('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
-    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number }) => void) => {
-        ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
-    },
+    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number }) => void) =>
+        ipcRenderer.on('server-status-changed', (_event, status) => callback(status)),
 
     clearCache: () => ipcRenderer.send('clear-cache'),
 
     getServerURLs: (): Promise<{ ip: string | null, mdns: string, hostname: string }> => ipcRenderer.invoke('get-server-urls'),
-    generateQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'ip-failed' | 'error', string> => ipcRenderer.invoke('generate-qr-code', type), // { success: boolean, code?: 'ip-failed' | 'error', data?: string }
-    saveQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'cancelled' | 'ip-failed' | 'error', string> => ipcRenderer.invoke('save-qr-code', type),
+    generateQRCode: (type: QRType): IPCResponse<'ip-failed' | 'error', string> => ipcRenderer.invoke('generate-qr-code', type),
+    saveQRCode: (type: QRType): IPCResponse<'cancelled' | 'ip-failed' | 'error', string> => ipcRenderer.invoke('save-qr-code', type),
 
     saveTimeSettings: (settings: TimeSettings) => ipcRenderer.send('save-time-settings', settings),
     exportTimeSettings: (): IPCResponse<'cancelled'> => ipcRenderer.invoke('export-time-settings'),

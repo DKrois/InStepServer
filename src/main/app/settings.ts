@@ -1,11 +1,10 @@
 import { app, dialog, ipcMain, nativeTheme } from 'electron';
 import Store from 'electron-store';
 import { defaultTimeSettings, Durations } from '../../common/time.js';
-import type { InitialSettings } from '../../common/types.js';
+import type { InitialSettings, IPCResponse } from '../../common/types.js';
 import { defaultDBPath } from '../constants.js';
 import { canWriteToPath } from '../util.js';
 import { isServerRunning } from '../api/server.js';
-import { IPCResponse } from '../../common/util.js';
 import { info as _info, warn as _warn } from '../log.js';
 
 const logSource = 'settings';
