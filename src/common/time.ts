@@ -1,4 +1,4 @@
-import type { Time, TimeSettings } from './types.js';
+import type { Time, TimeSettings, WeekdayRule } from './types.js';
 
 export function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
@@ -30,7 +30,7 @@ export function addZeroes(str: number, padAmount: number = 2, radix: number = 10
     return str.toString(radix).padStart(padAmount, '0');
 }
 
-type SplitDuration = { years: number, months: number, weeks: number, days: number, hours: number, minutes: number, seconds: number, milliseconds: number }
+export type Duration = { years: number, months: number, weeks: number, days: number, hours: number, minutes: number, seconds: number, milliseconds: number }
 const DurationUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'] as const;
 type DurationUnit = typeof DurationUnits[number];
 export enum Durations {
@@ -51,7 +51,11 @@ export enum Durations {
     msInYear = msInDay * daysInYear,
 }
 
-export function getTotalMs(duration: SplitDuration | number[]) {
+export function getTotalMsPartial(duration: Partial<Duration>) {
+    return getTotalMs(createDuration(duration));
+}
+
+function getTotalMs(duration: Duration | number[]) {
     if (Array.isArray(duration)) duration = createDuration(duration);
 
     return Math.floor(duration.milliseconds
@@ -64,10 +68,10 @@ export function getTotalMs(duration: SplitDuration | number[]) {
         + duration.years * Durations.msInYear);
 }
 
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: false, highest?: DurationUnit, exclude?: DurationUnit[]): SplitDuration;
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: true, highest?: DurationUnit, exclude?: DurationUnit[]): number[];
+export function normalizeDuration(duration: Duration | number[] | number, returnArr?: false, highest?: DurationUnit, exclude?: DurationUnit[]): Duration;
+export function normalizeDuration(duration: Duration | number[] | number, returnArr?: true, highest?: DurationUnit, exclude?: DurationUnit[]): number[];
 
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: boolean, highest: DurationUnit = 'y', exclude: DurationUnit[] = []): number[] | SplitDuration {
+export function normalizeDuration(duration: Duration | number[] | number, returnArr?: boolean, highest: DurationUnit = 'y', exclude: DurationUnit[] = []): number[] | Duration {
     let remainingMs = typeof duration === 'number' ? duration : getTotalMs(duration);
     const highestIndex = DurationUnits.indexOf(highest);
 
@@ -106,7 +110,7 @@ export function normalizeDuration(duration: SplitDuration | number[] | number, r
     return returnArr ? result : createDuration(result);
 }
 
-export function createDuration(duration: Partial<SplitDuration> | number[]): SplitDuration {
+export function createDuration(duration: Partial<Duration> | number[]): Duration {
     if (Array.isArray(duration)) {
         return {
             years: duration[0],
@@ -135,11 +139,11 @@ export function createDuration(duration: Partial<SplitDuration> | number[]): Spl
 // --- Scheduler ---
 export const defaultTimeSettings: TimeSettings = {
     enabled: false,
-    global: { start: '' as Time, end: '' as Time, mode: 'custom' },
+    global: { start: '', end: '', mode: 'custom' } as const,
     weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', end: '' }])) as TimeSettings['weekdays']
 };
 // Define a default rule for when no other configuration applies
-const DEFAULT_RULE = { mode: 'off', enabled: true };
+const DEFAULT_RULE = { enabled: true, mode: 'off' } as const;
 
 export function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -155,10 +159,8 @@ export function convertJsDayToCustom(jsDay: number): number {
 
 /**
  * Generates a chronological list of start/stop events based on time settings.
- * @param {object} timeSettings - The full time settings object
- * @returns {{time: Date, type: 'start' | 'stop'}[]} A sorted array of event objects.
  */
-export function generateScheduleEvents(timeSettings: any): { time: Date; type: 'start' | 'stop'; }[] {
+export function generateScheduleEvents(timeSettings: TimeSettings): { time: Date; type: 'start' | 'stop'; }[] {
     if (!timeSettings?.enabled) return [];
 
     const events: { time: Date, type: 'start' | 'stop' }[] = [];
@@ -172,18 +174,18 @@ export function generateScheduleEvents(timeSettings: any): { time: Date; type: '
 
         const dayIndex = convertJsDayToCustom(date.getDay());
 
-        let rule = timeSettings.weekdays?.[dayIndex];
-        if (!rule?.enabled) rule = timeSettings.global; // fallback to global
+        let rule: WeekdayRule = timeSettings.weekdays?.[dayIndex];
+        if (!rule?.enabled) rule = { ...timeSettings.global, enabled: true }; // fallback to global
         if (!rule?.enabled) rule = DEFAULT_RULE; // fallback to default
 
-        const { mode, start, end } = rule;
-
         // --- Translate the effective rule into events ---
+        const { mode } = rule;
         if (mode === 'wholeday') {
             events.push({ time: date, type: 'start' });
         } else if (mode === 'off') {
             events.push({ time: date, type: 'stop' });
-        } else if (mode === 'custom' || !mode) { // Catches global and custom rules
+        } else if (mode === 'custom' || !mode) { // catches global and custom rules
+            const { start, end } = rule;
 
             // treat undefined rules as off day
             if (!start && !end) {

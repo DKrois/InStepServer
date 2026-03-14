@@ -73,7 +73,7 @@ async function handleUpdateLoginSettings(settings: { maxAttempts: number, lockou
     store.set('maxLoginAttempts', maxAttempts);
     store.set('lockoutDurationMinutes', lockoutMinutes);
 
-    info(`Limited login to ${maxAttempts} attempts, blocking for ${lockoutMinutes}m`);
+    info(`Limited login to ${maxAttempts} attempts, blocking for ${lockoutMinutes}min`);
     return { success: true, data: undefined };
 }
 

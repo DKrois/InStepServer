@@ -65,8 +65,7 @@ export function registerSettingsIPC() {
         };
     });
 
-    ipcMain.on('save-lang', (_event, language: string) => store.set('language', language));
-
+    ipcMain.on('save-language', (_event, language: string) => store.set('language', language));
     ipcMain.handle('set-project-data-path', (_event, currentlySelectedPath?: string) => handleUpdatePath(currentlySelectedPath));
 }
 

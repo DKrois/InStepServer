@@ -1,5 +1,6 @@
 import { showTranslatedToast } from './logs';
 import { getTranslation } from './translate';
+import type { InitialSettings } from '../../common/types.js';
 
 const startBtn = document.getElementById('start-btn')! as HTMLButtonElement;
 const stopBtn = document.getElementById('stop-btn')! as HTMLButtonElement;
@@ -72,7 +73,7 @@ function serverStatusChanged(status: { isRunning: boolean; port?: number, isStar
     }
 }
 
-export function setInitialServerSettings(settings: { serverEnabled: boolean, port: number }) {
+export function setInitialServerSettings(settings: Pick<InitialSettings, 'serverEnabled' | 'port'>) {
     const { serverEnabled, port } = settings;
     return serverStatusChanged({ isRunning: serverEnabled, port, isStartup: true });
 }

@@ -14,7 +14,7 @@ export type TranslationKey = keyof typeof en;
 
 i18next.init({
     lng: 'en',
-    debug: false,
+    debug: true,
     fallbackLng: 'en',
     resources: {
         en: { translation: en },
@@ -25,8 +25,8 @@ i18next.init({
 languageSwitcher.addEventListener('change', async () => {
     const newLang = languageSwitcher.value;
     await updateLanguage(newLang);
-
     window.api.saveLanguage(newLang);
+
     const fullLang = languageSwitcher.selectedOptions.item(0)?.innerText;
     showTranslatedToast('toastLangSwitch', { lang: fullLang });
 });

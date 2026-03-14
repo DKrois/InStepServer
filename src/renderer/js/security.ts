@@ -1,6 +1,7 @@
 import { showTranslatedToast } from './logs';
-import { createDuration, getTotalMs, normalizeDuration } from '../../common/time';
+import { type Duration, getTotalMsPartial, normalizeDuration } from '../../common/time';
 import { setRestartServerInfoVisible } from './serverStatus';
+import type { InitialSettings } from '../../common/types.js';
 
 const securityCard = document.getElementById('security-card')!;
 
@@ -96,7 +97,7 @@ clearSessionsBtn.addEventListener('click', async () => {
     }
 });
 
-export function setInitialSecuritySettings(settings: { imdEnabled: boolean, sessionDuration: number, maxLoginAttempts: number, lockoutMinutes: number }) {
+export function setInitialSecuritySettings(settings: Pick<InitialSettings, 'imdEnabled' | 'sessionDuration' | 'maxLoginAttempts' | 'lockoutMinutes'>) {
     const { imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes } = settings;
     currentDurationMs = sessionDuration;
     previousMaxAttempts = maxLoginAttempts;
@@ -137,65 +138,101 @@ async function handleUnlock() {
 }
 
 async function handleSave() {
+    // validation first to avoid changing anything (& locking) if smth is invalid
     const currentPassword = currentPasswordInput.value;
     if (!currentPassword) {
         showTranslatedToast('toastPasswordEmpty', undefined, 'error');
         return;
     }
 
-    // -- handle session --
-    const enableIMDAPI = enableIMDAPICheckbox.checked;
-    if (enableIMDAPI !== previousEnableIMDAPI) {
-        previousEnableIMDAPI = enableIMDAPI;
-        const enableIMDAPIResult = await window.api.toggleIMDAPI(enableIMDAPI, currentPassword);
-        if (enableIMDAPIResult.success) {
-            showTranslatedToast( enableIMDAPI ? 'toastIMDAPIEnabled' : 'toastIMDAPIDisabled');
-        } else {
-            showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
-            setLockedState(true);
-            return;
-        }
+    // duration
+    const p = (e: HTMLInputElement) => parseInt(e.value, 10) ?? 0;
+    const years = p(sessionYearsInput);
+    const days = p(sessionDaysInput);
+    const hours = p(sessionHoursInput);
+    const minutes = p(sessionMinutesInput);
+    if (years < 0 || days < 0 || hours < 0 || minutes < 0) {
+        showTranslatedToast('toastInvalidDuration', undefined, 'error');
+        return;
     }
 
-    const durationResult = await handleSaveDuration();
+    // lockout settings
+    const maxAttempts = parseInt(maxLoginAttemptsInput.value, 10);
+    const lockoutMinutes = parseInt(lockoutMinutesInput.value, 10);
+    if (isNaN(maxAttempts) || isNaN(lockoutMinutes) || maxAttempts < 1 || lockoutMinutes < 1) {
+        showTranslatedToast('toastInvalidLoginSecuritySettings', undefined, 'error');
+        return;
+    }
 
-    // user entered invalid duration; toast already shown. don't lock, don't continue (avoid confusion if pw changed)
-    if (durationResult.code === 'invalid-duration') return;
+    // --- handle saves ---
+    const imdEnabledResult = await handleSaveIMDEnabledState(currentPassword);
+    if (imdEnabledResult.code === 'invalid-password') {
+        setLockedState(true);
+        return;
+    }
 
-    // pw wrong for duration update
+    const durationResult = await handleSaveDuration({ years, days, hours, minutes }, currentPassword);
     if (durationResult.code === 'invalid-password') {
-        // lock and don't continue (as update pw request would fail anyway)
         setLockedState(true);
         return;
     }
-    if (durationResult.success) setRestartServerInfoVisible(true);
 
-    // if duration change successful or duration wasn't changed, continue
-    // -- handle password change --
-    const passwordResult = await handleSavePassword();
-
-    // duration unchanged but user tried to change pw & current pw is wrong
+    const passwordResult = await handleSavePassword(currentPassword);
     if (passwordResult.code === 'invalid-password') {
-        // duration request wasn't made (→ invalid pw toast wasn't shown yet)
         setLockedState(true);
         return;
     }
 
-    const securityResult = await handleSaveLockoutSettings();
-    if (securityResult.code === 'invalid-settings') return;
-    if (securityResult.code === 'invalid-password') {
+    const lockoutResult = await handleSaveLockoutSettings({ maxAttempts, lockoutMinutes }, currentPassword);
+    if (lockoutResult.code === 'invalid-password') {
         setLockedState(true);
         return;
     }
 
-    // lock again
     setLockedState(true);
 }
 
-async function handleSavePassword(): Promise<{ success: boolean, code?: 'empty-password' | 'invalid-password' }> {
-    const newPassword = newPasswordInput.value;
-    const currentPassword = currentPasswordInput.value;
+async function handleSaveIMDEnabledState(currentPassword: string): Promise<{ success: boolean, code?: 'invalid-password' }> {
+    const enableIMDAPI = enableIMDAPICheckbox.checked;
+    if (enableIMDAPI !== previousEnableIMDAPI) {
+        previousEnableIMDAPI = enableIMDAPI;
 
+        const enableIMDAPIResult = await window.api.toggleIMDAPI(enableIMDAPI, currentPassword);
+        if (enableIMDAPIResult.success) {
+            showTranslatedToast( enableIMDAPI ? 'toastIMDAPIEnabled' : 'toastIMDAPIDisabled');
+            return { success: true };
+        } else {
+            showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+            setLockedState(true);
+            return { success: false, code: 'invalid-password' };
+        }
+    }
+
+    // just return success: true for simplicity
+    return { success: true };
+}
+
+async function handleSaveDuration(
+    d: Partial<Duration>, currentPassword: string
+) : Promise<{ success: boolean, code?: 'unchanged-duration' | 'invalid-password' }> {
+    const totalMs = getTotalMsPartial(d);
+    if (totalMs === currentDurationMs) return { success: false, code: 'unchanged-duration' };
+
+    const result = await window.api.updateSessionDuration(totalMs, currentPassword);
+    if (result.success) {
+        showTranslatedToast('toastDurationUpdated');
+        setRestartServerInfoVisible(true);
+
+        currentDurationMs = totalMs;
+        return { success: true };
+    } else {
+        showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
+        return { success: false, code: 'invalid-password' };
+    }
+}
+
+async function handleSavePassword(currentPassword: string): Promise<{ success: boolean, code?: 'empty-password' | 'invalid-password' }> {
+    const newPassword = newPasswordInput.value;
     if (!newPassword) return { success: false, code: 'empty-password' };
 
     const result = await window.api.updatePassword(currentPassword, newPassword);
@@ -208,35 +245,18 @@ async function handleSavePassword(): Promise<{ success: boolean, code?: 'empty-p
     }
 }
 
-async function handleSaveLockoutSettings() {
-    const newMaxTries = parseInt(maxLoginAttemptsInput.value, 10);
-    const newLockoutMinutes = parseInt(lockoutMinutesInput.value, 10);
+async function handleSaveLockoutSettings(settings: { maxAttempts: number; lockoutMinutes: number }, currentPassword: string) {
+    const { maxAttempts, lockoutMinutes } = settings;
 
-    // Basic validation
-    if (isNaN(newMaxTries) || isNaN(newLockoutMinutes) || newMaxTries < 1 || newLockoutMinutes < 1) {
-        showTranslatedToast('toastInvalidLoginSecuritySettings', undefined, 'error');
-        return { code: 'invalid-settings' };
+    if (maxAttempts === previousMaxAttempts && lockoutMinutes === previousLockoutMinutes) {
+        return { changed: false };
     }
 
-    const maxTriesChanged = newMaxTries !== previousMaxAttempts;
-    const lockoutMinutesChanged = newLockoutMinutes !== previousLockoutMinutes;
-
-    // If nothing changed, we don't need to do anything
-    if (!maxTriesChanged && !lockoutMinutesChanged) {
-        return { success: true, changed: false };
-    }
-
-    // Something changed, so we need the password and must call the API
-    const currentPassword = currentPasswordInput.value;
-    const result = await window.api.updateLoginSecuritySettings({
-        maxAttempts: newMaxTries,
-        lockoutMinutes: newLockoutMinutes
-    }, currentPassword);
-
+    const result = await window.api.updateLoginSecuritySettings(settings, currentPassword);
     if (result.success) {
         // Update the in-memory state
-        previousMaxAttempts = newMaxTries;
-        previousLockoutMinutes = newLockoutMinutes;
+        previousMaxAttempts = maxAttempts;
+        previousLockoutMinutes = lockoutMinutes;
         showTranslatedToast('toastLoginSecuritySettingsUpdated');
         return { success: true, changed: true };
     }
@@ -248,40 +268,4 @@ async function handleSaveLockoutSettings() {
 
     // Catch any other unexpected errors
     return { code: 'error' };
-}
-
-// --- Session config ---
-async function handleSaveDuration(): Promise<{ success: boolean, code?: 'invalid-duration' | 'unchanged-duration' | 'invalid-password' }> {
-    const years = parseInt(sessionYearsInput.value) ?? 0;
-    const days = parseInt(sessionDaysInput.value) ?? 0;
-    const hours = parseInt(sessionHoursInput.value) ?? 0;
-    const minutes = parseInt(sessionMinutesInput.value) ?? 0;
-    const currentPassword = currentPasswordInput.value;
-
-    // Basic validation
-    if (years < 0 || days < 0 || hours < 0 || minutes < 0) {
-        showTranslatedToast('toastInvalidDuration', undefined, 'error');
-        return { success: false, code: 'invalid-duration' };
-    }
-
-    const duration = createDuration({
-        years,
-        days,
-        hours,
-        minutes,
-    });
-
-    const totalMs = getTotalMs(duration);
-    if (totalMs === currentDurationMs) return { success: false, code: 'unchanged-duration' };
-
-    const result = await window.api.updateSessionDuration(totalMs, currentPassword);
-    if (result.success) {
-        // only show toast if duration was actually changed
-        showTranslatedToast('toastDurationUpdated');
-        currentDurationMs = totalMs;
-        return { success: true };
-    } else {
-        showTranslatedToast('toastPasswordIncorrect', undefined, 'error');
-        return { success: false, code: 'invalid-password' };
-    }
 }

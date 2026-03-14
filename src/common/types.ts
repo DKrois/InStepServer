@@ -28,8 +28,8 @@ export interface GlobalRule {
 export interface WeekdayRule {
     enabled: boolean;
     mode: Mode;
-    start: Time;
-    end: Time;
+    start?: Time;
+    end?: Time;
 }
 
 export interface TimeSettings {

@@ -17,7 +17,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     const settings = await window.api.getInitialSettings();
     const { version, isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes } = settings;
 
-    console.log(version);
     document.title = `${getTranslation('title')} ${version}`;
     document.documentElement.setAttribute('version', version);
     versionDisplay.textContent = version;
