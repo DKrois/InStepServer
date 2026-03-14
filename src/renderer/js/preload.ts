@@ -5,7 +5,6 @@ import { IPCResponse } from '../../common/util.js';
 import type { TranslationKey } from './translate.js';
 
 const api = {
-    getAppVersion: (): Promise<string> => ipcRenderer.invoke('get-app-version'),
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
     saveLanguage: (lang: string): void => ipcRenderer.send('save-language', lang),
 

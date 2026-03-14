@@ -2,7 +2,7 @@ import { app, BrowserWindow, nativeTheme } from 'electron';
 import log from 'electron-log';
 import type { TOptions } from 'i18next';
 import { initDB } from '../api/database.js';
-import { initLogging } from '../log.js';
+import { info, initLogging } from '../log.js';
 import { handleSquirrelCommands, initUpdater } from './installer.js';
 import { registerIPCHandlers } from './ipc.js';
 import { initStore, store } from './settings.js';
@@ -27,6 +27,7 @@ export function initApp() {
     }
 
     app.on('ready', async () => {
+        info('App ready');
         initLogging();
         // set stored theme
         nativeTheme.themeSource = store.get('theme') as 'system' | 'light' | 'dark';
@@ -51,6 +52,7 @@ export function initApp() {
 
     // will be emitted on the first instance when a second instance is launched
     app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
+        info('Second instance opened, focusing main window...');
         if (mainWindow) {
             if (!mainWindow.isVisible()) mainWindow.show();
             if (mainWindow.isMinimized()) mainWindow.restore();

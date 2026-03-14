@@ -8,7 +8,7 @@ import { error as _error } from '../log.js';
 import { formatCase } from '../../common/util.js';
 
 const logSource = 'docs';
-const error = (message: string, err: unknown) => _error(message, err, logSource);
+const error = (str: string, err: unknown) => _error(str, err, logSource);
 
 const preloadPath = join(SitesPaths.docs.assets, 'js', 'preload.js');
 

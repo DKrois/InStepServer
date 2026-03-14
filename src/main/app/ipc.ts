@@ -9,6 +9,10 @@ import { registerTimeSettingsIPC } from './timeScheduler.js';
 import { mainWindow } from './window.js';
 import { registerQRIPC } from './qr.js';
 import { registerSecurityIPC } from './security.js';
+import { info as _info } from '../log.js';
+
+const logSource = 'ipc';
+const info = (str: string) => _info(str, logSource);
 
 export let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;
@@ -16,6 +20,7 @@ let statsInterval: NodeJS.Timeout | null = null;
 export let manualTimeOverride = false;
 
 export async function registerIPCHandlers() {
+    info('Registering IPC handlers');
     registerThemeIPC();
     registerSettingsIPC();
     registerTimeSettingsIPC();
@@ -26,7 +31,6 @@ export async function registerIPCHandlers() {
     registerShortcutsIPC();
     registerStatsIPC();
 
-    ipcMain.handle('get-app-version', () => app.getVersion());
     ipcMain.handle('is-windows', () => process.platform === 'win32');
     ipcMain.once('initial-modal-closed', handleInitialModalClosed);
 }

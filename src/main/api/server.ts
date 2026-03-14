@@ -211,7 +211,7 @@ function getSessionSecret(): string {
     const secret = store.get('sessionSecret');
     if (secret) return secret;
 
-    _info('No session secret found. Generating a new one.', 'session');
+    _info('No session secret found. Generating a new one...', 'session');
     return generateSessionSecret();
 }
 

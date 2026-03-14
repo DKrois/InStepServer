@@ -37,6 +37,7 @@ export interface TimeSettings {
 }
 
 export interface InitialSettings {
+    version: string;
     port: number;
     language: string;
     timeSettings: TimeSettings;
@@ -49,7 +50,6 @@ export interface InitialSettings {
 }
 
 export interface Stats {
-    version: string;
     appDownloadCount: number;
     projectsCount: number;
     fileCount: number;

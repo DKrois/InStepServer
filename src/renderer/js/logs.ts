@@ -40,13 +40,9 @@ logsOutput.addEventListener('scroll', () => {
 });
 
 function addLogMessage(message: string[]) {
-    const [first, ...rest] = message;
+    const formatted = message.map(formatLog).join('\n');
 
-    const formatted = formatLog(first);
-    const r = rest.length > 0 ? rest.map(s => formatLog(s)).join('\n') : '';
-
-    logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n${r}`);
-
+    logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n`);
     if (isAutoScrollActive) scrollToBottom();
 }
 
@@ -54,12 +50,11 @@ function addLogMessage(message: string[]) {
 function formatLog(message: string) {
     const m = escapeHtml(message);
     const str = convert.toHtml(m);
-    console.log({ m, str });
     return linkify(str);
 }
 
 export function linkify(text: string): string {
-    const urlRegex = /(https?:\/\/\S+)/g;
+    const urlRegex = /(https?:\/\/[^\s<>"')]+)/g;
     return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }
 

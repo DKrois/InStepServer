@@ -6,6 +6,11 @@ import { defaultDBPath } from '../constants.js';
 import { canWriteToPath } from '../util.js';
 import { isServerRunning } from '../api/server.js';
 import { IPCResponse } from '../../common/util.js';
+import { info as _info, warn as _warn } from '../log.js';
+
+const logSource = 'settings';
+const info = (str: string) => _info(str, logSource);
+const warn = (str: string) => _warn(str, logSource);
 
 export const store = new Store({
     defaults: {
@@ -43,10 +48,12 @@ export function initStore() {
 export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', (): InitialSettings => {
         const { port, language, timeSettings, imdEnabled, sessionMaxAge, maxLoginAttempts, lockoutMinutes } = store.store;
+        const version = `v${app.getVersion()}`;
         const isDarkMode = nativeTheme.shouldUseDarkColors;
         const serverEnabled = isServerRunning();
 
         return {
+            version,
             isDarkMode,
             language,
             port,
@@ -82,8 +89,11 @@ async function handleUpdatePath(currentlySelected?: string): IPCResponse<'cancel
         const isWritable = await canWriteToPath(selectedPath);
         if (isWritable) {
             store.set('projectDataPath', selectedPath);
+
+            info(`Updated db path to ${selectedPath}`);
             return { success: true, data: selectedPath };
         } else {
+            warn(`Cannot write to selected db path ${selectedPath}`);
             // path is not writeable (admin, ...)
             return { success: false, code: 'permission-denied' };
         }

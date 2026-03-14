@@ -2,13 +2,16 @@ import { app, BrowserWindow, Menu, screen, session, shell } from 'electron';
 import { defaultWindowHeightPercent, defaultWindowWidthPercent, defaultWindowWidthPx, defaultWindowHeightPx, minWindowHeight, minWindowWidth } from '../../../config.json';
 import { isServerRunning } from '../api/server.js';
 import { defaultDBPath } from '../constants.js';
-import { info } from '../log.js';
+import { info as _info } from '../log.js';
 import { isQuitting } from './app.js';
 import { handleStartServer } from './ipc.js';
 import { createMenu } from './menu.js';
 import { store } from './settings.js';
 import { startScheduler } from './timeScheduler.js';
 import { setInitialPassword } from './security.js';
+
+const logSource = 'window';
+const info = (str: string) => _info(str, logSource);
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -51,6 +54,7 @@ export function createWindow() {
 
     mainWindow.on('close', event => {
         if (!isQuitting && store.get('hideToTray')) {
+            info('Hiding window to tray');
             // hide window to tray rather than full close
             event.preventDefault();
             mainWindow?.hide();

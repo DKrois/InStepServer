@@ -57,7 +57,7 @@ export function initUpdater() {
 
     const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
     if (!fs.existsSync(updateExe)) {
-        info('No Update.exe: auto-updater disabled.');
+        warn('No Update.exe: auto-updater disabled.');
         return;
     }
 

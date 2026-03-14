@@ -69,6 +69,11 @@ hr {
     visibility: hidden;
 }
 
+.vertical-flex {
+    display: flex;
+    flex-direction: row;
+}
+
 .no-click {
     pointer-events: none;
 }

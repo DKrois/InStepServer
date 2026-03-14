@@ -1,7 +1,7 @@
 import { setInitialSecuritySettings } from './security';
 import { setInitialServerSettings } from './serverStatus';
 import { setInitialTimeSettings } from './timeManagement';
-import { setInitialLanguage, updateTheme } from './translate';
+import { getTranslation, setInitialLanguage, updateTheme } from './translate';
 import './stats'; // to register event listeners
 
 import '../css/theme.css';
@@ -10,16 +10,17 @@ import '../css/components.css';
 import '../css/features.css';
 import '../css/modals.css';
 
-const title = document.getElementById('title')!;
+const versionDisplay = document.getElementById('app-version')!;
 
 window.addEventListener('DOMContentLoaded', async () => {
-    const version = await window.api.getAppVersion();
-    // titles can't contain span element
-    title.textContent = title.textContent?.replace('vx.x.x', `v${version}`) ?? `InStep Server Control Panel v${version}`;
-
     // update to stored settings
     const settings = await window.api.getInitialSettings();
-    const { isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes } = settings;
+    const { version, isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes } = settings;
+
+    console.log(version);
+    document.title = `${getTranslation('title')} ${version}`;
+    document.documentElement.setAttribute('version', version);
+    versionDisplay.textContent = version;
 
     updateTheme(isDarkMode);
     setInitialLanguage(language);
