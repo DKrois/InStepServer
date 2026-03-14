@@ -80,5 +80,5 @@ export function setInitialServerSettings(settings: Pick<InitialSettings, 'server
 
 export function setRestartServerInfoVisible(visible: boolean) {
     // only show warning if server is running rn; always disable if server isn't running
-    if (serverStatusIndicator.classList.contains('status-running') || !visible) restartServerInfo.classList.toggle('hidden', !visible);
+    if (serverStatusIndicator.classList.contains('status-running') || !visible) restartServerInfo.classList.toggle('display-none', !visible);
 }

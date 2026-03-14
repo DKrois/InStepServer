@@ -8,7 +8,8 @@
 }
 
 #restart-server-info {
-    margin: 0 0 8px 0;
+    margin-top: 0;
+    margin-bottom: 10px;
 }
 
 /* --- Time Management Card --- */
@@ -27,9 +28,9 @@ input[type="time"]:focus {
 }
 
 .time-buttons {
-    justify-content: space-between; /* This is the key: pushes the two subgroups apart */
-    align-items: center;            /* Vertically aligns the groups if they wrap */
-    flex-wrap: wrap;                /* This is crucial for responsiveness */
+    justify-content: space-between; /* pushes subgroups apart */
+    align-items: center;            /* Vertically aligns groups if they wrap */
+    flex-wrap: wrap;
 }
 
 .button-subgroup {

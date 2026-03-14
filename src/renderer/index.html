@@ -50,11 +50,11 @@
                             <input type="number" id="port-input" value="5000" min="1024" max="65535"> <!-- on linux, ports below 1024 can only be opened as root -->
                         </div>
 
-                        <div class="form-group">
+                        <p id="restart-server-info" data-i18n="restartServerInfo" class="error-text display-none">Please restart the server for changes to take effect.</p>
+                        <div class="form-group mt-auto">
                             <button id="clear-cache-btn" data-i18n="clearCache" class="ml-auto">Clear project cache</button>
                             <button id="generate-qr-btn" data-i18n="generateQR">Generate QR codes</button>
                         </div>
-                        <p id="restart-server-info" data-i18n="restartServerInfo" class="error-text hidden">Please restart the server for changes to take effect.</p>
                     </div>
 
                     <div class="card">
@@ -73,7 +73,7 @@
                             <label for="time-global-end" data-i18n="disableAt">Disable At:</label>
                             <input type="time" id="time-global-end">
                         </div>
-                        <div class="button-group time-buttons">
+                        <div class="button-group time-buttons mt-auto">
                             <div class="button-subgroup">
                                 <button id="time-advanced-btn" data-i18n="advanced">Advanced</button>
                                 <button id="time-save-btn" data-i18n="save">Save</button>
