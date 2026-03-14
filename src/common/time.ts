@@ -139,8 +139,8 @@ export function createDuration(duration: Partial<Duration> | number[]): Duration
 // --- Scheduler ---
 export const defaultTimeSettings: TimeSettings = {
     enabled: false,
-    global: { start: '', end: '', mode: 'custom' } as const,
-    weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', end: '' }])) as TimeSettings['weekdays']
+    global: { start: '', stop: '', mode: 'custom' } as const,
+    weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', stop: '' }])) as TimeSettings['weekdays']
 };
 // Define a default rule for when no other configuration applies
 const DEFAULT_RULE = { enabled: true, mode: 'off' } as const;
@@ -185,17 +185,17 @@ export function generateScheduleEvents(timeSettings: TimeSettings): { time: Date
         } else if (mode === 'off') {
             events.push({ time: date, type: 'stop' });
         } else if (mode === 'custom' || !mode) { // catches global and custom rules
-            const { start, end } = rule;
+            const { start, stop } = rule;
 
             // treat undefined rules as off day
-            if (!start && !end) {
+            if (!start && !stop) {
                 events.push({ time: date, type: 'stop' });
                 continue; // move to next day
             }
 
-            if (start && end) {
+            if (start && stop) {
                 const startDate = parseTimeToDate(start, date);
-                const endDate = parseTimeToDate(end, date);
+                const endDate = parseTimeToDate(stop, date);
                 events.push({ time: startDate, type: 'start' });
                 if (endDate < startDate) {
                     endDate.setDate(endDate.getDate() + 1);
@@ -203,8 +203,8 @@ export function generateScheduleEvents(timeSettings: TimeSettings): { time: Date
                 events.push({ time: endDate, type: 'stop' });
             } else if (start) {
                 events.push({ time: parseTimeToDate(start, date), type: 'start' });
-            } else if (end) {
-                events.push({ time: parseTimeToDate(end, date), type: 'stop' });
+            } else if (stop) {
+                events.push({ time: parseTimeToDate(stop, date), type: 'stop' });
             }
         }
     }

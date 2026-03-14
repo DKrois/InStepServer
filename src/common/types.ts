@@ -21,7 +21,7 @@ export type Time = `${number}:${number}` | '';
 export type Mode = 'custom' | 'wholeday' | 'off';
 export interface GlobalRule {
     start: Time;
-    end: Time;
+    stop: Time;
     mode: 'custom';
 }
 
@@ -29,7 +29,7 @@ export interface WeekdayRule {
     enabled: boolean;
     mode: Mode;
     start?: Time;
-    end?: Time;
+    stop?: Time;
 }
 
 export interface TimeSettings {

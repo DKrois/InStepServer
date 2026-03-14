@@ -10,7 +10,7 @@ const countdownLabel = document.getElementById('countdown-label')!;
 const countdownDisplay = document.getElementById('countdown-display')!;
 
 const globalStartInput = document.getElementById('time-global-start') as HTMLInputElement;
-const globalEndInput = document.getElementById('time-global-end') as HTMLInputElement;
+const globalEndInput = document.getElementById('time-global-stop') as HTMLInputElement;
 
 const advancedBtn = document.getElementById('time-advanced-btn')!;
 const saveBtn = document.getElementById('time-save-btn')!;
@@ -51,7 +51,7 @@ weekdayList.addEventListener('click', (event) => {
     if (target.classList.contains('weekday-clear-btn')) {
         const row = target.closest('.weekday-row')!;
         const startInput = row.querySelector('.weekday-start-time') as HTMLInputElement;
-        const endInput = row.querySelector('.weekday-end-time') as HTMLInputElement;
+        const endInput = row.querySelector('.weekday-stop-time') as HTMLInputElement;
         (row.querySelector('.weekday-enabled-toggle') as HTMLInputElement).checked = false;
         (row.querySelector('.weekday-mode-select') as HTMLSelectElement).value = 'custom';
         startInput.value = '';
@@ -61,12 +61,7 @@ weekdayList.addEventListener('click', (event) => {
     }
 });
 
-[globalStartInput, globalEndInput].forEach(input => {
-    input.addEventListener('contextmenu', (event) => {
-        event.preventDefault(); // Stop the default right-click menu
-        window.api.showClearTimeContextMenu(input.id);
-    });
-});
+[globalStartInput, globalEndInput].forEach(createRightClickListeners);
 window.api.onClearTimeInput((inputId) => {
     const input = document.getElementById(inputId) as HTMLInputElement;
     if (input) input.value = '';
@@ -111,6 +106,19 @@ export function setInitialTimeSettings(settings: TimeSettings) {
 function createWeekdayRows() {
     weekdayList.innerHTML = ''; // Clear existing
 
+    const headerRow = document.createElement('li');
+    headerRow.classList.add('weekday-header');
+    headerRow.innerHTML = `
+        <p></p>
+        <p data-i18n="weekday">Weekday</p>
+        <p data-i18n="mode">Mode</p>
+        <p data-i18n="start">Start</p>
+        <p data-i18n="stop">Stop</p>
+        <p></p>
+    `;
+
+    weekdayList.appendChild(headerRow);
+
     weekdays.forEach((day, index) => {
         const li = document.createElement('li');
         li.className = 'weekday-row';
@@ -124,8 +132,8 @@ function createWeekdayRows() {
                 <option value="wholeday" data-i18n="wholeday">Entire day</option>
                 <option value="off" data-i18n="off">Off</option>
             </select>
-            <input type="time" class="weekday-start-time">
-            <input type="time" class="weekday-end-time">
+            <input type="time" class="weekday-start-time" id="time-weekday-${index}-start">
+            <input type="time" class="weekday-stop-time" id="time-weekday-${index}-stop">
             <button class="weekday-clear-btn icon-button" data-i18n-title="clearDaySettings">
                 <img src="assets/cross-dark.png" class="button-image no-click light-icon" alt="X">
                 <img src="assets/cross-light.png" class="button-image no-click dark-icon" alt="X">
@@ -135,12 +143,19 @@ function createWeekdayRows() {
     });
 }
 
+function createRightClickListeners(input: HTMLInputElement) {
+    input.addEventListener('contextmenu', event => {
+        event.preventDefault(); // Stop the default right-click menu
+        window.api.showClearTimeContextMenu(input.id);
+    });
+}
+
 function populateUI(settings: TimeSettings) {
     timeSettings = settings;
     lastSavedSettings = JSON.parse(JSON.stringify(settings)); // Deep copy for cancel functionality
 
     globalStartInput.value = settings.global.start || '';
-    globalEndInput.value = settings.global.end || '';
+    globalEndInput.value = settings.global.stop || '';
 
     Object.entries(settings.weekdays).forEach(([i, dayConfig]) => {
         const row = weekdayList.querySelector(`[data-day-index="${i}"]`) as HTMLLIElement;
@@ -149,9 +164,11 @@ function populateUI(settings: TimeSettings) {
         (row.querySelector('.weekday-enabled-toggle') as HTMLInputElement).checked = dayConfig.enabled;
         (row.querySelector('.weekday-mode-select') as HTMLSelectElement).value = dayConfig.mode;
         const startInput = row.querySelector('.weekday-start-time') as HTMLInputElement;
-        const endInput = row.querySelector('.weekday-end-time') as HTMLInputElement;
+        const endInput = row.querySelector('.weekday-stop-time') as HTMLInputElement;
         startInput.value = dayConfig.start || '';
-        endInput.value = dayConfig.end || '';
+        endInput.value = dayConfig.stop || '';
+
+        [startInput, endInput].forEach(createRightClickListeners);
 
         // Disable time inputs if mode is not 'custom'
         const isCustom = dayConfig.mode === 'custom';
@@ -163,7 +180,7 @@ function populateUI(settings: TimeSettings) {
 function readUIState() {
     const newSettings: TimeSettings = JSON.parse(JSON.stringify(timeSettings)); // Start with a copy
     newSettings.global.start = globalStartInput.value as Time;
-    newSettings.global.end = globalEndInput.value as Time;
+    newSettings.global.stop = globalEndInput.value as Time;
 
     Object.entries(newSettings.weekdays).forEach(([i, dayConfig]) => {
         const row = weekdayList.querySelector(`[data-day-index="${i}"]`) as HTMLLIElement;
@@ -171,7 +188,7 @@ function readUIState() {
         dayConfig.enabled = (row.querySelector('.weekday-enabled-toggle') as HTMLInputElement).checked;
         dayConfig.mode = (row.querySelector('.weekday-mode-select') as HTMLSelectElement).value as Mode;
         dayConfig.start = (row.querySelector('.weekday-start-time') as HTMLInputElement).value as Time;
-        dayConfig.end = (row.querySelector('.weekday-end-time') as HTMLInputElement).value as Time;
+        dayConfig.stop = (row.querySelector('.weekday-stop-time') as HTMLInputElement).value as Time;
     });
 
     // disable if nothing configured
@@ -213,14 +230,14 @@ function handleWeekdayInteraction(event: Event) {
     const enabledToggle = row.querySelector('.weekday-enabled-toggle') as HTMLInputElement;
 
     // If the user interacts with the mode select or time inputs, and the toggle is not already checked, check it.
-    if ((target.classList.contains('weekday-mode-select') || target.classList.contains('weekday-start-time') || target.classList.contains('weekday-end-time')) && !enabledToggle.checked ) {
+    if ((target.classList.contains('weekday-mode-select') || target.classList.contains('weekday-start-time') || target.classList.contains('weekday-stop-time')) && !enabledToggle.checked ) {
         enabledToggle.checked = true;
     }
 
     // disable time inputs if mode is not 'custom'
     if (target.classList.contains('weekday-mode-select')) {
         const startInput = row.querySelector('.weekday-start-time') as HTMLInputElement;
-        const endInput = row.querySelector('.weekday-end-time') as HTMLInputElement;
+        const endInput = row.querySelector('.weekday-stop-time') as HTMLInputElement;
         const isCustom = (target as HTMLSelectElement).value === 'custom';
 
         startInput.disabled = !isCustom;
@@ -235,13 +252,13 @@ function handleWeekdayInteraction(event: Event) {
 
 // Helpers
 function isScheduleConfigured(settings: TimeSettings): boolean {
-    if (settings.global.start || settings.global.end) {
+    if (settings.global.start || settings.global.stop) {
         return true;
     }
     for (const day of Object.values(settings.weekdays)) {
         if (day.enabled) {
             if (day.mode === 'wholeday' || day.mode === 'off') return true;
-            if (day.mode === 'custom' && (day.start || day.end)) return true;
+            if (day.mode === 'custom' && (day.start || day.stop)) return true;
         }
     }
     return false;

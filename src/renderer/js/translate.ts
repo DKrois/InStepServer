@@ -14,7 +14,7 @@ export type TranslationKey = keyof typeof en;
 
 i18next.init({
     lng: 'en',
-    debug: true,
+    debug: false,
     fallbackLng: 'en',
     resources: {
         en: { translation: en },

@@ -113,11 +113,13 @@
   "import": "Importieren",
 
   "advancedTimeSettings": "Erweiterte Zeiteinstellungen",
+  "mode": "Modus",
   "customTime": "Benutzerdefiniert",
   "wholeday": "Ganztägig",
   "off": "Aus",
   "clearDaySettings": "Einstellungen für diesen Tag löschen",
 
+  "weekday": "Wochentag",
   "monday": "Montag",
   "tuesday": "Dienstag",
   "wednesday": "Mittwoch",

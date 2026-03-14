@@ -113,11 +113,13 @@
   "import": "Import",
 
   "advancedTimeSettings": "Advanced Time Settings",
+  "mode": "Mode",
   "customTime": "Custom Time",
   "wholeday": "Entire day",
   "off": "Off",
   "clearDaySettings": "Clear settings for this day",
 
+  "weekday": "Weekday",
   "monday": "Monday",
   "tuesday": "Tuesday",
   "wednesday": "Wednesday",
