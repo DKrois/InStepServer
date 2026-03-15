@@ -9,7 +9,8 @@
   "imdLockDurationSeconds": 300,
 
   "toastTimeout": 2000,
-  "schedulerIntervalTime": 20000,
+  "schedulerCheckIntervalSeconds": 10,
+  "schedulerUpdateEventsIntervalSeconds": 300,
 
   "defaultWindowWidthPercent": 0.8,
   "defaultWindowHeightPercent": 0.8,

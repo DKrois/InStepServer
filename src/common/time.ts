@@ -1,4 +1,4 @@
-import type { Time, TimeSettings, WeekdayRule } from './types.js';
+import type { Time, TimeEvent, TimeSettings, WeekdayRule } from './types.js';
 
 export function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
@@ -145,6 +145,8 @@ export const defaultTimeSettings: TimeSettings = {
 // Define a default rule for when no other configuration applies
 const DEFAULT_RULE = { enabled: true, mode: 'off' } as const;
 
+let events: TimeEvent[] = [];
+
 export function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
     const [hours, minutes] = timeStr.split(':').map(Number);
     const date = new Date(referenceDate);
@@ -157,13 +159,33 @@ export function convertJsDayToCustom(jsDay: number): number {
     return jsDay === 0 ? 6 : jsDay - 1;
 }
 
+export function updateEvents(timeSettings: TimeSettings): TimeEvent[] {
+    return events = generateScheduleEvents(timeSettings);
+}
+
+export function getEventsInfo(): { nextStateChangeEvent: TimeEvent | undefined, shouldBeRunning: boolean | undefined } {
+    const now = Date.now();
+
+    const pastEvents = events.filter(e => e.time <= now);
+    const mostRecentEvent = pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : undefined;
+    const isRunningAccordingToSchedule = mostRecentEvent ? mostRecentEvent.type === 'start' : false;
+
+    // find next event that will change state
+    const nextStateChangeEvent = events.find(e =>
+        e.time > now && e.type === (isRunningAccordingToSchedule ? 'stop' : 'start')
+    );
+
+    const shouldBeRunning = mostRecentEvent ? mostRecentEvent.type === 'start' : undefined;
+    return { nextStateChangeEvent, shouldBeRunning };
+}
+
 /**
  * Generates a chronological list of start/stop events based on time settings.
  */
-export function generateScheduleEvents(timeSettings: TimeSettings): { time: Date; type: 'start' | 'stop'; }[] {
-    if (!timeSettings?.enabled) return [];
+function generateScheduleEvents(timeSettings: TimeSettings): TimeEvent[] {
+    if (!timeSettings.enabled) return [];
 
-    const events: { time: Date, type: 'start' | 'stop' }[] = [];
+    const events: TimeEvent[] = [];
     const now = new Date();
 
     // Generate events for a wide window to catch all relevant past/future events
@@ -171,44 +193,44 @@ export function generateScheduleEvents(timeSettings: TimeSettings): { time: Date
         const date = new Date(now);
         date.setDate(now.getDate() + i);
         date.setHours(0, 0, 0, 0); // Start of the day
-
+        const time = date.getTime();
         const dayIndex = convertJsDayToCustom(date.getDay());
 
-        let rule: WeekdayRule = timeSettings.weekdays?.[dayIndex];
+        let rule: WeekdayRule = timeSettings.weekdays[dayIndex];
         if (!rule?.enabled) rule = { ...timeSettings.global, enabled: true }; // fallback to global
         if (!rule?.enabled) rule = DEFAULT_RULE; // fallback to default
 
-        // --- Translate the effective rule into events ---
+        // --- Translate effective rule into events ---
         const { mode } = rule;
         if (mode === 'wholeday') {
-            events.push({ time: date, type: 'start' });
+            events.push({ time, type: 'start' });
         } else if (mode === 'off') {
-            events.push({ time: date, type: 'stop' });
+            events.push({ time, type: 'stop' });
         } else if (mode === 'custom' || !mode) { // catches global and custom rules
             const { start, stop } = rule;
 
             // treat undefined rules as off day
             if (!start && !stop) {
-                events.push({ time: date, type: 'stop' });
+                events.push({ time, type: 'stop' });
                 continue; // move to next day
             }
 
             if (start && stop) {
                 const startDate = parseTimeToDate(start, date);
                 const endDate = parseTimeToDate(stop, date);
-                events.push({ time: startDate, type: 'start' });
+                events.push({ time: startDate.getTime(), type: 'start' });
                 if (endDate < startDate) {
                     endDate.setDate(endDate.getDate() + 1);
                 }
-                events.push({ time: endDate, type: 'stop' });
+                events.push({ time: endDate.getTime(), type: 'stop' });
             } else if (start) {
-                events.push({ time: parseTimeToDate(start, date), type: 'start' });
+                events.push({ time: parseTimeToDate(start, date).getTime(), type: 'start' });
             } else if (stop) {
-                events.push({ time: parseTimeToDate(stop, date), type: 'stop' });
+                events.push({ time: parseTimeToDate(stop, date).getTime(), type: 'stop' });
             }
         }
     }
 
     // sort all events chronologically
-    return events.sort((a, b) => a.time.getTime() - b.time.getTime());
+    return events.sort((a, b) => a.time - b.time);
 }

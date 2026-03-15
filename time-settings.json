@@ -1,0 +1,60 @@
+{
+  "enabled": true,
+  "global": {
+    "start": "10:00",
+    "end": "18:00",
+    "mode": "custom",
+    "stop": ""
+  },
+  "weekdays": {
+    "0": {
+      "enabled": true,
+      "mode": "custom",
+      "start": "09:00",
+      "end": "17:00",
+      "stop": "17:00"
+    },
+    "1": {
+      "enabled": true,
+      "mode": "wholeday",
+      "start": "",
+      "end": "",
+      "stop": ""
+    },
+    "2": {
+      "enabled": true,
+      "mode": "custom",
+      "start": "",
+      "end": "17:00",
+      "stop": "17:00"
+    },
+    "3": {
+      "enabled": true,
+      "mode": "custom",
+      "start": "09:00",
+      "end": "",
+      "stop": ""
+    },
+    "4": {
+      "enabled": true,
+      "mode": "wholeday",
+      "start": "",
+      "end": "",
+      "stop": ""
+    },
+    "5": {
+      "enabled": true,
+      "mode": "custom",
+      "start": "",
+      "end": "19:00",
+      "stop": "19:00"
+    },
+    "6": {
+      "enabled": false,
+      "mode": "custom",
+      "start": "13:00",
+      "end": "",
+      "stop": ""
+    }
+  }
+}

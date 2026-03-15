@@ -1,6 +1,6 @@
-import { addZeroes, defaultTimeSettings, generateScheduleEvents } from '../../common/time';
-import { schedulerIntervalTime } from '../../../config.json';
-import type { Mode, Time, TimeSettings } from '../../common/types.js';
+import { addZeroes, defaultTimeSettings, getEventsInfo, updateEvents } from '../../common/time';
+import { schedulerCheckIntervalSeconds, schedulerUpdateEventsIntervalSeconds } from '../../../config.json';
+import type { Mode, Time, TimeEvent, TimeSettings } from '../../common/types.js';
 import { showTranslatedToast } from './logs';
 import { closeModal, openModal, showConfirmation } from './modal';
 import { getTranslation } from './translate';
@@ -87,6 +87,7 @@ importBtn.addEventListener('click', async () => {
     const result = await window.api.importTimeSettings();
     if (result.success && result.data) {
         populateUI(result.data);
+        startOrUpdateCountdown();
         showTranslatedToast('toastImportSuccess');
     } else if (result.code === 'cancelled') {
         showTranslatedToast('cancelled');
@@ -274,50 +275,37 @@ function formatTimeDiff(ms: number): string {
 }
 
 // --- Countdown ---
+/* Intervals:
+ * - updateEventsInterval: Generates list of events
+ * - checkEventsInterval: Checks for the next event
+ * - countdownInterval: Updates countdown (once per sec)
+ */
+let updateEventsInterval: NodeJS.Timeout | null = null;
+let checkEventsInterval: NodeJS.Timeout | null = null;
 let countdownInterval: NodeJS.Timeout | null = null;
-let scheduleUpdateInterval: NodeJS.Timeout | null = null;
-let nextEvent: { time: Date, type: 'start' | 'stop' } | null = null;
+let nextEvent: TimeEvent | undefined = undefined;
 
 function startOrUpdateCountdown() {
-    if (scheduleUpdateInterval) clearInterval(scheduleUpdateInterval);
+    if (updateEventsInterval) clearInterval(updateEventsInterval);
+    if (checkEventsInterval) clearInterval(checkEventsInterval);
     if (countdownInterval) clearInterval(countdownInterval);
 
     // Run once immediately
-    updateSchedule();
+    updateEvents(timeSettings);
+    checkEvents();
     updateCountdown();
 
-    scheduleUpdateInterval = setInterval(updateSchedule, schedulerIntervalTime);
+    updateEventsInterval = setInterval(() => updateEvents(timeSettings), schedulerUpdateEventsIntervalSeconds * 1000);
+    checkEventsInterval = setInterval(checkEvents, schedulerCheckIntervalSeconds * 1000);
     countdownInterval = setInterval(updateCountdown, 1000);
 }
 
-function updateSchedule() {
+function checkEvents() {
     if (!timeSettings.enabled) {
-        nextEvent = null;
+        nextEvent = undefined;
         return;
     }
-
-    const now = new Date();
-    const events = generateScheduleEvents(timeSettings);
-
-    if (events.length === 0) {
-        nextEvent = null;
-        return;
-    }
-
-    // find most recent event in the past to know what the state should be
-    const pastEvents = events.filter(e => e.time <= now);
-    const lastEvent = pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : null;
-    const isRunningAccordingToSchedule = lastEvent ? lastEvent.type === 'start' : false;
-
-    // find next event that will change state
-    let nextStateChangeEvent;
-    if (isRunningAccordingToSchedule) {
-        nextStateChangeEvent = events.find(e => e.time > now && e.type === 'stop');
-    } else {
-        nextStateChangeEvent = events.find(e => e.time > now && e.type === 'start');
-    }
-
-    nextEvent = nextStateChangeEvent || null;
+    nextEvent = getEventsInfo().nextStateChangeEvent;
 }
 
 function updateCountdown() {
@@ -326,20 +314,17 @@ function updateCountdown() {
         return;
     }
 
-    const now = new Date();
-    const timeDiff = nextEvent.time.getTime() - now.getTime();
-
+    const timeDiff = nextEvent.time - Date.now();
     if (timeDiff < 0) {
         countdownContainer.classList.add('hidden');
         return;
     }
 
     const isNextEventAStart = nextEvent.type === 'start';
-
     // update ui
     countdownDisplay.textContent = formatTimeDiff(timeDiff);
     countdownLabel.textContent = getTranslation('countdownLabel', {
-        nextAction: isNextEventAStart ? getTranslation('startup') : getTranslation('shutdown')
+        nextAction: getTranslation(isNextEventAStart ? 'startup' : 'shutdown')
     });
     countdownContainer.classList.remove('hidden');
 }

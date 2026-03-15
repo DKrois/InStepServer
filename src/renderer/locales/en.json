@@ -134,7 +134,7 @@
 
   "toastExportSuccess": "Time settings exported successfully",
   "toastExportFailed": "Failed to export settings",
-  "toastImportSuccess": "Time settings imported. Click Save to apply them.",
+  "toastImportSuccess": "Time settings imported",
   "toastImportFailed": "Failed to import settings",
 
   "projectPathTitle": "Project Storage Path",

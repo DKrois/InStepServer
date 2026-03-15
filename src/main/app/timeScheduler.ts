@@ -1,7 +1,7 @@
 import { dialog, ipcMain, Menu } from 'electron';
 import { readFile, writeFile } from 'node:fs/promises';
-import { schedulerIntervalTime } from '../../../config.json';
-import { generateScheduleEvents } from '../../common/time.js';
+import { schedulerCheckIntervalSeconds, schedulerUpdateEventsIntervalSeconds } from '../../../config.json';
+import { getEventsInfo, updateEvents } from '../../common/time.js';
 import type { IPCResponse, TimeSettings } from '../../common/types.js';
 import { info as _info, warn as _warn } from '../log.js';
 import {
@@ -14,11 +14,12 @@ import {
 import { store } from './settings.js';
 import { mainWindow } from './window.js';
 
-let schedulerInterval: NodeJS.Timeout | null = null;
-
 const logSource = 'scheduler';
 const info = (str: string) => _info(str, logSource);
 const warn = (str: string) => _warn(str, logSource);
+
+let schedulerInterval: NodeJS.Timeout | null = null;
+let updateEventsInterval: NodeJS.Timeout | null = null;
 
 export function registerTimeSettingsIPC() {
     ipcMain.on('save-time-settings', async (_event, settings) => {
@@ -97,6 +98,8 @@ async function handleImport(): IPCResponse<'cancelled' | '', TimeSettings> {
         try {
             const data = await readFile(filePaths[0], 'utf-8');
             const settings = JSON.parse(data);
+
+            store.set('timeSettings', settings);
             return { success: true, data: settings };
         } catch (error: any) {
             error('Error importing time settings', error);
@@ -105,7 +108,6 @@ async function handleImport(): IPCResponse<'cancelled' | '', TimeSettings> {
     }
     return { success: false, code: 'cancelled' };
 }
-
 
 function isValidTimeSettings(x: any): x is TimeSettings {
     return (
@@ -119,38 +121,29 @@ function isValidTimeSettings(x: any): x is TimeSettings {
 export async function startScheduler() {
     info('Starting time settings scheduler...');
     if (schedulerInterval) clearInterval(schedulerInterval);
+    if (updateEventsInterval) clearInterval(updateEventsInterval);
 
-    schedulerInterval = setInterval(checkSchedule, schedulerIntervalTime); // once every 20s
+    schedulerInterval = setInterval(checkSchedule, schedulerCheckIntervalSeconds * 1000);
+    updateEventsInterval = setInterval(() => updateEvents(store.get('timeSettings')), schedulerUpdateEventsIntervalSeconds * 1000);
 
     // Run once on startup as well
+    updateEvents(store.get('timeSettings'));
     await checkSchedule();
 }
 
 async function checkSchedule() {
-    const settings = store.get('timeSettings');
-    if (!settings?.enabled || manualTimeOverride) return;
+    if (manualTimeOverride) return;
 
-    const now = new Date();
-    const isActuallyRunning = serverStartTime !== null;
-
-    // get timeline of all scheduled events
-    const events = generateScheduleEvents(settings);
-    if (events.length === 0) return; // no schedule configured
-
-    // find most recent event that has already occurred
-    const pastEvents = events.filter(e => e.time <= now);
-    const lastEvent = pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : null;
-
-    // last event's type determines if server should be running
-    // no past events → off
-    const shouldBeRunning = lastEvent ? lastEvent.type === 'start' : false;
+    const { shouldBeRunning } = getEventsInfo();
+    if (shouldBeRunning === undefined) return;
 
     // only start/stop if state differs from desired state
+    const isActuallyRunning = serverStartTime !== null;
     if (shouldBeRunning && !isActuallyRunning) {
-        info(`State should be ON. Starting server.`);
+        info(`Starting server...`);
         await handleStartServer();
     } else if (!shouldBeRunning && isActuallyRunning) {
-        info(`State should be OFF. Stopping server.`);
+        info(`Stopping server...`);
         await handleStopServer();
     }
 }

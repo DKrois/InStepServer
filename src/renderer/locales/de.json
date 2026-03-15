@@ -134,7 +134,7 @@
 
   "toastExportSuccess": "Zeiteinstellungen erfolgreich exportiert",
   "toastExportFailed": "Fehler beim Exportieren",
-  "toastImportSuccess": "Zeiteinstellungen importiert. Klicken Sie auf Speichern, um sie zu übernehmen.",
+  "toastImportSuccess": "Zeiteinstellungen importiert",
   "toastImportFailed": "Fehler beim Importieren",
 
 

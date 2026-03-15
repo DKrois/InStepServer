@@ -17,6 +17,7 @@ export type IPCPacket<C extends IPCCodes | '' = '', T = undefined> =
 
 export type IPCResponse<C extends IPCCodes | '' = '', T = undefined> = Promise<IPCPacket<C, T>>;
 
+export type TimeEvent = { time: number; type: 'start' | 'stop' };
 export type Time = `${number}:${number}` | '';
 export type Mode = 'custom' | 'wholeday' | 'off';
 export interface GlobalRule {
