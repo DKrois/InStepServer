@@ -9,6 +9,8 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 .card-header {
@@ -199,4 +201,8 @@ input[type="number"]::-webkit-inner-spin-button {
     font-size: 14px;
     margin: 0;
     white-space: nowrap;
+}
+
+.app-download-count {
+    text-wrap: nowrap;
 }

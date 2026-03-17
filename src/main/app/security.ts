@@ -1,21 +1,16 @@
 import { ipcMain } from 'electron';
 import { store } from './settings.js';
 import bcrypt from 'bcryptjs';
-import { info } from '../log.js';
+import { info as _info } from '../log.js';
 import crypto from 'node:crypto';
-import type { IPCResponse } from '../../common/util.js';
 import { releaseLock } from '../api/auth.js';
 import { generateSessionSecret, sessionStore } from '../api/server.js';
+import type { IPCResponse } from '../../common/types.js';
 
-let initialPassword: string | null = null;
+const logSource = 'security';
+const info = (str: string) => _info(str, logSource);
 
 export function registerSecurityIPC() {
-    ipcMain.handle('get-initial-password', () => {
-        const pass = initialPassword;
-        initialPassword = null; // Ensure it can only be retrieved once
-        return pass;
-    });
-
     ipcMain.handle('verify-password',  (_event, password) => verifyPassword(password));
     ipcMain.handle('update-password', async (_event, oldPassword, newPassword) => handleUpdatePassword(oldPassword, newPassword));
 
@@ -25,25 +20,19 @@ export function registerSecurityIPC() {
     ipcMain.handle('get-session-duration', () => store.get('sessionMaxAge'));
     ipcMain.handle('update-session-duration', (_event, durationMs, currentPassword) => handleUpdateSessionDuration(durationMs, currentPassword));
 
-    ipcMain.handle('get-login-security-settings', () => {
-        const maxAttempts = store.get('maxLoginAttempts');
-        const lockoutMinutes = store.get('lockoutDurationMinutes');
-        return { maxAttempts, lockoutMinutes };
-    });
-
     // Handler to update the settings
     ipcMain.handle('update-login-security-settings', (_event, settings, currentPassword) => handleUpdateLoginSettings(settings, currentPassword));
 }
 
-export async function setInitialPassword() {
+export function setInitialPassword() {
     const newPassword = generateRandomPassword();
-    initialPassword = newPassword; // Store it to show the user once
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(newPassword, salt);
     store.set('passwordHash', hash);
 
-    info('Initial password set', 'auth');
+    info('Initial password set');
+    return newPassword;
 }
 
 function generateRandomPassword() {
@@ -71,6 +60,7 @@ async function handleUpdatePassword(oldPassword: string, newPassword: string): I
     const newHash = await bcrypt.hash(newPassword, salt);
     store.set('passwordHash', newHash);
 
+    info('Updated password');
     return { success: true, data: undefined };
 }
 
@@ -83,6 +73,7 @@ async function handleUpdateLoginSettings(settings: { maxAttempts: number, lockou
     store.set('maxLoginAttempts', maxAttempts);
     store.set('lockoutDurationMinutes', lockoutMinutes);
 
+    info(`Limited login to ${maxAttempts} attempts, blocking for ${lockoutMinutes}min`);
     return { success: true, data: undefined };
 }
 
@@ -90,6 +81,7 @@ async function handleToggleIMDAPI(enable: boolean, currentPassword: string): IPC
     if (!verifyPassword(currentPassword)) return { success: false, code: 'permission-denied' };
 
     store.set('imdEnabled', enable);
+    info(`${enable ? 'En' : 'Dis'}abled IMD API`);
     return { success: true, data: undefined };
 }
 
@@ -106,6 +98,7 @@ async function handleClearSessions(currentPassword: string): IPCResponse<'permis
     // session.Store declares clear() as sync, but nedb-promises-session-store implements it as async
     await sessionStore.clear?.();
     generateSessionSecret();
+    info('Cleared session store and reset session secret');
     return { success: true, data: undefined };
 }
 
@@ -113,5 +106,6 @@ async function handleUpdateSessionDuration(durationMs: number, currentPassword: 
     if (!verifyPassword(currentPassword)) return { success: false };
 
     store.set('sessionMaxAge', durationMs);
+    info(`Set session duration to ${durationMs}ms`);
     return { success: true };
 }

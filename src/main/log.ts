@@ -24,7 +24,7 @@ const enum Color {
 /**
  * Formats a log string using chalk.
  * Format:
- * `time [source] <message>
+ * `<time> [source] <message>
  * @param message
  * @param source
  * @param useColor Whether to apply chalk formatting
@@ -33,12 +33,11 @@ function formatLogString(message: string, source?: string, useColor?: boolean): 
     const timeStr = getCurrentTime();
     //const callerLocation = getCallerLocation();
     const fullSource = source ? ` [${source}]` : '';
+    //const cl = callerLocation ? ` [${callerLocation}]` : '';
 
     if (useColor) {
         const bgFormatter = chalk.hex(Color.gray.toString(16)).dim;
         const sourceFormatter = chalk.hex(Color.darkAqua.toString(16));
-
-        //const cl = callerLocation ? ` [${callerLocation}]` : '';
 
         const bg = bgFormatter(timeStr);
         const src = sourceFormatter(fullSource);

@@ -17,9 +17,13 @@
     transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
 }
 
+.modal h3 {
+    margin: 15px 0;
+}
+
 .modal-dialog {
-    max-width: 500px;
-    width: 90%;
+    max-width: min(550px, 40%);
+    width: fit-content;
     max-height: 90%;
 }
 
@@ -42,13 +46,6 @@
 }
 
 /* --- Initial Modal --- */
-#initial-modal {
-    transition: none;
-}
-#initial-modal.closing {
-    transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
-}
-
 .password-display-wrapper {
     display: flex;
     align-items: center;
@@ -92,7 +89,7 @@
     margin-top: 10px;
 }
 
-.weekday-row {
+.weekday-header, .weekday-row {
     display: flex;
     align-items: center;
     gap: 15px;
@@ -103,14 +100,63 @@
     border-bottom: none;
 }
 
+.weekday-header p {
+    margin: 0 0 0 1px;
+    font-size: 0.75rem; /* Smaller font */
+    font-weight: bold;
+    color: #888; /* Dimmer color */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 1. Checkbox/Empty column */
+.weekday-header p:nth-child(1),
+.weekday-enabled-toggle {
+    margin: 0;
+    width: 20px;
+    flex-shrink: 0;
+}
+
+/* 2. Weekday Name column */
+.weekday-header p:nth-child(2),
 .weekday-name {
     flex-basis: 100px;
+    flex-shrink: 0;
+}
+
+/* 3. Mode Select column */
+.weekday-header p:nth-child(3),
+.weekday-mode-select {
+    flex-basis: 160px;
     flex-shrink: 0;
 }
 
 .weekday-mode-select {
     padding: 8px;
     border-radius: 5px;
+}
+
+/* 4 & 5. Time Input columns */
+.weekday-header p:nth-child(4),
+.weekday-header p:nth-child(5),
+.weekday-start-time,
+.weekday-end-time {
+    flex-basis: 40px;
+    flex-shrink: 0;
+}
+
+.weekday-header p:nth-child(4) {
+    /* Shift next column "End" a bit to the right*/
+    padding-right: 16px;
+}
+
+/* 6. Clear Button column */
+.weekday-header p:nth-child(6),
+.weekday-clear-btn {
+    width: 30px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
 }
 
 .weekday-clear-btn {
@@ -125,21 +171,11 @@
 
 
 /* --- Path Configuration --- */
-.path-config-section {
-    margin: 20px 0;
-}
-
-.path-config-section h3 {
-    margin-top: 0;
-    margin-bottom: 5px;
-}
-
 .path-config-section p {
     font-size: 0.9em;
     opacity: 0.8;
     line-height: 1.5;
-    margin-top: 0;
-    margin-bottom: 15px;
+    margin: 5px 0;
 }
 
 .path-display-wrapper {
@@ -251,6 +287,6 @@
 }
 
 #confirm-message {
-    margin: 20px 0;
+    margin: 5px 0;
     line-height: 1.5;
 }

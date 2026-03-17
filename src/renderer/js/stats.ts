@@ -12,20 +12,18 @@ const filesAmountDisplay = document.getElementById('files-amount')!;
 const storageUsed = document.getElementById('storage-used')!;
 
 const appDownloadCountDisplay = document.getElementById('app-download-count')!;
-const versionDisplay = document.getElementById('app-version')!;
 
 window.api.onProjectDBInitialized(refreshStats);
 
 async function refreshStats() {
     const stats = await window.api.getStats();
-    const { version, appDownloadCount, projectsCount, fileCount, sizeUsed } = stats;
+    const { appDownloadCount, projectsCount, fileCount, sizeUsed } = stats;
 
     projectsAmountDisplay.textContent = projectsCount.toString();
     filesAmountDisplay.textContent = fileCount.toString();
     storageUsed.textContent = sizeUsed;
 
     appDownloadCountDisplay.textContent = appDownloadCount.toString();
-    versionDisplay.textContent = `v${version}`;
 }
 
 refreshStatsBtn.addEventListener('click', refreshStats);

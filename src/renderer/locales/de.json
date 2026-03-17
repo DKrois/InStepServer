@@ -66,7 +66,7 @@
   "login": "Login",
   "changePassword": "Passwort ändern:",
   "maxLoginAttempts": "Login-Versuche",
-  "lockoutDuration": "Login-Sperre-Dauer",
+  "lockoutDuration": "Login-Sperre-Dauer (Minuten)",
   "toastInvalidLoginSecuritySettings": "Ungültige Login-Sicherheits-Einstellungen",
   "toastLoginSecuritySettingsUpdated": "Login-Sicherheits-Einstellungen gespeichert",
 
@@ -113,11 +113,13 @@
   "import": "Importieren",
 
   "advancedTimeSettings": "Erweiterte Zeiteinstellungen",
+  "mode": "Modus",
   "customTime": "Benutzerdefiniert",
   "wholeday": "Ganztägig",
   "off": "Aus",
   "clearDaySettings": "Einstellungen für diesen Tag löschen",
 
+  "weekday": "Wochentag",
   "monday": "Montag",
   "tuesday": "Dienstag",
   "wednesday": "Mittwoch",
@@ -132,7 +134,8 @@
 
   "toastExportSuccess": "Zeiteinstellungen erfolgreich exportiert",
   "toastExportFailed": "Fehler beim Exportieren",
-  "toastImportSuccess": "Zeiteinstellungen importiert. Klicken Sie auf Speichern, um sie zu übernehmen.",
+  "toastImportSuccess": "Zeiteinstellungen importiert",
+  "toastImportInvalid": "Angegebene Datei beinhaltet keine Zeiteinstellungen",
   "toastImportFailed": "Fehler beim Importieren",
 
 
@@ -143,7 +146,7 @@
   "pathPermissionError": "Die Anwendung hat keine Berechtigung, in das ausgewählte Verzeichnis zu schreiben. Bitte wählen Sie einen anderen Ordner.",
 
   "toastPathUpdated": "Speicherpfad erfolgreich aktualisiert",
-  "toastPathError": "Speicherpfad konnte nicht aktualisiert werden",
+  "toastPathError": "Keine Schreib-Berechtigung für den ausgewählten Speicherpfad",
 
 
   "shortcutsTitle": "Verknüpfungen erstellen",

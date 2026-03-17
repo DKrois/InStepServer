@@ -3,7 +3,9 @@ import type { TOptions } from 'i18next';
 import { toastTimeout } from '../../../config.json';
 import { getTranslation, type TranslationKey } from './translate';
 
-const convert = new AnsiToHTML();
+const convert = new AnsiToHTML({
+    fg: 'var(--text-color)' // use theme dependant css variables
+});
 
 const logsOutput = document.getElementById('logs-output')! as HTMLPreElement;
 const logsSection = document.querySelector('.logs-section')!;
@@ -38,13 +40,9 @@ logsOutput.addEventListener('scroll', () => {
 });
 
 function addLogMessage(message: string[]) {
-    const [first, ...rest] = message;
+    const formatted = message.map(formatLog).join('\n');
 
-    const formatted = formatLog(first);
-    const r = rest.length > 0 ? rest.map(s => formatLog(s)).join('\n') : '';
-
-    logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n${r}`);
-
+    logsOutput.insertAdjacentHTML('beforeend', `${formatted}\n`);
     if (isAutoScrollActive) scrollToBottom();
 }
 
@@ -56,7 +54,7 @@ function formatLog(message: string) {
 }
 
 export function linkify(text: string): string {
-    const urlRegex = /(https?:\/\/\S+)/g;
+    const urlRegex = /(https?:\/\/[^\s<>"')]+)/g;
     return text.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
 }
 

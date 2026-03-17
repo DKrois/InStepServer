@@ -13,7 +13,6 @@ const languageSwitcher = document.getElementById('language-switcher') as HTMLSel
 export type TranslationKey = keyof typeof en;
 
 i18next.init({
-    lng: 'en',
     debug: false,
     fallbackLng: 'en',
     resources: {
@@ -24,26 +23,28 @@ i18next.init({
 
 languageSwitcher.addEventListener('change', async () => {
     const newLang = languageSwitcher.value;
-    await i18next.changeLanguage(newLang);
-    updateUIText();
+    await updateLanguage(newLang);
     window.api.saveLanguage(newLang);
 
     const fullLang = languageSwitcher.selectedOptions.item(0)?.innerText;
     showTranslatedToast('toastLangSwitch', { lang: fullLang });
 });
 
-export async function setInitialLanguage(language: string) {
-    languageSwitcher.value = language;
-    await i18next.changeLanguage(language);
+export async function setInitialLanguage(lang: string) {
+    languageSwitcher.value = lang;
+    await updateLanguage(lang);
+}
 
+async function updateLanguage(lang: string) {
+    await i18next.changeLanguage(lang);
     updateUIText();
+    document.documentElement.setAttribute('lang', lang);
+
+    const version = document.documentElement.getAttribute('version') ?? `v1.0.0`;
+    document.title = `${getTranslation('title')} ${version}`;
 }
 
-export function getTranslation(str: TranslationKey, options?: TOptions) {
-    return i18next.t(str, options);
-}
-
-export function updateUIText() {
+function updateUIText() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n')!;
         element.textContent = i18next.t(key);
@@ -52,6 +53,10 @@ export function updateUIText() {
         const key = element.getAttribute('data-i18n-title')!;
         element.setAttribute('title', i18next.t(key));
     });
+}
+
+export function getTranslation(str: TranslationKey, options?: TOptions) {
+    return i18next.t(str, options);
 }
 
 // *** Theme ***

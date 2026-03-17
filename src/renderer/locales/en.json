@@ -66,7 +66,7 @@
   "login": "Login",
   "changePassword": "Change password:",
   "maxLoginAttempts": "Login attempts",
-  "lockoutDuration": "Lockout duration",
+  "lockoutDuration": "Lockout duration (minutes)",
   "toastInvalidLoginSecuritySettings": "Invalid login security settings",
   "toastLoginSecuritySettingsUpdated": "Updated login security settings",
 
@@ -113,11 +113,13 @@
   "import": "Import",
 
   "advancedTimeSettings": "Advanced Time Settings",
+  "mode": "Mode",
   "customTime": "Custom Time",
   "wholeday": "Entire day",
   "off": "Off",
   "clearDaySettings": "Clear settings for this day",
 
+  "weekday": "Weekday",
   "monday": "Monday",
   "tuesday": "Tuesday",
   "wednesday": "Wednesday",
@@ -132,7 +134,8 @@
 
   "toastExportSuccess": "Time settings exported successfully",
   "toastExportFailed": "Failed to export settings",
-  "toastImportSuccess": "Time settings imported. Click Save to apply them.",
+  "toastImportSuccess": "Time settings imported",
+  "toastImportInvalid": "Provided file does not contain time settings",
   "toastImportFailed": "Failed to import settings",
 
   "projectPathTitle": "Project Storage Path",
@@ -142,7 +145,7 @@
   "pathPermissionError": "The application does not have permission to write to the selected directory. Please choose a different folder.",
 
   "toastPathUpdated": "Storage path updated successfully",
-  "toastPathError": "Error updating storage path",
+  "toastPathError": "Cannot write to selected path",
 
 
   "shortcutsTitle": "Create shortcuts",

@@ -101,16 +101,17 @@ const config: ForgeConfig = {
                 ],
             },
         }),
-        // Fuses are used to enable/disable various Electron functionality
-        // at package time, before code signing the application
+        // Fuses are used to enable/disable various Electron functionality at package time, before code signing the application
         new FusesPlugin({
             version: FuseVersion.V1,
-            [FuseV1Options.RunAsNode]: false,
-            [FuseV1Options.EnableCookieEncryption]: true,
-            [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
-            [FuseV1Options.EnableNodeCliInspectArguments]: false,
-            [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-            [FuseV1Options.OnlyLoadAppFromAsar]: true,
+            [FuseV1Options.RunAsNode]: false, // enable if child_process.fork is used
+            [FuseV1Options.EnableCookieEncryption]: true, // encrypts cookies on disk
+            [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false, // whether NODE_OPTIONS and NODE_EXTRA_CA_CERTS env vars are respected
+            [FuseV1Options.EnableNodeCliInspectArguments]: false, // whether --inspect, --inspect-brk, ... flags are respected
+            [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true, // validate app.asar file on load
+            [FuseV1Options.OnlyLoadAppFromAsar]: true, // ensure non-validated code can be run (only search for app.asar)
+            [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true, // use different files for main/renderer for V8 snapshots
+            [FuseV1Options.GrantFileProtocolExtraPrivileges]: false, // don't give pages loaded via file:// protocol extra privileges
         }),
     ],
 };

@@ -1,14 +1,20 @@
-import { app, ipcMain, nativeTheme } from 'electron';
+import { ipcMain } from 'electron';
+import { formatTimeDiff } from '../../common/time.js';
+import type { Stats } from '../../common/types.js';
 import { initDB, projectDB } from '../api/database.js';
 import { appDownloadCount, initServer, stopServer } from '../api/server.js';
 import { defaultDBPath } from '../constants.js';
+import { info as _info } from '../log.js';
 import { normalizeSize } from '../util.js';
 import { registerShortcutsIPC, registerUpdateIPC } from './installer.js';
+import { registerQRIPC } from './qr.js';
+import { registerSecurityIPC } from './security.js';
 import { registerSettingsIPC, store } from './settings.js';
 import { registerTimeSettingsIPC } from './timeScheduler.js';
 import { mainWindow } from './window.js';
-import { registerQRIPC } from './qr.js';
-import { registerSecurityIPC } from './security.js';
+
+const logSource = 'ipc';
+const info = (str: string) => _info(str, logSource);
 
 export let serverStartTime: number | null = null;
 let statsInterval: NodeJS.Timeout | null = null;
@@ -16,7 +22,8 @@ let statsInterval: NodeJS.Timeout | null = null;
 export let manualTimeOverride = false;
 
 export async function registerIPCHandlers() {
-    registerThemeIPC();
+    info('Registering IPC handlers');
+
     registerSettingsIPC();
     registerTimeSettingsIPC();
     registerUpdateIPC();
@@ -26,19 +33,7 @@ export async function registerIPCHandlers() {
     registerShortcutsIPC();
     registerStatsIPC();
 
-    ipcMain.handle('get-app-version', () => app.getVersion());
-    ipcMain.handle('is-windows', () => process.platform === 'win32');
-    ipcMain.on('initial-modal-closed', handleInitialModalClosed);
-}
-
-function registerThemeIPC() {
-    ipcMain.handle('toggle-theme', () => {
-        const newTheme = nativeTheme.shouldUseDarkColors ? 'light' : 'dark';
-        nativeTheme.themeSource = newTheme;
-        store.set('theme', newTheme);
-
-        return nativeTheme.shouldUseDarkColors;
-    });
+    ipcMain.once('initial-modal-closed', handleInitialModalClosed);
 }
 
 function registerServerIPC() {
@@ -57,10 +52,9 @@ function registerServerIPC() {
 }
 
 function registerStatsIPC() {
-    ipcMain.handle('get-stats', async () => {
+    ipcMain.handle('get-stats', async (): Promise<Stats> => {
         const dbStats = await getDBStats();
-        const version = app.getVersion();
-        return { version, appDownloadCount, ...dbStats };
+        return { appDownloadCount, ...dbStats };
     });
 }
 
@@ -92,11 +86,11 @@ export function setManualTimeOverride(override: boolean) {
 
 function handleInitialModalClosed() {
     const projectDataPath = store.get('projectDataPath');
-    if (!projectDataPath) {
+    if (projectDataPath) {
+        initDB(projectDataPath);
+    } else {
         store.set('projectDataPath', defaultDBPath);
         initDB(defaultDBPath);
-    } else {
-        initDB(projectDataPath);
     }
     store.set('firstTimeRunning', false);
 }
@@ -107,14 +101,12 @@ function sendUsageStats() {
     if (!serverStartTime || !mainWindow) return;
 
     const uptimeMs = Date.now() - serverStartTime;
-    const hours = Math.floor(uptimeMs / 3600000).toString().padStart(2, '0');
-    const minutes = Math.floor((uptimeMs % 3600000) / 60000).toString().padStart(2, '0');
-    const seconds = Math.floor((uptimeMs % 60000) / 1000).toString().padStart(2, '0');
+    const uptime = formatTimeDiff(uptimeMs);
 
     const memory = normalizeSize(process.memoryUsage().heapUsed, 2);
 
     mainWindow.webContents.send('update-stats', {
-        uptime: `${hours}:${minutes}:${seconds}`,
+        uptime,
         memory
     });
 }

@@ -14,7 +14,7 @@ marked.setOptions({ gfm: true, breaks: true, pedantic: false });
 const modalEscapeHandlers = new WeakMap<HTMLElement, () => void>();
 
 const initialModalBackdrop = document.getElementById('initial-modal')!;
-const closeInitialModalBtn = document.getElementById('close-modal-btn')!;
+const closeInitialModalBtn = document.getElementById('close-modal-btn') as HTMLButtonElement;
 const initialPasswordDisplay = document.getElementById('initial-password-display') as HTMLInputElement;
 const copyInitialPasswordBtn = document.getElementById('copy-initial-password-btn')!;
 
@@ -71,11 +71,10 @@ document.addEventListener('keydown', event => {
 });
 
 // --- Initial Modal ---
-window.api.onFirstTimeRunning(async (defaultDBPath: string) => {
-    const isWindows = await window.api.isWindows();
-    if (isWindows) shortcutOptionsContainer.classList.remove('hidden');
+window.api.onFirstTimeRunning(async (defaultDBPath: string, initialPassword: string, canCreateShortcuts: boolean) => {
+    if (canCreateShortcuts) shortcutOptionsContainer.classList.remove('hidden');
 
-    initialPasswordDisplay.value = await window.api.getInitialPassword();
+    initialPasswordDisplay.value = initialPassword;
 
     currentPathSpan.textContent = defaultDBPath;
     currentPathSpan.title = defaultDBPath;
@@ -90,8 +89,7 @@ copyInitialPasswordBtn.addEventListener('click', () => {
 });
 
 changePathBtn.addEventListener('click', async () => {
-    // Hide previous error message when user tries again
-    pathErrorMessage.classList.add('hidden');
+    // transmit now rather than on modal close to check perms
     const result = await window.api.setProjectDataPath(currentPathSpan.textContent ?? undefined);
 
     if (result.success) {
@@ -100,14 +98,17 @@ changePathBtn.addEventListener('click', async () => {
         currentPathSpan.title = result.data;
 
         showTranslatedToast('toastPathUpdated');
+        closeInitialModalBtn.disabled = false;
         pathErrorMessage.textContent = '';
+        pathErrorMessage.classList.add('display-none');
     } else { // not writeable (admin perms, ...)
         switch (result.code) {
             case 'permission-denied':
                 showTranslatedToast('toastPathError', undefined, 'error');
 
+                closeInitialModalBtn.disabled = true; // prevent closing modal on invalid path
                 pathErrorMessage.textContent = getTranslation('pathPermissionError');
-                pathErrorMessage.classList.remove('hidden');
+                pathErrorMessage.classList.remove('display-none');
                 break;
 
             case 'cancelled':
@@ -138,7 +139,6 @@ closeInitialModalBtn.addEventListener('click', () => {
 
     // tell main process that the modal is closed → init db using chosen path
     window.api.closeInitialModal();
-
     closeModal(initialModalBackdrop);
 });
 
@@ -232,14 +232,14 @@ export function closeModal(modal: HTMLElement) {
 const handleGenerateQR = async (type: QRType) => {
     currentQRType = type;
     try {
-        const response = await window.api.generateQRCode(type);
+        const { success, data, code } = await window.api.generateQRCode(type);
 
-        if (response.success) {
-            qrImage.src = response.data;
+        if (success) {
+            qrImage.src = data;
             qrImage.classList.remove('hidden');
             qrSaveBtn.classList.remove('hidden');
         } else {
-            if (response.code === 'ip-failed') showTranslatedToast('toastIPFailed', undefined, 'error');
+            if (code === 'ip-failed') showTranslatedToast('toastIPFailed', undefined, 'error');
             else showTranslatedToast('toastUnknownError', undefined, 'error');
         }
     } catch (error) {

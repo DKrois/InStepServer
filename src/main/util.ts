@@ -122,7 +122,7 @@ export async function canWriteToPath(directoryPath: string): Promise<boolean> {
         // try to write a file
         await fs.writeFile(testFile, 'test');
 
-        // if writing succeeded, immediately delete the file
+        // if writing succeeded, immediately delete file
         await fs.rm(testFile);
         return true;
     } catch (error) {

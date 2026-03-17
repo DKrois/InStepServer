@@ -1,12 +1,12 @@
+import type { MenuItemConstructorOptions } from 'electron';
 import { app, Menu, shell, Tray } from 'electron';
-import type { MenuItem, MenuItemConstructorOptions } from 'electron';
 import { join } from 'node:path';
 import { projectDB } from '../api/database.js';
 import { isServerRunning } from '../api/server.js';
 import { Routes, SitesPaths } from '../constants.js';
 import { error } from '../log.js';
 import { sendPopup, sendToast } from './app.js';
-import { createShortcut } from './installer.js';
+import { createShortcut, supportedOSForShortcuts } from './installer.js';
 import { handleStartServer, handleStopServer } from './ipc.js';
 import { store } from './settings.js';
 import { mainWindow } from './window.js';
@@ -15,7 +15,7 @@ const iconPath = join(SitesPaths.assets, process.platform === 'win32' ? 'icon.ic
 let tray: Tray | null = null;
 
 export function createMenu() {
-    const menu: (MenuItemConstructorOptions | MenuItem)[] = [
+    const menu: MenuItemConstructorOptions[] = [
         {
             label: 'File',
             submenu: [
@@ -97,7 +97,7 @@ export function createMenu() {
         }
     ];
 
-    if (process.platform === 'win32') {
+    if (supportedOSForShortcuts.includes(process.platform)) {
         const options: MenuItemConstructorOptions[] = [
             { type: 'separator' },
             {
@@ -126,21 +126,20 @@ export function createMenu() {
 }
 
 export function createTray() {
-    // Create the tray icon
     tray = new Tray(iconPath);
+    tray.setToolTip('InStep Server Control Panel');
 
-    // Define the context menu for the tray icon
+    // define context menu for the tray icon
     const contextMenu = Menu.buildFromTemplate([
         { label: 'Open', click: () => mainWindow?.show() },
         { type: 'separator' },
 
-        { label: 'Start Server', click: async () => await handleStartServer() },
+        { label: 'Start Server', click: () => handleStartServer() },
         { label: 'Stop Server', click: handleStopServer },
         { type: 'separator' },
 
         { label: 'Quit', role: 'quit' }
     ]);
-    tray.setToolTip('InStep Server Control Panel');
     tray.setContextMenu(contextMenu);
 
     // re-open app when user clicks tray icon

@@ -1,13 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { TOptions } from 'i18next';
-import type { InitialSettings, Stats, TimeSettings } from '../../common/types.js';
-import { IPCResponse } from '../../common/util.js';
+import type { InitialSettings, IPCResponse, QRType, Stats, TimeSettings } from '../../common/types.js';
 import type { TranslationKey } from './translate.js';
 
 const api = {
-    getAppVersion: (): Promise<string> => ipcRenderer.invoke('get-app-version'),
     toggleTheme: (): Promise<boolean> => ipcRenderer.invoke('toggle-theme'),
-    saveLanguage: (lang: string): void => ipcRenderer.send('save-language', lang),
+    saveLanguage: (lang: string) => ipcRenderer.send('save-language', lang),
 
     onUpdateAvailable: (callback: (details: { version: string, oldVersion: string, releaseNotes: string, url: string }) => void) => {
         ipcRenderer.on('update-available', (_event, details) => callback(details));
@@ -15,34 +13,31 @@ const api = {
     openDownloadURL: () => ipcRenderer.send('open-download-url'),
     setUpdateNotification: (notificationType: 'never' | 'later') => ipcRenderer.send('set-notification-update', notificationType),
 
-    onFirstTimeRunning: (callback: (defaultDBPath: string) => void) => {
+    onFirstTimeRunning: (callback: (defaultDBPath: string, initialPassword: string, canCreateShortcuts: boolean) => void) => {
         // event can only happen once
-        ipcRenderer.once('first-time-running', (_event, defaultDBPath: string) => callback(defaultDBPath));
+        ipcRenderer.once('first-time-running', (_event, defaultDBPath: string, initialPassword: string, canCreateShortcuts: boolean) => callback(defaultDBPath, initialPassword, canCreateShortcuts));
     },
     getInitialSettings: (): Promise<InitialSettings> => ipcRenderer.invoke('get-initial-settings'),
     setProjectDataPath: (currentlySelectedPath?: string): IPCResponse<'cancelled' | 'permission-denied', string> => ipcRenderer.invoke('set-project-data-path', currentlySelectedPath),
 
     startServer: (port: number): Promise<boolean> => ipcRenderer.invoke('start-server', port),
     stopServer: () => ipcRenderer.send('stop-server'),
-    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number }) => void) => {
-        ipcRenderer.on('server-status-changed', (_event, status) => callback(status));
-    },
+    onServerStatusChanged: (callback: (status: { isRunning: boolean, port?: number }) => void) =>
+        ipcRenderer.on('server-status-changed', (_event, status) => callback(status)),
 
     clearCache: () => ipcRenderer.send('clear-cache'),
 
     getServerURLs: (): Promise<{ ip: string | null, mdns: string, hostname: string }> => ipcRenderer.invoke('get-server-urls'),
-    generateQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'ip-failed' | 'error', string> => ipcRenderer.invoke('generate-qr-code', type), // { success: boolean, code?: 'ip-failed' | 'error', data?: string }
-    saveQRCode: (type: 'ip' | 'mdns' | 'hostname'): IPCResponse<'cancelled' | 'ip-failed' | 'error', string> => ipcRenderer.invoke('save-qr-code', type),
+    generateQRCode: (type: QRType): IPCResponse<'ip-failed' | 'error', string> => ipcRenderer.invoke('generate-qr-code', type),
+    saveQRCode: (type: QRType): IPCResponse<'cancelled' | 'ip-failed' | 'error', string> => ipcRenderer.invoke('save-qr-code', type),
 
     saveTimeSettings: (settings: TimeSettings) => ipcRenderer.send('save-time-settings', settings),
     exportTimeSettings: (): IPCResponse<'cancelled'> => ipcRenderer.invoke('export-time-settings'),
-    importTimeSettings: (): IPCResponse<'cancelled', TimeSettings> => ipcRenderer.invoke('import-time-settings'),
+    importTimeSettings: (): IPCResponse<'cancelled' | 'invalid-data', TimeSettings> => ipcRenderer.invoke('import-time-settings'),
     showClearTimeContextMenu: (inputId: string) => ipcRenderer.send('show-clear-time-context-menu', inputId),
-    onClearTimeInput: (callback: (inputId: string) => void) => {
-        ipcRenderer.on('clear-time-input', (_event, inputId) => callback(inputId as string));
-    },
+    onClearTimeInput: (callback: (inputId: string) => void) =>
+        ipcRenderer.on('clear-time-input', (_event, inputId) => callback(inputId as string)),
 
-    getInitialPassword: (): Promise<string> => ipcRenderer.invoke('get-initial-password'),
     verifyPassword: (password: string): Promise<boolean> => ipcRenderer.invoke('verify-password', password),
     updatePassword: (oldPassword: string, newPassword: string): IPCResponse<'permission-denied'> => ipcRenderer.invoke('update-password', oldPassword, newPassword),
 
@@ -54,7 +49,6 @@ const api = {
 
     createStartMenuShortcut: (): Promise<boolean> => ipcRenderer.invoke('create-start-menu-shortcut'),
     createDesktopShortcut: (): Promise<boolean> => ipcRenderer.invoke('create-desktop-shortcut'),
-    isWindows: (): Promise<boolean> => ipcRenderer.invoke('is-windows'),
 
     onUpdateStats: (callback: (stats: { uptime: string, memory: string }) => void) => {
         ipcRenderer.on('update-stats', (_event, stats) => callback(stats));
@@ -67,7 +61,7 @@ const api = {
     },
 
     onLog: (callback: (log: string[]) => void) => {
-        ipcRenderer.on('log', (_event, value) => callback(value as string[]));
+        ipcRenderer.on('log', (_event, value) => callback(value));
     },
     onShowToast: (callback: (key: TranslationKey, options?: TOptions, type?: 'info' | 'error') => void) => {
         ipcRenderer.on('show-toast', (_event, key: TranslationKey, options?: TOptions, type: 'info' | 'error' = 'info') => callback(key, options, type));

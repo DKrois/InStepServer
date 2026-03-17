@@ -1,6 +1,6 @@
 export type QRType = 'ip' | 'mdns' | 'hostname';
 
-export type IPCCodes = 'error' | 'cancelled' | 'permission-denied' | 'ip-failed';
+export type IPCCodes = 'error' | 'cancelled' | 'invalid-data' | 'permission-denied' | 'ip-failed';
 
 // pick which codes can be present
 export type IPCPacket<C extends IPCCodes | '' = '', T = undefined> =
@@ -15,19 +15,22 @@ export type IPCPacket<C extends IPCCodes | '' = '', T = undefined> =
     data?: T;
 };
 
+export type IPCResponse<C extends IPCCodes | '' = '', T = undefined> = Promise<IPCPacket<C, T>>;
+
+export type TimeEvent = { time: number; type: 'start' | 'stop' };
 export type Time = `${number}:${number}` | '';
 export type Mode = 'custom' | 'wholeday' | 'off';
 export interface GlobalRule {
     start: Time;
-    end: Time;
+    stop: Time;
     mode: 'custom';
 }
 
 export interface WeekdayRule {
     enabled: boolean;
     mode: Mode;
-    start: Time;
-    end: Time;
+    start?: Time;
+    stop?: Time;
 }
 
 export interface TimeSettings {
@@ -37,6 +40,7 @@ export interface TimeSettings {
 }
 
 export interface InitialSettings {
+    version: string;
     port: number;
     language: string;
     timeSettings: TimeSettings;
@@ -49,7 +53,6 @@ export interface InitialSettings {
 }
 
 export interface Stats {
-    version: string;
     appDownloadCount: number;
     projectsCount: number;
     fileCount: number;

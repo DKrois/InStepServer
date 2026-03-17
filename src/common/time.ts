@@ -1,4 +1,4 @@
-import type { Time, TimeSettings } from './types.js';
+import type { Time, TimeEvent, TimeSettings, WeekdayRule } from './types.js';
 
 export function getCurrentTime(includeMillis = false, gmt = false): string {
     return timeToString(new Date(), gmt, includeMillis);
@@ -10,7 +10,6 @@ function timeToString(time: number | Date | null, gmt = false, includeMillis = t
     let dt;
     if (typeof time === 'number') {
         const isMillis = time.toString().length > 12;
-        dt = isMillis ? new Date(time) : new Date(time * 1000);
         dt = isMillis ? new Date(time) : new Date(time * 1000);
     } else {
         dt = time;
@@ -26,11 +25,21 @@ function timeToString(time: number | Date | null, gmt = false, includeMillis = t
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}${millis}`;
 }
+
+export function formatTimeDiff(ms: number): string {
+    if (ms < 0) return '00:00:00';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = addZeroes(Math.floor(totalSeconds / 3600));
+    const minutes = addZeroes(Math.floor((totalSeconds % 3600) / 60));
+    const seconds = addZeroes((totalSeconds % 60));
+    return `${hours}:${minutes}:${seconds}`;
+}
+
 export function addZeroes(str: number, padAmount: number = 2, radix: number = 10): string {
     return str.toString(radix).padStart(padAmount, '0');
 }
 
-type SplitDuration = { years: number, months: number, weeks: number, days: number, hours: number, minutes: number, seconds: number, milliseconds: number }
+export type Duration = { years: number, months: number, weeks: number, days: number, hours: number, minutes: number, seconds: number, milliseconds: number }
 const DurationUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'] as const;
 type DurationUnit = typeof DurationUnits[number];
 export enum Durations {
@@ -51,7 +60,11 @@ export enum Durations {
     msInYear = msInDay * daysInYear,
 }
 
-export function getTotalMs(duration: SplitDuration | number[]) {
+export function getTotalMsPartial(duration: Partial<Duration>) {
+    return getTotalMs(createDuration(duration));
+}
+
+function getTotalMs(duration: Duration | number[]) {
     if (Array.isArray(duration)) duration = createDuration(duration);
 
     return Math.floor(duration.milliseconds
@@ -64,10 +77,10 @@ export function getTotalMs(duration: SplitDuration | number[]) {
         + duration.years * Durations.msInYear);
 }
 
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: false, highest?: DurationUnit, exclude?: DurationUnit[]): SplitDuration;
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: true, highest?: DurationUnit, exclude?: DurationUnit[]): number[];
+export function normalizeDuration(duration: Duration | number[] | number, returnArr?: false, highest?: DurationUnit, exclude?: DurationUnit[]): Duration;
+export function normalizeDuration(duration: Duration | number[] | number, returnArr?: true, highest?: DurationUnit, exclude?: DurationUnit[]): number[];
 
-export function normalizeDuration(duration: SplitDuration | number[] | number, returnArr?: boolean, highest: DurationUnit = 'y', exclude: DurationUnit[] = []): number[] | SplitDuration {
+export function normalizeDuration(duration: Duration | number[] | number, returnArr?: boolean, highest: DurationUnit = 'y', exclude: DurationUnit[] = []): number[] | Duration {
     let remainingMs = typeof duration === 'number' ? duration : getTotalMs(duration);
     const highestIndex = DurationUnits.indexOf(highest);
 
@@ -106,7 +119,7 @@ export function normalizeDuration(duration: SplitDuration | number[] | number, r
     return returnArr ? result : createDuration(result);
 }
 
-export function createDuration(duration: Partial<SplitDuration> | number[]): SplitDuration {
+export function createDuration(duration: Partial<Duration> | number[]): Duration {
     if (Array.isArray(duration)) {
         return {
             years: duration[0],
@@ -135,11 +148,17 @@ export function createDuration(duration: Partial<SplitDuration> | number[]): Spl
 // --- Scheduler ---
 export const defaultTimeSettings: TimeSettings = {
     enabled: false,
-    global: { start: '' as Time, end: '' as Time, mode: 'custom' },
-    weekdays: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { enabled: false, mode: 'custom', start: '', end: '' }])) as TimeSettings['weekdays']
+    global: { start: '', stop: '', mode: 'custom' } as const,
+    weekdays: Object.fromEntries(
+        Array.from({ length: 7 }, (_, i) =>
+            [i, { enabled: false, mode: 'custom', start: '', stop: '' }]
+        )
+    ) as TimeSettings['weekdays']
 };
 // Define a default rule for when no other configuration applies
-const DEFAULT_RULE = { mode: 'off', enabled: true };
+const DEFAULT_RULE = { enabled: true, mode: 'off' } as const;
+
+let events: TimeEvent[] = [];
 
 export function parseTimeToDate(timeStr: Time, referenceDate: Date): Date {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -153,15 +172,33 @@ export function convertJsDayToCustom(jsDay: number): number {
     return jsDay === 0 ? 6 : jsDay - 1;
 }
 
+export function updateEvents(timeSettings: TimeSettings): TimeEvent[] {
+    return events = generateScheduleEvents(timeSettings);
+}
+
+export function getEventsInfo(): { nextStateChangeEvent: TimeEvent | undefined, shouldBeRunning: boolean | undefined } {
+    const now = Date.now();
+
+    const pastEvents = events.filter(e => e.time <= now);
+    const mostRecentEvent = pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : undefined;
+    const isRunningAccordingToSchedule = mostRecentEvent ? mostRecentEvent.type === 'start' : false;
+
+    // find next event that will change state
+    const nextStateChangeEvent = events.find(e =>
+        e.time > now && e.type === (isRunningAccordingToSchedule ? 'stop' : 'start')
+    );
+
+    const shouldBeRunning = mostRecentEvent ? mostRecentEvent.type === 'start' : undefined;
+    return { nextStateChangeEvent, shouldBeRunning };
+}
+
 /**
  * Generates a chronological list of start/stop events based on time settings.
- * @param {object} timeSettings - The full time settings object
- * @returns {{time: Date, type: 'start' | 'stop'}[]} A sorted array of event objects.
  */
-export function generateScheduleEvents(timeSettings: any): { time: Date; type: 'start' | 'stop'; }[] {
-    if (!timeSettings?.enabled) return [];
+function generateScheduleEvents(timeSettings: TimeSettings): TimeEvent[] {
+    if (!timeSettings.enabled) return [];
 
-    const events: { time: Date, type: 'start' | 'stop' }[] = [];
+    const events: TimeEvent[] = [];
     const now = new Date();
 
     // Generate events for a wide window to catch all relevant past/future events
@@ -169,44 +206,44 @@ export function generateScheduleEvents(timeSettings: any): { time: Date; type: '
         const date = new Date(now);
         date.setDate(now.getDate() + i);
         date.setHours(0, 0, 0, 0); // Start of the day
-
+        const time = date.getTime();
         const dayIndex = convertJsDayToCustom(date.getDay());
 
-        let rule = timeSettings.weekdays?.[dayIndex];
-        if (!rule?.enabled) rule = timeSettings.global; // fallback to global
+        let rule: WeekdayRule = timeSettings.weekdays[dayIndex];
+        if (!rule?.enabled) rule = { ...timeSettings.global, enabled: true }; // fallback to global
         if (!rule?.enabled) rule = DEFAULT_RULE; // fallback to default
 
-        const { mode, start, end } = rule;
-
-        // --- Translate the effective rule into events ---
+        // --- Translate effective rule into events ---
+        const { mode } = rule;
         if (mode === 'wholeday') {
-            events.push({ time: date, type: 'start' });
+            events.push({ time, type: 'start' });
         } else if (mode === 'off') {
-            events.push({ time: date, type: 'stop' });
-        } else if (mode === 'custom' || !mode) { // Catches global and custom rules
+            events.push({ time, type: 'stop' });
+        } else if (mode === 'custom' || !mode) { // catches global and custom rules
+            const { start, stop } = rule;
 
             // treat undefined rules as off day
-            if (!start && !end) {
-                events.push({ time: date, type: 'stop' });
+            if (!start && !stop) {
+                events.push({ time, type: 'stop' });
                 continue; // move to next day
             }
 
-            if (start && end) {
+            if (start && stop) {
                 const startDate = parseTimeToDate(start, date);
-                const endDate = parseTimeToDate(end, date);
-                events.push({ time: startDate, type: 'start' });
+                const endDate = parseTimeToDate(stop, date);
+                events.push({ time: startDate.getTime(), type: 'start' });
                 if (endDate < startDate) {
                     endDate.setDate(endDate.getDate() + 1);
                 }
-                events.push({ time: endDate, type: 'stop' });
+                events.push({ time: endDate.getTime(), type: 'stop' });
             } else if (start) {
-                events.push({ time: parseTimeToDate(start, date), type: 'start' });
-            } else if (end) {
-                events.push({ time: parseTimeToDate(end, date), type: 'stop' });
+                events.push({ time: parseTimeToDate(start, date).getTime(), type: 'start' });
+            } else if (stop) {
+                events.push({ time: parseTimeToDate(stop, date).getTime(), type: 'stop' });
             }
         }
     }
 
     // sort all events chronologically
-    return events.sort((a, b) => a.time.getTime() - b.time.getTime());
+    return events.sort((a, b) => a.time - b.time);
 }

@@ -2,6 +2,7 @@ import { app, ipcMain, shell } from 'electron';
 import electron_log from 'electron-log';
 import { spawn, spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import { basename,  dirname, resolve } from 'node:path';
 import { updateElectronApp } from 'update-electron-app';
@@ -16,6 +17,7 @@ const warn = (str: string) => _warn(str, logSource);
 const error = (str: string, err: unknown) => _error(str, err, logSource);
 
 type ShortcutLocation = 'Desktop' | 'StartMenu';
+export const supportedOSForShortcuts = ['win32', 'linux'];
 
 // not much installer, just what happens on first run after install & updater
 let updateUrl = '';
@@ -57,7 +59,7 @@ export function initUpdater() {
 
     const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
     if (!fs.existsSync(updateExe)) {
-        info('No Update.exe: auto-updater disabled.');
+        warn('No Update.exe: auto-updater disabled.');
         return;
     }
 
@@ -119,19 +121,19 @@ async function checkForUpdate() {
 }
 
 // modified from https://www.npmjs.com/package/electron-squirrel-startup
-// (the same functionality except for creating shortcuts)
+// (same functionality except for creating shortcuts)
 export function handleSquirrelCommands() {
     if (process.platform === 'win32') {
         const cmd = process.argv[1];
-        if (!cmd) return false;
+        if (!cmd || cmd === '.') return false;
         info(`processing squirrel command \`${cmd}\``);
-        const target = basename(process.execPath);
 
         if (cmd === '--squirrel-install' || cmd === '--squirrel-updated') {
             // don't create shortcuts here
             return true;
         }
         if (cmd === '--squirrel-uninstall') {
+            const target = basename(process.execPath);
             run(['--removeShortcut=' + target + ''], app.quit);
             return true;
         }
@@ -157,27 +159,33 @@ export function registerShortcutsIPC() {
 }
 
 export function createShortcut(location: ShortcutLocation) {
-    if (process.platform !== 'win32') {
-        warn("Didn't create shortcut due to non-Windows OS");
-        return false;
-    }
     if (!app.isPackaged) {
         warn("Didn't create shortcut due to dev environment");
         return false;
     }
 
+    switch (process.platform) {
+        case 'win32': return createShortcutWindows(location);
+        case 'linux': return createShortcutLinux(location);
+        default: {
+            warn(`Cannot create shortcuts on ${process.platform}`);
+            return false;
+        }
+    }
+}
+
+function createShortcutWindows(location: ShortcutLocation): boolean {
     const updateExePath = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
     const exeName = path.basename(process.execPath);
 
     if (fs.existsSync(updateExePath)) {
-        // --- Squirrel Update.exe ---
         info(`Using Update.exe to create ${location} shortcut`);
         try {
             const result = spawnSync(updateExePath, [
                 `--createShortcut=${exeName}`,
                 `--shortcut-locations=${location}`,
                 '--silent', // Suppress any UI
-            ], { encoding: 'utf-8' });
+            ]);
 
             if (result.error) {
                 error(`Failed to create ${location} shortcut via Update.exe`, result.error);
@@ -221,6 +229,32 @@ export function createShortcut(location: ShortcutLocation) {
         }
     } catch (e) {
         error(`Failed to create ${location} shortcut via PowerShell`, e);
+        return false;
+    }
+}
+
+function createShortcutLinux(location: ShortcutLocation) {
+    info(`Creating ${location} shortcut`);
+    try {
+        const filePath = path.join(
+            os.homedir(),
+            location === 'Desktop' ? 'Desktop' : '.local/share/applications',
+            `${app.getName()}.desktop`
+        );
+
+        const content = `
+            [Desktop Entry]
+            Name=${app.getName()}
+            Exec=${process.execPath}
+            Type=Application
+            Terminal=false
+        `;
+
+        fs.writeFileSync(filePath, content);
+        fs.chmodSync(filePath, 0o755); // make executable
+        return true;
+    } catch (e) {
+        error(`Failed to create ${location} shortcut`, e);
         return false;
     }
 }

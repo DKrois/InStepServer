@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/html">
     <head>
         <meta charset="UTF-8">
-        <title id="title">InStep Server Control Panel vx.x.x</title>
+        <title>InStep Server Control Panel vx.x.x</title> <!-- Set by renderer -->
         <link rel="icon" type="image/png" href="assets/icon.png">
     </head>
 
@@ -50,8 +50,8 @@
                             <input type="number" id="port-input" value="5000" min="1024" max="65535"> <!-- on linux, ports below 1024 can only be opened as root -->
                         </div>
 
-                        <div class="form-group">
-                            <p id="restart-server-info" data-i18n="restartServerInfo" class="error-text hidden">Please restart the server for changes to take effect.</p>
+                        <p id="restart-server-info" data-i18n="restartServerInfo" class="error-text display-none">Please restart the server for changes to take effect.</p>
+                        <div class="form-group mt-auto">
                             <button id="clear-cache-btn" data-i18n="clearCache" class="ml-auto">Clear project cache</button>
                             <button id="generate-qr-btn" data-i18n="generateQR">Generate QR codes</button>
                         </div>
@@ -70,10 +70,10 @@
                             <input type="time" id="time-global-start">
                         </div>
                         <div class="form-group">
-                            <label for="time-global-end" data-i18n="disableAt">Disable At:</label>
-                            <input type="time" id="time-global-end">
+                            <label for="time-global-stop" data-i18n="disableAt">Disable At:</label>
+                            <input type="time" id="time-global-stop">
                         </div>
-                        <div class="button-group time-buttons">
+                        <div class="button-group time-buttons mt-auto">
                             <div class="button-subgroup">
                                 <button id="time-advanced-btn" data-i18n="advanced">Advanced</button>
                                 <button id="time-save-btn" data-i18n="save">Save</button>
@@ -197,7 +197,7 @@
                         <span data-i18n="filesAmount">Amount of version files stored</span>: <span id="files-amount">0</span><br>
                         <span data-i18n="storageSize">Total storage size used</span>: <span id="storage-used">0</span>
                     </p>
-                    <p>
+                    <p class="app-download-count">
                         <span data-i18n="appDownloadCount">App download count</span>: <span id="app-download-count">0</span>
                     </p>
                     <button id="refresh-stats-btn" data-i18n="refresh">Refresh</button>
@@ -207,7 +207,7 @@
                             <p data-i18n="sponsoredBy"></p>
                             <div class="sponsor-images">
                                 <img class="sponsor-logo" src="assets/sponsors/palfinger.png" alt="Palfinger">
-                                <img class="sponsor-logo" src="assets/sponsors/minew.webp" alt="Minew">
+                                <img class="sponsor-logo" src="assets/sponsors/minew.png" alt="Minew">
                             </div>
                         </div>
                         <div id="app-version">v1.0.0</div>
@@ -254,10 +254,10 @@
                     <p data-i18n="projectPathDesc">Choose a directory where all projects will be stored.</p>
                     <div class="path-display-wrapper">
                         <!-- updated by JS to show the actual current path -->
-                        <span id="current-project-path" data-i18n-title="currentPath" title="Current storage path">C:\Path\To\Data</span>
+                        <span id="current-project-path" data-i18n-title="currentPath">C:\Path\To\Data</span>
                         <button id="change-path-btn" data-i18n="changePath">Change...</button>
                     </div>
-                    <p id="path-error-message" class="error-text hidden"></p>
+                    <p id="path-error-message" class="error-text display-none"></p>
                 </div>
 
                 <hr>
