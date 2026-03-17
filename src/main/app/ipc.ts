@@ -23,7 +23,7 @@ export let manualTimeOverride = false;
 
 export async function registerIPCHandlers() {
     info('Registering IPC handlers');
-
+    registerThemeIPC();
     registerSettingsIPC();
     registerTimeSettingsIPC();
     registerUpdateIPC();
@@ -34,6 +34,16 @@ export async function registerIPCHandlers() {
     registerStatsIPC();
 
     ipcMain.once('initial-modal-closed', handleInitialModalClosed);
+}
+
+function registerThemeIPC() {
+    ipcMain.handle('toggle-theme', () => {
+        const newTheme = nativeTheme.shouldUseDarkColors ? 'light' : 'dark';
+        nativeTheme.themeSource = newTheme;
+        store.set('theme', newTheme);
+
+        return nativeTheme.shouldUseDarkColors;
+    });
 }
 
 function registerServerIPC() {
