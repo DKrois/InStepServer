@@ -1,18 +1,20 @@
-## v1.1.4
+## v1.1.5
 
-### Pages
-- Download page
+## Server
 
-### Database
-- Also store floorplanImage URLs in cache
+- Scheduler: improved event check performance
 
-### App
-- Create tray on db init
-- GUI width changes
+### Security & Login
 
-### Bugs
-- lots of fixes
+- Added max login attempts + lockout
+- Clear sessions button
 
-### Internal
-- Improved type safety
-  - more shared types between main/renderer
+### GUI
+
+- Advanced time config: Weekday headers
+- SVG QR code
+- Layout spacing reduced
+- Sponsor logos updated
+
+### Installer
+- Shortcuts on Linux
