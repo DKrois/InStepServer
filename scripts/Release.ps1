@@ -45,9 +45,13 @@ Write-Host "Proceeding with release..."
 # make sure repo & packages are up-to-date
 pnpm i
 
+if ($LASTEXITCODE -ne 0) { throw "pnpm install failed!" }
+
 git add .
 git commit -m "Release $Version"
 git push origin master
+
+if ($LASTEXITCODE -ne 0) { throw "git push failed!" }
 
 Write-Host "-- Pushed to git"
 

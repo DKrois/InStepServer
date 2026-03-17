@@ -22,7 +22,7 @@ export const supportedOSForShortcuts = ['win32', 'linux'];
 // not much installer, just what happens on first run after install & updater
 let updateUrl = '';
 let lastNotifiedVersion = '';
-let updateNotificationInterval: NodeJS.Timeout; // allow for clearing
+let updateNotificationInterval: NodeJS.Timeout; // allows for clearing
 
 export function registerUpdateIPC() {
     ipcMain.on('open-download-url', () => {
@@ -44,22 +44,26 @@ export function initUpdater() {
     }
     info ('Initializing updater...');
 
-    // updater only works on Windows & macOS
-    if (process.platform !== 'win32' && process.platform !== 'darwin') {
-        info ('Non-windows / linux install, fallback to update notifications');
-        // show notification instead
+    const u = () => {
         setTimeout(() => {
             if (store.get('blockUpdateNotification')) return;
 
             checkForUpdate();
             updateNotificationInterval = setInterval(checkForUpdate, 3 * Durations.msInHour);
         }, 5000); // short delay to ensure renderer is ready
+    };
+
+    // updater only works on Windows & macOS
+    if (process.platform !== 'win32' && process.platform !== 'darwin') {
+        info('Non-windows / linux install, fallback to update notifications');
+        u();
         return;
     }
 
     const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
     if (!fs.existsSync(updateExe)) {
-        warn('No Update.exe: auto-updater disabled.');
+        warn('No Update.exe, fallback to update notifications');
+        u();
         return;
     }
 
