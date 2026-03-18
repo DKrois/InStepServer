@@ -30,7 +30,7 @@ export function registerUpdateIPC() {
         shell.openExternal(updateUrl);
     });
 
-    ipcMain.on('set-notification-update', (_event, notificationType: 'never' | 'later') => {
+    ipcMain.on('set-update-notification', (_event, notificationType: 'never' | 'later') => {
         if (notificationType === 'never') store.set('blockUpdateNotification', true);
         clearInterval(updateNotificationInterval);
         info(`Disabling update notification: ${notificationType}`);
@@ -42,34 +42,23 @@ export function initUpdater() {
         info('Development mode: Auto-updater disabled.');
         return;
     }
-    info ('Initializing updater...');
+    if (store.get('blockUpdateNotification')) info('Update notifications disabled, not initializing updater');
+    info('Initializing updater...');
 
-    const u = () => {
+    const updateExeExists = fs.existsSync(resolve(dirname(process.execPath), '..', 'Update.exe'));
+    if (!updateExeExists || (process.platform !== 'win32' && process.platform !== 'darwin')) {
+        info(`${updateExeExists ? 'No Update.exe' : 'Non-windows / linux install'}, fallback to update notifications`);
         setTimeout(() => {
             if (store.get('blockUpdateNotification')) return;
-
             checkForUpdate();
             updateNotificationInterval = setInterval(checkForUpdate, 3 * Durations.msInHour);
         }, 5000); // short delay to ensure renderer is ready
-    };
-
-    // updater only works on Windows & macOS
-    if (process.platform !== 'win32' && process.platform !== 'darwin') {
-        info('Non-windows / linux install, fallback to update notifications');
-        u();
-        return;
-    }
-
-    const updateExe = resolve(dirname(process.execPath), '..', 'Update.exe');
-    if (!fs.existsSync(updateExe)) {
-        warn('No Update.exe, fallback to update notifications');
-        u();
         return;
     }
 
     try {
         updateElectronApp({
-            updateInterval: '1 hour',
+            updateInterval: '3 hours',
             logger: electron_log,
         });
     } catch (e) {

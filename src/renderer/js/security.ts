@@ -97,11 +97,11 @@ clearSessionsBtn.addEventListener('click', async () => {
     }
 });
 
-export function setInitialSecuritySettings(settings: Pick<InitialSettings, 'imdEnabled' | 'sessionDuration' | 'maxLoginAttempts' | 'lockoutMinutes'>) {
-    const { imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes } = settings;
+export function setInitialSecuritySettings(settings: Pick<InitialSettings, 'imdEnabled' | 'sessionDuration' | 'maxLoginAttempts' | 'lockoutDurationMinutes'>) {
+    const { imdEnabled, sessionDuration, maxLoginAttempts, lockoutDurationMinutes } = settings;
     currentDurationMs = sessionDuration;
     previousMaxAttempts = maxLoginAttempts;
-    previousLockoutMinutes = lockoutMinutes;
+    previousLockoutMinutes = lockoutDurationMinutes;
     previousEnableIMDAPI = imdEnabled;
 
     enableIMDAPICheckbox.checked = imdEnabled;
@@ -113,7 +113,7 @@ export function setInitialSecuritySettings(settings: Pick<InitialSettings, 'imdE
     sessionMinutesInput.value = String(duration.minutes);
 
     maxLoginAttemptsInput.value = maxLoginAttempts.toString(10);
-    lockoutMinutesInput.value = lockoutMinutes.toString(10);
+    lockoutMinutesInput.value = lockoutDurationMinutes.toString(10);
 }
 
 function setLockedState(locked: boolean) {

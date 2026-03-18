@@ -22,7 +22,7 @@ export const store = new Store({
         firstTimeRunning: true,
         blockUpdateNotification: false,
         passwordHash: '', // set on startup or update ipc
-        lockoutMinutes: 10,
+        lockoutDurationMinutes: 10,
         maxLoginAttempts: 5,
         sessionSecret: '', // set on server init
         sessionMaxAge: 30 * Durations.msInDay,
@@ -46,7 +46,7 @@ export function initStore() {
 
 export function registerSettingsIPC() {
     ipcMain.handle('get-initial-settings', (): InitialSettings => {
-        const { port, language, timeSettings, imdEnabled, sessionMaxAge, maxLoginAttempts, lockoutMinutes } = store.store;
+        const { port, language, timeSettings, imdEnabled, sessionMaxAge, maxLoginAttempts, lockoutDurationMinutes } = store.store;
         const version = `v${app.getVersion()}`;
         const isDarkMode = nativeTheme.shouldUseDarkColors;
         const serverEnabled = isServerRunning();
@@ -61,7 +61,7 @@ export function registerSettingsIPC() {
             imdEnabled,
             sessionDuration: sessionMaxAge,
             maxLoginAttempts,
-            lockoutMinutes
+            lockoutDurationMinutes
         };
     });
 

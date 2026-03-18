@@ -13,8 +13,6 @@ const storageUsed = document.getElementById('storage-used')!;
 
 const appDownloadCountDisplay = document.getElementById('app-download-count')!;
 
-window.api.onProjectDBInitialized(refreshStats);
-
 async function refreshStats() {
     const stats = await window.api.getStats();
     const { appDownloadCount, projectsCount, fileCount, sizeUsed } = stats;

@@ -3,7 +3,6 @@ import * as fs from 'node:fs/promises';
 import { join, basename, extname } from 'node:path';
 import { cacheMaxAgeSeconds, cacheSize } from '../../../config.json';
 import { createTray } from '../app/menu.js';
-import { mainWindow } from '../app/window.js';
 import { Routes } from '../constants.js';
 import { error as _error, info as _info, warn as _warn } from '../log.js';
 import { writeJSON } from '../util.js';
@@ -367,8 +366,6 @@ export function initDB(path: string) {
     info(`Initializing database at path: ${path}`);
     _db = new ProjectDatabase(path);
 
-    // tell the renderer process that the database is initialized → request stats
-    mainWindow?.webContents.send('project-db-initialized');
     createTray(); // only create tray now to avoid starting & accessing server (db) via tray before db init
 }
 

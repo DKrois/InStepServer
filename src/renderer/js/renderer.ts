@@ -15,7 +15,7 @@ const versionDisplay = document.getElementById('app-version')!;
 window.addEventListener('DOMContentLoaded', async () => {
     // update to stored settings
     const settings = await window.api.getInitialSettings();
-    const { version, isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes } = settings;
+    const { version, isDarkMode, language, port, serverEnabled, timeSettings, imdEnabled, sessionDuration, maxLoginAttempts, lockoutDurationMinutes } = settings;
 
     document.title = `${getTranslation('title')} ${version}`;
     document.documentElement.setAttribute('version', version);
@@ -25,7 +25,5 @@ window.addEventListener('DOMContentLoaded', async () => {
     setInitialLanguage(language);
     setInitialServerSettings({ port, serverEnabled });
     setInitialTimeSettings(timeSettings);
-    setInitialSecuritySettings({ imdEnabled, sessionDuration, maxLoginAttempts, lockoutMinutes });
-
-    // refresh stats on load → done in stats.ts after projectDB init
+    setInitialSecuritySettings({ imdEnabled, sessionDuration, maxLoginAttempts, lockoutDurationMinutes });
 });

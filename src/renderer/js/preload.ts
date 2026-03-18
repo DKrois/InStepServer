@@ -11,7 +11,7 @@ const api = {
         ipcRenderer.on('update-available', (_event, details) => callback(details));
     },
     openDownloadURL: () => ipcRenderer.send('open-download-url'),
-    setUpdateNotification: (notificationType: 'never' | 'later') => ipcRenderer.send('set-notification-update', notificationType),
+    setUpdateNotification: (notificationType: 'never' | 'later') => ipcRenderer.send('set-update-notification', notificationType),
 
     onFirstTimeRunning: (callback: (defaultDBPath: string, initialPassword: string, canCreateShortcuts: boolean) => void) => {
         // event can only happen once
@@ -56,9 +56,6 @@ const api = {
     getStats: (): Promise<Stats> => ipcRenderer.invoke('get-stats'),
 
     closeInitialModal: () => ipcRenderer.send('initial-modal-closed'),
-    onProjectDBInitialized: (callback: () => void) => {
-        ipcRenderer.on('project-db-initialized', () => callback());
-    },
 
     onLog: (callback: (log: string[]) => void) => {
         ipcRenderer.on('log', (_event, value) => callback(value));

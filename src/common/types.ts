@@ -47,7 +47,7 @@ export interface InitialSettings {
     imdEnabled: boolean;
     sessionDuration: number;
     maxLoginAttempts: number;
-    lockoutMinutes: number;
+    lockoutDurationMinutes: number;
     isDarkMode: boolean;
     serverEnabled: boolean;
 }
