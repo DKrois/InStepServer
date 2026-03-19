@@ -136,8 +136,20 @@ function createExpressApp() {
     // login & IMD routes with auth
     app.use(Routes.login, isIMDAPIEnabled, express.static(SitesPaths.login));
     app.post(Routes.login, isIMDAPIEnabled, handleLogin);
-    app.use(Routes.imdAPI, createIMDRouter());
-    app.use(Routes.imd, isIMDAPIEnabled, isAuth, manageImdLock, express.static(SitesPaths.imd));
+
+    // redirect /floor and /etage to /app/...
+    app.get(/^\/(etage|floor)\/(.*)/, (req: express.Request, res: express.Response) => {
+        // req.params[0]: 'etage' or 'floor'
+        const originalPath = req.params[0];
+        const subPath = req.params[1];
+
+        // reconstruct new URL under correct application path
+        const newUrl = `${Routes.imd}/${originalPath}/${subPath}`;
+        res.redirect(newUrl);
+    });
+
+    app.use(Routes.imdAPI, createIMDAPIRouter());
+    app.use(Routes.imd, createIMDRouter());
 
     // 404 and unhandled errors
     app.use(handle404, handleErrors);
@@ -147,10 +159,21 @@ function createExpressApp() {
 
 function createIMDRouter() {
     const router = express.Router();
+    router.use(isIMDAPIEnabled, isAuth, manageImdLock);
+    router.use(express.static(SitesPaths.imd));
+
+    // for fullscreen 3d
+    router.get(`/*`, (_req, res) =>
+        res.sendFile(join(SitesPaths.imd, 'index.html'))
+    );
+
+    return router;
+}
+
+function createIMDAPIRouter() {
+    const router = express.Router();
 
     router.post(`/release-lock`, isIMDAPIEnabled, isAuth, handleReleaseLock);
-
-    // add auth middleware
     router.use(isIMDAPIEnabled, isAuth, manageImdLock);
 
     router.use(Routes.staticAPIRelative, express.static(projectDB.path)); // serve db path for image access

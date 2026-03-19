@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/sites/docs/assets/js" />
       <excludeFolder url="file://$MODULE_DIR$/.webpack" />
+      <excludeFolder url="file://$MODULE_DIR$/sites/protected" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
