@@ -88,7 +88,9 @@ export function isServerRunning() {
 
 function createExpressApp() {
     const app = express();
-    app.use(express.json());
+    // https://stackoverflow.com/questions/19917401/error-request-entity-too-large
+    app.use(express.json({ limit: "50MB" }));
+    //app.use(express.urlencoded({ limit: "50MB" }))
 
     app.use(session({
         secret: getSessionSecret(), // Used to sign the session ID cookie
@@ -106,7 +108,8 @@ function createExpressApp() {
 
     app.use(handleRedirects);
 
-    app.use(Routes.assets, express.static(SitesPaths.assets));
+    // dynamic imports from vite request at /assets
+    app.use(Routes.assets, express.static(SitesPaths.assets), express.static(`${SitesPaths.imd}/assets`));
     app.use(Routes.download, (req: express.Request, _res: express.Response, next: express.NextFunction) => {
         if (req.path.endsWith('InStep-latest.apk')) appDownloadCount++;
         return next();
@@ -163,7 +166,7 @@ function createIMDRouter() {
     router.use(express.static(SitesPaths.imd));
 
     // for fullscreen 3d
-    router.get(`/*`, (_req, res) =>
+    router.get(`/*p`, (_req, res) =>
         res.sendFile(join(SitesPaths.imd, 'index.html'))
     );
 

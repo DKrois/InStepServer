@@ -23,13 +23,25 @@ Write-Host "-- Building project..."
 npm run build
 if ($LASTEXITCODE -ne 0) { throw "npm build failed!" }
 
-Write-Host "-- Replacing '/assets' with 'assets'..."
+Write-Host "-- Replacing '/assets' with '/app/assets'..."
 $distPath = Join-Path $imdProjectPath "dist"
+$assetsPath = Join-Path $distPath "assets"
 $indexFile = Join-Path $distPath "index.html"
 
 (Get-Content $indexFile -Raw) `
-    -replace '/assets', 'assets' |
+    -replace '/assets', '/app/assets' |
         Set-Content $indexFile -NoNewline
+
+$searchPattern = "(floor|etage)"
+$escapedPattern = [System.Text.RegularExpressions.Regex]::Escape($searchPattern)
+$replacement = "app\/(floor|etage)"
+
+Get-ChildItem $assetsPath -Filter *.js -Recurse | ForEach-Object {
+    (Get-Content $_.FullName -Raw) `
+        -replace '/assets', '/app/assets' `
+        -replace $escapedPattern, $replacement |
+            Set-Content $_.FullName -NoNewline
+}
 
 Write-Host "-- Deleting old and copying over files..."
 Remove-Item -Path "$outPath\*" -ErrorAction SilentlyContinue -Recurse -Force
