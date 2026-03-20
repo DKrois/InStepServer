@@ -143,16 +143,9 @@ export function isAuth(req: express.Request, res: express.Response, next: expres
         if (req.session.isAuthenticated) return next();
 
         // not authenticated
-        res.status(401);
-        if (isBrowser(req)) {
-            if (req.path === '/' || req.path === Routes.imd) {
-                return res.redirect(Routes.login);
-            } else {
-                return next();
-            }
-        } else {
-            return res.json(errorToJSON('Unauthorized. Please log in.'));
-        }
+        return isBrowser(req)
+            ? res.redirect(Routes.login)
+            : res.status(401).json(errorToJSON('Unauthorized. Please log in.'));
     } catch (e) {
         next(e);
     }
