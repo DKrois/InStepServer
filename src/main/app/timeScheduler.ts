@@ -67,7 +67,10 @@ async function handleExport(): IPCResponse<'cancelled' | ''> {
     const { filePath } = await dialog.showSaveDialog(mainWindow, {
         title: 'Export Time Settings',
         defaultPath: 'time-settings.json',
-        filters: [{ name: 'JSON Files', extensions: ['json'] }]
+        filters: [
+            { name: 'JSON Files', extensions: ['json'] },
+            { name: 'All files', extensions: ['*'] }
+        ]
     });
 
     if (filePath) {
@@ -92,7 +95,10 @@ async function handleImport(): IPCResponse<'cancelled' | 'invalid-data' | '', Ti
     const { filePaths } = await dialog.showOpenDialog(mainWindow, {
         title: 'Import Time Settings',
         properties: ['openFile'],
-        filters: [{ name: 'JSON Files', extensions: ['json'] }]
+        filters: [
+            { name: 'JSON Files', extensions: ['json'] },
+            { name: 'All files', extensions: ['*'] }
+        ]
     });
 
     if (filePaths.length > 0) {
@@ -105,7 +111,7 @@ async function handleImport(): IPCResponse<'cancelled' | 'invalid-data' | '', Ti
             return { success: true, data: settings };
         } catch (e) {
             error('Error importing time settings', e);
-            return { success: false, code: '' };
+            return { success: false, code: 'invalid-data' };
         }
     }
     return { success: false, code: 'cancelled' };

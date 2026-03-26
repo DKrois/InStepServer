@@ -7,6 +7,7 @@ import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-nati
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import type { ForgeConfig } from '@electron-forge/shared-types';
+// @ts-expect-error import works
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';

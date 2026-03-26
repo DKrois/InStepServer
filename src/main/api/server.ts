@@ -31,7 +31,7 @@ const uploadDirBase = 'InStepServer-uploads-';
 const uploadDir = getUploadDir();
 const upload = multer({ dest: uploadDir });
 
-// add isAuthenticated flag to session
+// inject isAuthenticated flag to session
 declare module 'express-session' {
     interface SessionData {
         isAuthenticated: boolean;
@@ -209,7 +209,7 @@ function handle404(req: express.Request, res: express.Response) {
     return sendFileIfBrowser(req, res, {
         status: 404,
         filepath: `${SitesPaths.public}/404.html`,
-        error: {
+        message: {
             error: 'Not Found',
             path: req.originalUrl,
         }

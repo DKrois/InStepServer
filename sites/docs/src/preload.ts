@@ -1,8 +1,9 @@
 (function() {
     try {
-        const saved = localStorage.getItem('instep-theme');
-        const sysLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-        const theme = saved ? saved : (sysLight ? 'light' : 'dark');
+        const theme = localStorage.getItem('instep-theme')
+            ?? window.matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light' : 'dark';
+
         document.documentElement.setAttribute('data-theme', theme);
     } catch (e) {}
 })();

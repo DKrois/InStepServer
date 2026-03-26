@@ -112,7 +112,7 @@ export function manageImdLock(req: express.Request, res: express.Response, next:
         return sendFileIfBrowser(req, res, {
             status: 423, // 423 Locked
             filepath: `${SitesPaths.public}/imdInUse.html`,
-            error: 'The IMD API is currently in use by another user. Please try again later.',
+            message: 'The IMD API is currently in use by another user. Please try again later.',
         });
     }
 
@@ -134,7 +134,7 @@ export function isIMDAPIEnabled(req: express.Request, res: express.Response, nex
     sendFileIfBrowser(req, res, {
         status: 403, // 403 Forbidden
         filepath: `${SitesPaths.public}/apiDisabled.html`,
-        error: 'IMD API has been disabled by the server administrator.'
+        message: 'IMD API has been disabled by the server administrator.'
     });
 }
 
@@ -155,13 +155,13 @@ export function isAuth(req: express.Request, res: express.Response, next: expres
 export function sendFileIfBrowser(req: express.Request, res: express.Response, options: {
     status: number,
     filepath: string,
-    error: string | object
+    message: string | object
 }) {
-    const { status, filepath, error } = options;
+    const { status, filepath, message } = options;
     if (isBrowser(req)) {
         return res.status(status).sendFile(filepath);
     } else {
-        const e = typeof error === 'string' ? { error } : error;
+        const e = typeof message === 'string' ? { message } : message;
         return res.status(status).json(e);
     }
 }

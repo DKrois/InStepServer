@@ -54,6 +54,7 @@ async function saveQRCode(type: QRType): IPCResponse<'cancelled' | 'ip-failed' |
         filters: [
             { name: 'PNG Images', extensions: ['png'] },
             { name: 'SVG Images', extensions: ['svg'] },
+            { name: 'All files', extensions: ['*'] }
         ]
     });
 
@@ -63,15 +64,20 @@ async function saveQRCode(type: QRType): IPCResponse<'cancelled' | 'ip-failed' |
         const url = getURL(type);
         if (!url) return { success: false, code: 'ip-failed' };
 
-        const ext = extname(filePath).replaceAll('.', '') as 'png' | 'svg';
-        await QRCode.toFile(filePath, url, {
+        let ext = extname(filePath).replaceAll('.', '') as 'png' | 'svg';
+        let p = filePath;
+        if (ext !== 'png' && ext !== 'svg') {
+            ext = 'png';
+            p += '.png';
+        }
+        await QRCode.toFile(p, url, {
             type: ext,
             errorCorrectionLevel: 'H',
             width: 512,
             margin: 2,
         });
-        info(`Saved QR Code of type ${type} at ${filePath}`);
-        return { success: true, data: filePath };
+        info(`Saved QR Code of type ${type} at ${p}`);
+        return { success: true, data: p };
     } catch (err) {
         error('Failed to save QR code', err);
         return { success: false, code: 'error' };
